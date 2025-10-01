@@ -1693,8 +1693,6 @@ VITE_APP_NAME=Protextify
 
 Rencana ini memberikan roadmap lengkap untuk membangun frontend Protextify dari awal dengan integrasi backend yang sudah tersedia, menggunakan modern React patterns dan best practices.
 
-```
-
 File ini telah disesuaikan dengan:
 
 1. **Workspace yang fresh** - dimulai dari setup basic React + Vite
@@ -1703,4 +1701,20 @@ File ini telah disesuaikan dengan:
 4. **Brand consistency** - mempertahankan warna `#23407a`
 5. **Modern React patterns** - menggunakan hooks, context, dan best practices
 6. **Scalable architecture** - struktur folder yang terorganisir dan mudah dikembangkan
-```
+
+## 🗂️ Daftar Branch untuk Setiap Phase
+
+| Phase    | Nama Branch                        |
+| -------- | ---------------------------------- |
+| Phase 1  | `feature/foundation-design-system` |
+| Phase 2  | `feature/auth-system`              |
+| Phase 3  | `feature/routing-layout`           |
+| Phase 4  | `feature/api-integration`          |
+| Phase 5  | `feature/student-dashboard`        |
+| Phase 6  | `feature/class-management`         |
+| Phase 7  | `feature/assignment-system`        |
+| Phase 8  | `feature/writing-editor`           |
+| Phase 9  | `feature/plagiarism-ui`            |
+| Phase 10 | `feature/payment-integration`      |
+| Phase 11 | `feature/final-polish-realtime`    |
+| Phase 12 | `feature/testing-deployment`       |
