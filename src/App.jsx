@@ -1,6 +1,8 @@
 import { useState } from "react";
-import reactLogo from "./assets/react.svg";
+import reactLogo from "@/assets/react.svg";
 import viteLogo from "/vite.svg";
+import { cn, formatDate } from "@/utils";
+import { API_BASE_URL, BRAND_COLORS } from "@/utils/constants";
 import "./App.css";
 
 function App() {
@@ -16,7 +18,12 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1 className="text-3xl font-bold underline">Vite + React</h1>
+      <h1
+        className={cn("text-3xl font-bold underline")}
+        style={{ color: BRAND_COLORS.primary }}
+      >
+        Vite + React + Protextify
+      </h1>
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
@@ -24,6 +31,8 @@ function App() {
         <p>
           Edit <code>src/App.jsx</code> and save to test HMR
         </p>
+        <p>API URL: {API_BASE_URL}</p>
+        <p>Today: {formatDate(new Date())}</p>
       </div>
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more

@@ -38,7 +38,7 @@ Estimasi: 1 hari
 
 **Tasks:**
 
-- [ ] Install core dependencies
+- [✅] Install core dependencies
 
 ```bash
 npm install react-router-dom axios socket.io-client
@@ -47,9 +47,9 @@ npm install lucide-react react-hot-toast
 npm install @headlessui/react clsx tailwind-merge
 ```
 
-- [ ] Setup project structure dasar
-- [ ] Konfigurasi absolute imports di vite.config.js
-- [ ] Setup ESLint rules untuk project
+- [✅] Setup project structure dasar
+- [✅] Konfigurasi absolute imports di vite.config.js
+- [✅] Setup ESLint rules untuk project
 
 **Files yang akan dibuat:**
 
