@@ -152,11 +152,11 @@ Estimasi: 3 hari
 
 **Tasks:**
 
-- [ ] Button component dengan variants
-- [ ] Input, Textarea, Select components
-- [ ] Card, Modal, Alert components
-- [ ] Loading spinner dan skeleton components
-- [ ] Layout components (Container, Grid, Stack)
+- [✅] Button component dengan variants
+- [✅] Input, Textarea, Select components
+- [✅] Card, Modal, Alert components
+- [✅] Loading spinner dan skeleton components
+- [✅] Layout components (Container, Grid, Stack)
 
 **Files:**
 

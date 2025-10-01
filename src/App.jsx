@@ -1,272 +1,311 @@
 import { useState } from "react";
-import reactLogo from "@/assets/react.svg";
-import viteLogo from "/vite.svg";
 import { cn, formatDate } from "@/utils";
-import { BRAND_COLORS, COLOR_PALETTE } from "@/utils/constants";
+import { BRAND_COLORS } from "@/utils/constants";
+import {
+  Button,
+  Input,
+  Textarea,
+  Select,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+  Modal,
+  Alert,
+  LoadingSpinner,
+  SkeletonCard,
+  Container,
+  Grid,
+  Stack,
+} from "@/components";
 import "./App.css";
 
 function App() {
   const [count, setCount] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleLoadingTest = () => {
+    setLoading(true);
+    setTimeout(() => setLoading(false), 2000);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Section */}
       <header className="bg-white shadow-sm border-b">
-        <div className="container py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <img src={viteLogo} className="h-12 w-12" alt="Vite logo" />
-              <div>
-                <h1 className="heading-3 text-brand">
-                  Protextify Design System
-                </h1>
-                <p className="body-small text-muted">Testing implementation</p>
-              </div>
+        <Container className="py-6">
+          <Stack direction="row" justify="between" align="center">
+            <div>
+              <h1 className="heading-3 text-brand">
+                Protextify Component Library
+              </h1>
+              <p className="body-small text-muted">
+                Testing Phase 1.3 Implementation
+              </p>
             </div>
-            <div className="flex items-center space-x-3">
-              <span className="badge badge-primary">Phase 1.2</span>
+            <Stack direction="row" spacing={3}>
+              <span className="badge badge-primary">Phase 1.3</span>
               <span className="badge badge-success">Complete</span>
-            </div>
-          </div>
-        </div>
+            </Stack>
+          </Stack>
+        </Container>
       </header>
 
       {/* Main Content */}
-      <main className="container content-padding">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Typography Showcase */}
-          <div className="card">
-            <div className="card-header">
-              <h2 className="heading-4">Typography Scale</h2>
-            </div>
-            <div className="card-body space-y-4">
-              <div>
-                <h1 className="heading-1">Heading 1</h1>
-                <h2 className="heading-2">Heading 2</h2>
-                <h3 className="heading-3">Heading 3</h3>
-                <h4 className="heading-4">Heading 4</h4>
-              </div>
-              <div className="space-y-2">
-                <p className="body-lead">Lead text - Introduction paragraph</p>
-                <p className="body-regular">Regular body text for content</p>
-                <p className="body-small">
-                  Small text for secondary information
-                </p>
-                <p className="caption">CAPTION TEXT</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Button Showcase */}
-          <div className="card">
-            <div className="card-header">
-              <h2 className="heading-4">Button Components</h2>
-            </div>
-            <div className="card-body space-y-4">
-              <div className="space-y-3">
-                <div className="flex flex-wrap gap-3">
-                  <button className="btn btn-primary btn-sm">Primary SM</button>
-                  <button className="btn btn-primary btn-md">Primary MD</button>
-                  <button className="btn btn-primary btn-lg">Primary LG</button>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  <button className="btn btn-secondary btn-md">
-                    Secondary
-                  </button>
-                  <button className="btn btn-outline btn-md">Outline</button>
-                  <button className="btn btn-ghost btn-md">Ghost</button>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  <button className="btn btn-success btn-md">Success</button>
-                  <button className="btn btn-danger btn-md">Danger</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Color Palette */}
-          <div className="card">
-            <div className="card-header">
-              <h2 className="heading-4">Brand Colors</h2>
-            </div>
-            <div className="card-body space-y-4">
-              <div className="grid grid-cols-3 gap-3">
-                <div className="text-center">
-                  <div
-                    className="h-16 w-full rounded-lg mb-2"
-                    style={{ backgroundColor: BRAND_COLORS.primary }}
-                  ></div>
-                  <p className="body-small">Primary</p>
-                  <p className="caption">{BRAND_COLORS.primary}</p>
-                </div>
-                <div className="text-center">
-                  <div
-                    className="h-16 w-full rounded-lg mb-2"
-                    style={{ backgroundColor: BRAND_COLORS.primaryDark }}
-                  ></div>
-                  <p className="body-small">Primary Dark</p>
-                  <p className="caption">{BRAND_COLORS.primaryDark}</p>
-                </div>
-                <div className="text-center">
-                  <div
-                    className="h-16 w-full rounded-lg mb-2"
-                    style={{ backgroundColor: BRAND_COLORS.primaryLight }}
-                  ></div>
-                  <p className="body-small">Primary Light</p>
-                  <p className="caption">{BRAND_COLORS.primaryLight}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Forms & Inputs */}
-          <div className="card">
-            <div className="card-header">
-              <h2 className="heading-4">Form Components</h2>
-            </div>
-            <div className="card-body space-y-4">
-              <div>
-                <label className="block body-small font-medium text-gray-700 mb-2">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  className="input-field"
-                  placeholder="Enter your email"
-                />
-              </div>
-              <div>
-                <label className="block body-small font-medium text-gray-700 mb-2">
-                  Message
-                </label>
-                <textarea
-                  className="input-field h-20 resize-none"
-                  placeholder="Enter your message"
-                ></textarea>
-              </div>
-              <div className="flex space-x-3">
-                <button className="btn btn-primary">Submit</button>
-                <button className="btn btn-secondary">Cancel</button>
-              </div>
-            </div>
-          </div>
-
-          {/* Alerts & Badges */}
-          <div className="card lg:col-span-2">
-            <div className="card-header">
-              <h2 className="heading-4">Alerts & Status</h2>
-            </div>
-            <div className="card-body space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-3">
-                  <div className="alert alert-success">
-                    ✅ Success: Operation completed successfully
+      <main>
+        <Container className="content-padding">
+          <Grid cols={1} lgCols={2} gap={8}>
+            {/* Button Components */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Button Components</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Stack spacing={4}>
+                  {/* Variants */}
+                  <div>
+                    <h4 className="heading-6 mb-3">Variants</h4>
+                    <Stack direction="row" spacing={3} wrap>
+                      <Button variant="primary">Primary</Button>
+                      <Button variant="secondary">Secondary</Button>
+                      <Button variant="outline">Outline</Button>
+                      <Button variant="ghost">Ghost</Button>
+                      <Button variant="danger">Danger</Button>
+                      <Button variant="success">Success</Button>
+                    </Stack>
                   </div>
-                  <div className="alert alert-warning">
-                    ⚠️ Warning: Please check your input
-                  </div>
-                  <div className="alert alert-error">
-                    ❌ Error: Something went wrong
-                  </div>
-                  <div className="alert alert-info">
-                    ℹ️ Info: Additional information available
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex flex-wrap gap-2">
-                    <span className="badge badge-primary">Primary</span>
-                    <span className="badge badge-secondary">Secondary</span>
-                    <span className="badge badge-success">Success</span>
-                    <span className="badge badge-warning">Warning</span>
-                    <span className="badge badge-error">Error</span>
-                    <span className="badge badge-info">Info</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Interactive Counter */}
-          <div className="card lg:col-span-2">
-            <div className="card-header">
-              <h2 className="heading-4">Interactive Demo</h2>
-            </div>
-            <div className="card-body">
-              <div className="text-center space-y-4">
-                <div className="flex items-center justify-center space-x-4">
-                  <img
-                    src={viteLogo}
-                    className="h-16 w-16 animate-bounce-gentle"
-                    alt="Vite"
+                  {/* Sizes */}
+                  <div>
+                    <h4 className="heading-6 mb-3">Sizes</h4>
+                    <Stack direction="row" spacing={3} align="center" wrap>
+                      <Button size="xs">Extra Small</Button>
+                      <Button size="sm">Small</Button>
+                      <Button size="md">Medium</Button>
+                      <Button size="lg">Large</Button>
+                      <Button size="xl">Extra Large</Button>
+                    </Stack>
+                  </div>
+
+                  {/* Loading */}
+                  <div>
+                    <h4 className="heading-6 mb-3">Loading State</h4>
+                    <Stack direction="row" spacing={3}>
+                      <Button loading={loading} onClick={handleLoadingTest}>
+                        {loading ? "Loading..." : "Test Loading"}
+                      </Button>
+                      <Button variant="outline" disabled>
+                        Disabled
+                      </Button>
+                    </Stack>
+                  </div>
+                </Stack>
+              </CardContent>
+            </Card>
+
+            {/* Form Components */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Form Components</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Stack spacing={4}>
+                  <Input
+                    label="Email Address"
+                    type="email"
+                    placeholder="Enter your email"
+                    helperText="We'll never share your email"
                   />
-                  <div className="text-4xl">+</div>
-                  <img
-                    src={reactLogo}
-                    className="h-16 w-16 animate-spin-slow"
-                    alt="React"
+
+                  <Input
+                    label="Password"
+                    type="password"
+                    placeholder="Enter password"
+                    showPasswordToggle
+                    required
                   />
-                </div>
-                <h3 className="heading-3 text-gradient-brand">
-                  Vite + React + Protextify
-                </h3>
-                <div className="space-y-3">
-                  <p className="body-regular">
-                    Count is{" "}
-                    <span className="font-semibold text-brand">{count}</span>
-                  </p>
-                  <div className="flex justify-center space-x-3">
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => setCount(count + 1)}
-                    >
-                      Increment
-                    </button>
-                    <button
-                      className="btn btn-secondary"
-                      onClick={() => setCount(0)}
-                    >
-                      Reset
-                    </button>
+
+                  <Select label="Role" placeholder="Select your role" required>
+                    <option value="student">Student</option>
+                    <option value="instructor">Instructor</option>
+                  </Select>
+
+                  <Textarea
+                    label="Description"
+                    placeholder="Enter description"
+                    rows={3}
+                    helperText="Maximum 500 characters"
+                  />
+                </Stack>
+              </CardContent>
+            </Card>
+
+            {/* Alert Components */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Alert Components</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Stack spacing={3}>
+                  <Alert variant="success" title="Success">
+                    Your data has been saved successfully.
+                  </Alert>
+
+                  <Alert variant="warning" title="Warning">
+                    Please check your input before submitting.
+                  </Alert>
+
+                  <Alert
+                    variant="error"
+                    title="Error"
+                    closable
+                    onClose={() => {}}
+                  >
+                    There was an error processing your request.
+                  </Alert>
+
+                  <Alert variant="info">
+                    This is some helpful information for you.
+                  </Alert>
+                </Stack>
+              </CardContent>
+            </Card>
+
+            {/* Modal & Loading */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Modal & Loading</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Stack spacing={4}>
+                  <Button onClick={() => setShowModal(true)}>Open Modal</Button>
+
+                  <div>
+                    <h4 className="heading-6 mb-3">Loading Spinners</h4>
+                    <Stack direction="row" spacing={4} align="center">
+                      <LoadingSpinner size="xs" />
+                      <LoadingSpinner size="sm" />
+                      <LoadingSpinner size="md" />
+                      <LoadingSpinner size="lg" />
+                      <LoadingSpinner size="xl" />
+                    </Stack>
                   </div>
-                </div>
-                <div className="pt-4 border-t space-y-2">
-                  <p className="body-small text-muted">
-                    API Base URL:{" "}
-                    <code className="code-inline">
-                      {import.meta.env.VITE_API_URL ||
-                        "http://localhost:3000/api"}
-                    </code>
-                  </p>
-                  <p className="body-small text-muted">
-                    Today:{" "}
-                    <span className="font-medium">
-                      {formatDate(new Date())}
-                    </span>
-                  </p>
-                  <p className="body-small text-muted">
-                    Design System:{" "}
-                    <span className="badge badge-success">Ready</span>
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+
+                  <div>
+                    <h4 className="heading-6 mb-3">Skeleton</h4>
+                    <SkeletonCard />
+                  </div>
+                </Stack>
+              </CardContent>
+            </Card>
+
+            {/* Layout Components */}
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle>Layout Components</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Stack spacing={6}>
+                  {/* Grid Layout */}
+                  <div>
+                    <h4 className="heading-6 mb-3">Grid Layout</h4>
+                    <Grid cols={1} smCols={2} lgCols={4} gap={4}>
+                      {[1, 2, 3, 4].map((item) => (
+                        <div
+                          key={item}
+                          className="bg-[#23407a] text-white p-4 rounded-lg text-center"
+                        >
+                          Grid Item {item}
+                        </div>
+                      ))}
+                    </Grid>
+                  </div>
+
+                  {/* Stack Layout */}
+                  <div>
+                    <h4 className="heading-6 mb-3">Stack Layout</h4>
+                    <Stack direction="row" spacing={4} justify="center" wrap>
+                      <div className="bg-green-100 text-green-800 px-4 py-2 rounded">
+                        Stack Item 1
+                      </div>
+                      <div className="bg-blue-100 text-blue-800 px-4 py-2 rounded">
+                        Stack Item 2
+                      </div>
+                      <div className="bg-purple-100 text-purple-800 px-4 py-2 rounded">
+                        Stack Item 3
+                      </div>
+                    </Stack>
+                  </div>
+
+                  {/* Counter Demo */}
+                  <div className="text-center">
+                    <h4 className="heading-6 mb-3">Interactive Demo</h4>
+                    <Stack direction="column" spacing={4} align="center">
+                      <p className="body-regular">
+                        Count is{" "}
+                        <span className="font-semibold text-brand">
+                          {count}
+                        </span>
+                      </p>
+                      <Stack direction="row" spacing={3}>
+                        <Button onClick={() => setCount(count + 1)}>
+                          Increment
+                        </Button>
+                        <Button variant="secondary" onClick={() => setCount(0)}>
+                          Reset
+                        </Button>
+                      </Stack>
+                    </Stack>
+                  </div>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Container>
       </main>
+
+      {/* Modal */}
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title="Example Modal"
+        description="This is a modal component demonstration"
+        size="md"
+      >
+        <Stack spacing={4}>
+          <p className="body-regular">
+            This is the modal content. You can put any content here like forms,
+            confirmations, or detailed information.
+          </p>
+
+          <Alert variant="info">
+            This modal can be closed by clicking the X button, pressing Escape,
+            or clicking outside the modal.
+          </Alert>
+
+          <Stack direction="row" spacing={3} justify="end">
+            <Button variant="secondary" onClick={() => setShowModal(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => setShowModal(false)}>Confirm</Button>
+          </Stack>
+        </Stack>
+      </Modal>
 
       {/* Footer */}
       <footer className="bg-white border-t mt-16">
-        <div className="container py-8">
+        <Container className="py-8">
           <div className="text-center space-y-2">
             <p className="body-small text-muted">
-              Protextify Design System v1.2 • Phase 1 Complete
+              Protextify Component Library v1.3 • Phase 1 Complete
             </p>
             <p className="caption">
-              Built with React {import.meta.env.REACT_VERSION || "19.1.1"} +
-              Vite + TailwindCSS
+              All components ready for development • {formatDate(new Date())}
             </p>
           </div>
-        </div>
+        </Container>
       </footer>
     </div>
   );
