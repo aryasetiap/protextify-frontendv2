@@ -74,11 +74,11 @@ Estimasi: 2 hari
 
 **Tasks:**
 
-- [ ] Setup design tokens dengan brand color `#23407a`
-- [ ] Konfigurasi TailwindCSS custom colors
-- [ ] Buat utility CSS classes
-- [ ] Setup typography scale
-- [ ] Dokumentasi color palette
+- [✅] Setup design tokens dengan brand color `#23407a`
+- [✅] Konfigurasi TailwindCSS custom colors
+- [✅] Buat utility CSS classes
+- [✅] Setup typography scale
+- [✅] Dokumentasi color palette
 
 **Implementation:**
 

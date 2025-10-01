@@ -1,0 +1,197 @@
+/* ===== TYPOGRAPHY SYSTEM ===== */
+
+/* Heading Scales */
+.heading-display {
+  @apply text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 leading-none tracking-tight;
+}
+
+.heading-1 {
+  @apply text-4xl sm:text-5xl font-bold text-gray-900 leading-tight tracking-tight;
+}
+
+.heading-2 {
+  @apply text-3xl sm:text-4xl font-bold text-gray-900 leading-tight tracking-tight;
+}
+
+.heading-3 {
+  @apply text-2xl sm:text-3xl font-semibold text-gray-900 leading-tight;
+}
+
+.heading-4 {
+  @apply text-xl sm:text-2xl font-semibold text-gray-900 leading-tight;
+}
+
+.heading-5 {
+  @apply text-lg sm:text-xl font-semibold text-gray-900 leading-tight;
+}
+
+.heading-6 {
+  @apply text-base sm:text-lg font-semibold text-gray-900 leading-tight;
+}
+
+/* Body Text */
+.body-lead {
+  @apply text-xl sm:text-2xl text-gray-700 leading-relaxed;
+}
+
+.body-large {
+  @apply text-lg text-gray-700 leading-relaxed;
+}
+
+.body-regular {
+  @apply text-base text-gray-700 leading-relaxed;
+}
+
+.body-small {
+  @apply text-sm text-gray-600 leading-relaxed;
+}
+
+.body-xs {
+  @apply text-xs text-gray-600 leading-normal;
+}
+
+/* Special Text */
+.caption {
+  @apply text-xs text-gray-500 leading-normal uppercase tracking-wide;
+}
+
+.overline {
+  @apply text-xs text-gray-500 leading-normal uppercase tracking-widest font-semibold;
+}
+
+.subtitle-1 {
+  @apply text-base text-gray-600 leading-relaxed font-medium;
+}
+
+.subtitle-2 {
+  @apply text-sm text-gray-600 leading-relaxed font-medium;
+}
+
+/* Brand Text */
+.text-brand {
+  @apply text-[#23407a];
+}
+
+.text-brand-light {
+  @apply text-[#3b5fa4];
+}
+
+.text-brand-dark {
+  @apply text-[#1a2f5c];
+}
+
+.text-gradient-brand {
+  background: linear-gradient(135deg, #23407a 0%, #3b5fa4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Interactive Text */
+.link-primary {
+  @apply text-[#23407a] hover:text-[#1a2f5c] underline decoration-1 underline-offset-2 transition-colors;
+}
+
+.link-secondary {
+  @apply text-gray-600 hover:text-[#23407a] transition-colors;
+}
+
+.link-subtle {
+  @apply text-gray-500 hover:text-gray-700 no-underline hover:underline transition-colors;
+}
+
+/* Text States */
+.text-success {
+  @apply text-green-600;
+}
+
+.text-warning {
+  @apply text-yellow-600;
+}
+
+.text-error {
+  @apply text-red-600;
+}
+
+.text-info {
+  @apply text-blue-600;
+}
+
+.text-muted {
+  @apply text-gray-500;
+}
+
+.text-placeholder {
+  @apply text-gray-400;
+}
+
+/* Typography Utilities */
+.text-balance {
+  text-wrap: balance;
+}
+
+.text-pretty {
+  text-wrap: pretty;
+}
+
+.font-display {
+  font-feature-settings: "ss01", "ss02", "ss03", "ss04";
+}
+
+/* Responsive Typography */
+.responsive-heading {
+  @apply text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold;
+}
+
+.responsive-body {
+  @apply text-sm sm:text-base lg:text-lg;
+}
+
+/* Code Typography */
+.code-inline {
+  @apply bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded text-sm font-mono;
+}
+
+.code-block {
+  @apply bg-gray-900 text-gray-100 p-4 rounded-lg text-sm font-mono leading-relaxed overflow-x-auto;
+}
+
+/* List Typography */
+.list-styled {
+  @apply space-y-2;
+}
+
+.list-styled li {
+  @apply relative pl-6;
+}
+
+.list-styled li::before {
+  @apply absolute left-0 top-0 text-[#23407a] font-semibold;
+  content: "•";
+}
+
+.list-numbered {
+  @apply space-y-2 counter-reset: item;
+}
+
+.list-numbered li {
+  @apply relative pl-8 counter-increment: item;
+}
+
+.list-numbered li::before {
+  @apply absolute left-0 top-0 text-[#23407a] font-semibold text-sm;
+  content: counter(item) ".";
+}
+
+/* Quote Typography */
+.blockquote {
+  @apply border-l-4 border-[#23407a] pl-6 py-2 italic text-gray-700 bg-gray-50 rounded-r-lg;
+}
+
+.blockquote-footer {
+  @apply text-sm text-gray-500 mt-2;
+}
+
+.blockquote-footer::before {
+  content: "— ";
+}
