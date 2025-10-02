@@ -52,8 +52,13 @@ export const verifyTokenSchema = z.object({
 
 // Class schemas
 export const createClassSchema = z.object({
-  name: requiredStringSchema.min(3, "Nama kelas minimal 3 karakter"),
-  description: z.string().optional(),
+  name: requiredStringSchema
+    .min(3, "Nama kelas minimal 3 karakter")
+    .max(100, "Nama kelas maksimal 100 karakter"),
+  description: z
+    .string()
+    .max(500, "Deskripsi maksimal 500 karakter")
+    .optional(),
 });
 
 export const joinClassSchema = z.object({
@@ -83,4 +88,15 @@ export const updateContentSchema = z.object({
 export const gradeSubmissionSchema = z.object({
   grade: z.number().min(0).max(100),
   feedback: z.string().optional(),
+});
+
+// Update class schema
+export const updateClassSchema = z.object({
+  name: requiredStringSchema
+    .min(3, "Nama kelas minimal 3 karakter")
+    .max(100, "Nama kelas maksimal 100 karakter"),
+  description: z
+    .string()
+    .max(500, "Deskripsi maksimal 500 karakter")
+    .optional(),
 });

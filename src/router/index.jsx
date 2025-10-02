@@ -175,6 +175,10 @@ export const router = createBrowserRouter([
             element: <ClassDetail />,
           },
           {
+            path: "classes/:classId/settings",
+            element: <ClassSettings />,
+          },
+          {
             path: "classes/:classId/create-assignment",
             element: <CreateAssignment />,
           },

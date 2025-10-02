@@ -61,6 +61,36 @@ const classesService = {
       throw error;
     }
   },
+
+  // Update class (instructor only)
+  updateClass: async (classId, updateData) => {
+    try {
+      const response = await api.patch(`/classes/${classId}`, updateData);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Delete class (instructor only)
+  deleteClass: async (classId) => {
+    try {
+      const response = await api.delete(`/classes/${classId}`);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Regenerate class token (instructor only)
+  regenerateClassToken: async (classId) => {
+    try {
+      const response = await api.post(`/classes/${classId}/regenerate-token`);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 export default classesService;
