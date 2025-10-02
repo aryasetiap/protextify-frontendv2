@@ -29,19 +29,31 @@ export const ROUTES = {
   INSTRUCTOR_DASHBOARD: "/instructor/dashboard",
   INSTRUCTOR_CLASSES: "/instructor/classes",
   CREATE_CLASS: "/instructor/create-class",
+  GOOGLE_CALLBACK: "/auth/google/callback",
 };
 
-// ===== DESIGN SYSTEM CONSTANTS =====
+// Auth related constants
+export const AUTH_STORAGE_KEYS = {
+  TOKEN: "token",
+  USER: "user",
+  REFRESH_TOKEN: "refreshToken",
+};
 
+export const TOKEN_REFRESH_THRESHOLD = 5 * 60 * 1000; // 5 minutes before expiry
+
+// ===== DESIGN SYSTEM CONSTANTS =====
 export const BRAND_COLORS = {
-  primary: "#23407a",
-  primaryDark: "#1a2f5c",
-  primaryLight: "#3b5fa4",
-  primaryLighter: "#4f6bb5",
+  PRIMARY: "#23407a",
+  PRIMARY_DARK: "#1a2f5c",
+  PRIMARY_LIGHT: "#3b5fa4",
+  PRIMARY_LIGHTER: "#4f6bb5",
+  SUCCESS: "#10b981",
+  WARNING: "#f59e0b",
+  ERROR: "#ef4444",
+  INFO: "#3b82f6",
 };
 
 export const COLOR_PALETTE = {
-  // Primary Colors
   primary: {
     50: "#eff6ff",
     100: "#dbeafe",
@@ -54,41 +66,6 @@ export const COLOR_PALETTE = {
     800: "#23407a", // Main brand
     900: "#1e3a8a",
   },
-
-  // Semantic Colors
-  success: {
-    50: "#ecfdf5",
-    100: "#d1fae5",
-    500: "#10b981",
-    600: "#059669",
-    700: "#047857",
-  },
-
-  warning: {
-    50: "#fffbeb",
-    100: "#fef3c7",
-    500: "#f59e0b",
-    600: "#d97706",
-    700: "#b45309",
-  },
-
-  error: {
-    50: "#fef2f2",
-    100: "#fee2e2",
-    500: "#ef4444",
-    600: "#dc2626",
-    700: "#b91c1c",
-  },
-
-  info: {
-    50: "#eff6ff",
-    100: "#dbeafe",
-    500: "#3b82f6",
-    600: "#2563eb",
-    700: "#1d4ed8",
-  },
-
-  // Neutral Colors
   gray: {
     50: "#f9fafb",
     100: "#f3f4f6",
@@ -101,6 +78,45 @@ export const COLOR_PALETTE = {
     800: "#1f2937",
     900: "#111827",
   },
+  success: {
+    50: "#ecfdf5",
+    100: "#d1fae5",
+    500: "#10b981",
+    600: "#059669",
+    700: "#047857",
+  },
+  warning: {
+    50: "#fffbeb",
+    100: "#fef3c7",
+    500: "#f59e0b",
+    600: "#d97706",
+    700: "#b45309",
+  },
+  error: {
+    50: "#fef2f2",
+    100: "#fee2e2",
+    500: "#ef4444",
+    600: "#dc2626",
+    700: "#b91c1c",
+  },
+};
+
+// API Error Messages
+export const ERROR_MESSAGES = {
+  NETWORK_ERROR: "Koneksi bermasalah. Periksa internet Anda.",
+  UNAUTHORIZED: "Sesi telah berakhir. Silakan login kembali.",
+  FORBIDDEN: "Anda tidak memiliki akses untuk melakukan tindakan ini.",
+  NOT_FOUND: "Data tidak ditemukan.",
+  VALIDATION_ERROR: "Data yang dimasukkan tidak valid.",
+  SERVER_ERROR: "Terjadi kesalahan server. Silakan coba lagi.",
+  TIMEOUT_ERROR: "Permintaan membutuhkan waktu terlalu lama.",
+};
+
+// Feature flags
+export const FEATURES = {
+  GOOGLE_AUTH: import.meta.env.VITE_ENABLE_GOOGLE_AUTH === "true",
+  WEBSOCKET: import.meta.env.VITE_ENABLE_WEBSOCKET === "true",
+  PLAGIARISM: import.meta.env.VITE_ENABLE_PLAGIARISM === "true",
 };
 
 export const TYPOGRAPHY_SCALE = {

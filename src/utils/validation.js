@@ -33,6 +33,23 @@ export const registerSchema = z.object({
   institution: requiredStringSchema.min(2, "Institusi minimal 2 karakter"),
 });
 
+// Profile update schema
+export const updateProfileSchema = z.object({
+  fullName: requiredStringSchema.min(2, "Nama minimal 2 karakter").optional(),
+  institution: requiredStringSchema
+    .min(2, "Institusi minimal 2 karakter")
+    .optional(),
+});
+
+// Email verification schema
+export const emailVerificationSchema = z.object({
+  email: emailSchema,
+});
+
+export const verifyTokenSchema = z.object({
+  token: requiredStringSchema,
+});
+
 // Class schemas
 export const createClassSchema = z.object({
   name: requiredStringSchema.min(3, "Nama kelas minimal 3 karakter"),
@@ -48,11 +65,22 @@ export const createAssignmentSchema = z.object({
   title: requiredStringSchema.min(3, "Judul tugas minimal 3 karakter"),
   instructions: requiredStringSchema.min(10, "Instruksi minimal 10 karakter"),
   deadline: z.string().datetime("Deadline tidak valid"),
-  expectedStudentCount: z.number().min(1, "Jumlah siswa minimal 1"),
+  expectedStudentCount: z
+    .number()
+    .min(1, "Jumlah siswa minimal 1")
+    .max(1000, "Maksimal 1000 siswa"),
 });
 
-// Profile schemas
-export const updateProfileSchema = z.object({
-  fullName: requiredStringSchema.min(2, "Nama minimal 2 karakter"),
-  institution: requiredStringSchema.min(2, "Institusi minimal 2 karakter"),
+// Submission schemas
+export const createSubmissionSchema = z.object({
+  content: requiredStringSchema.min(100, "Konten minimal 100 karakter"),
+});
+
+export const updateContentSchema = z.object({
+  content: z.string(),
+});
+
+export const gradeSubmissionSchema = z.object({
+  grade: z.number().min(0).max(100),
+  feedback: z.string().optional(),
 });

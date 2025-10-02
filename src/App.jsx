@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { cn, formatDate } from "@/utils";
-import { BRAND_COLORS } from "@/utils/constants";
+import { BRAND_COLORS, USER_ROLES } from "@/utils/constants";
+import { useAuth } from "@/contexts";
 import {
   Button,
   Input,
@@ -26,9 +27,46 @@ function App() {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Auth testing
+  const {
+    user,
+    isAuthenticated,
+    loading: authLoading,
+    login,
+    logout,
+    register,
+  } = useAuth();
+
+  const [showAuthDemo, setShowAuthDemo] = useState(false);
+
   const handleLoadingTest = () => {
     setLoading(true);
     setTimeout(() => setLoading(false), 2000);
+  };
+
+  const handleDemoLogin = async () => {
+    try {
+      await login({
+        email: "student@example.com",
+        password: "password123",
+      });
+    } catch (error) {
+      console.error("Demo login failed:", error);
+    }
+  };
+
+  const handleDemoRegister = async () => {
+    try {
+      await register({
+        email: "newuser@example.com",
+        password: "Password123",
+        fullName: "Demo User",
+        role: USER_ROLES.STUDENT,
+        institution: "Demo University",
+      });
+    } catch (error) {
+      console.error("Demo register failed:", error);
+    }
   };
 
   return (
@@ -39,15 +77,15 @@ function App() {
           <Stack direction="row" justify="between" align="center">
             <div>
               <h1 className="heading-3 text-brand">
-                Protextify Component Library
+                Protextify Authentication System
               </h1>
               <p className="body-small text-muted">
-                Testing Phase 1.3 Implementation
+                Testing Phase 2.1 Implementation
               </p>
             </div>
             <Stack direction="row" spacing={3}>
-              <span className="badge badge-primary">Phase 1.3</span>
-              <span className="badge badge-success">Complete</span>
+              <span className="badge badge-primary">Phase 2.1</span>
+              <span className="badge badge-success">Auth Ready</span>
             </Stack>
           </Stack>
         </Container>
@@ -56,6 +94,149 @@ function App() {
       {/* Main Content */}
       <main>
         <Container className="content-padding">
+          {/* Auth Status Card */}
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Authentication Status</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Stack spacing={4}>
+                {authLoading ? (
+                  <div className="flex items-center space-x-3">
+                    <LoadingSpinner size="sm" />
+                    <span>Checking authentication...</span>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div
+                        className={`w-3 h-3 rounded-full ${
+                          isAuthenticated ? "bg-green-500" : "bg-red-500"
+                        }`}
+                      />
+                      <span className="font-medium">
+                        Status:{" "}
+                        {isAuthenticated
+                          ? "Authenticated"
+                          : "Not Authenticated"}
+                      </span>
+                    </div>
+
+                    {isAuthenticated && user && (
+                      <div className="bg-green-50 p-4 rounded-lg">
+                        <h4 className="font-medium text-green-900 mb-2">
+                          User Information:
+                        </h4>
+                        <div className="text-sm text-green-800 space-y-1">
+                          <p>
+                            <strong>Name:</strong> {user.fullName}
+                          </p>
+                          <p>
+                            <strong>Email:</strong> {user.email}
+                          </p>
+                          <p>
+                            <strong>Role:</strong> {user.role}
+                          </p>
+                          <p>
+                            <strong>Institution:</strong> {user.institution}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <Stack direction="row" spacing={3} wrap>
+                  {!isAuthenticated ? (
+                    <>
+                      <Button onClick={handleDemoLogin} variant="primary">
+                        Demo Login
+                      </Button>
+                      <Button onClick={handleDemoRegister} variant="secondary">
+                        Demo Register
+                      </Button>
+                    </>
+                  ) : (
+                    <Button onClick={logout} variant="danger">
+                      Logout
+                    </Button>
+                  )}
+                  <Button
+                    onClick={() => setShowAuthDemo(!showAuthDemo)}
+                    variant="outline"
+                  >
+                    {showAuthDemo ? "Hide" : "Show"} Auth Demo
+                  </Button>
+                </Stack>
+              </Stack>
+            </CardContent>
+          </Card>
+
+          {/* Auth Demo Section */}
+          {showAuthDemo && (
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle>Authentication Demo</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Stack spacing={4}>
+                  <Alert variant="info">
+                    <p>
+                      Authentication system sudah terintegrasi dengan backend
+                      API. Context menyediakan state management untuk login,
+                      logout, dan user data.
+                    </p>
+                  </Alert>
+
+                  <div>
+                    <h4 className="heading-6 mb-3">Features Implemented:</h4>
+                    <Grid cols={1} mdCols={2} gap={4}>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <span className="w-2 h-2 bg-green-500 rounded-full" />
+                          <span className="text-sm">JWT Token Management</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="w-2 h-2 bg-green-500 rounded-full" />
+                          <span className="text-sm">
+                            Persistent Authentication
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="w-2 h-2 bg-green-500 rounded-full" />
+                          <span className="text-sm">Auto-refresh Token</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="w-2 h-2 bg-green-500 rounded-full" />
+                          <span className="text-sm">Protected Routes</span>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <span className="w-2 h-2 bg-green-500 rounded-full" />
+                          <span className="text-sm">Role-based Access</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="w-2 h-2 bg-green-500 rounded-full" />
+                          <span className="text-sm">Error Handling</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="w-2 h-2 bg-green-500 rounded-full" />
+                          <span className="text-sm">Google OAuth Ready</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="w-2 h-2 bg-green-500 rounded-full" />
+                          <span className="text-sm">Loading States</span>
+                        </div>
+                      </div>
+                    </Grid>
+                  </div>
+                </Stack>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Original Component Demo */}
           <Grid cols={1} lgCols={2} gap={8}>
             {/* Button Components */}
             <Card>
@@ -74,18 +255,6 @@ function App() {
                       <Button variant="ghost">Ghost</Button>
                       <Button variant="danger">Danger</Button>
                       <Button variant="success">Success</Button>
-                    </Stack>
-                  </div>
-
-                  {/* Sizes */}
-                  <div>
-                    <h4 className="heading-6 mb-3">Sizes</h4>
-                    <Stack direction="row" spacing={3} align="center" wrap>
-                      <Button size="xs">Extra Small</Button>
-                      <Button size="sm">Small</Button>
-                      <Button size="md">Medium</Button>
-                      <Button size="lg">Large</Button>
-                      <Button size="xl">Extra Large</Button>
                     </Stack>
                   </div>
 
@@ -128,16 +297,9 @@ function App() {
                   />
 
                   <Select label="Role" placeholder="Select your role" required>
-                    <option value="student">Student</option>
-                    <option value="instructor">Instructor</option>
+                    <option value="STUDENT">Student</option>
+                    <option value="INSTRUCTOR">Instructor</option>
                   </Select>
-
-                  <Textarea
-                    label="Description"
-                    placeholder="Enter description"
-                    rows={3}
-                    helperText="Maximum 500 characters"
-                  />
                 </Stack>
               </CardContent>
             </Card>
@@ -150,159 +312,57 @@ function App() {
               <CardContent>
                 <Stack spacing={3}>
                   <Alert variant="success" title="Success">
-                    Your data has been saved successfully.
+                    Authentication system berhasil diimplementasikan!
                   </Alert>
 
                   <Alert variant="warning" title="Warning">
-                    Please check your input before submitting.
-                  </Alert>
-
-                  <Alert
-                    variant="error"
-                    title="Error"
-                    closable
-                    onClose={() => {}}
-                  >
-                    There was an error processing your request.
+                    Pastikan untuk menguji semua fitur auth sebelum deploy.
                   </Alert>
 
                   <Alert variant="info">
-                    This is some helpful information for you.
+                    Auth Context siap untuk Phase 2.2 - Authentication Pages.
                   </Alert>
                 </Stack>
               </CardContent>
             </Card>
 
-            {/* Modal & Loading */}
+            {/* Counter Demo */}
             <Card>
               <CardHeader>
-                <CardTitle>Modal & Loading</CardTitle>
+                <CardTitle>Interactive Demo</CardTitle>
               </CardHeader>
               <CardContent>
-                <Stack spacing={4}>
-                  <Button onClick={() => setShowModal(true)}>Open Modal</Button>
-
-                  <div>
-                    <h4 className="heading-6 mb-3">Loading Spinners</h4>
-                    <Stack direction="row" spacing={4} align="center">
-                      <LoadingSpinner size="xs" />
-                      <LoadingSpinner size="sm" />
-                      <LoadingSpinner size="md" />
-                      <LoadingSpinner size="lg" />
-                      <LoadingSpinner size="xl" />
+                <div className="text-center">
+                  <Stack direction="column" spacing={4} align="center">
+                    <p className="body-regular">
+                      Count is{" "}
+                      <span className="font-semibold text-brand">{count}</span>
+                    </p>
+                    <Stack direction="row" spacing={3}>
+                      <Button onClick={() => setCount(count + 1)}>
+                        Increment
+                      </Button>
+                      <Button variant="secondary" onClick={() => setCount(0)}>
+                        Reset
+                      </Button>
                     </Stack>
-                  </div>
-
-                  <div>
-                    <h4 className="heading-6 mb-3">Skeleton</h4>
-                    <SkeletonCard />
-                  </div>
-                </Stack>
-              </CardContent>
-            </Card>
-
-            {/* Layout Components */}
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Layout Components</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Stack spacing={6}>
-                  {/* Grid Layout */}
-                  <div>
-                    <h4 className="heading-6 mb-3">Grid Layout</h4>
-                    <Grid cols={1} smCols={2} lgCols={4} gap={4}>
-                      {[1, 2, 3, 4].map((item) => (
-                        <div
-                          key={item}
-                          className="bg-[#23407a] text-white p-4 rounded-lg text-center"
-                        >
-                          Grid Item {item}
-                        </div>
-                      ))}
-                    </Grid>
-                  </div>
-
-                  {/* Stack Layout */}
-                  <div>
-                    <h4 className="heading-6 mb-3">Stack Layout</h4>
-                    <Stack direction="row" spacing={4} justify="center" wrap>
-                      <div className="bg-green-100 text-green-800 px-4 py-2 rounded">
-                        Stack Item 1
-                      </div>
-                      <div className="bg-blue-100 text-blue-800 px-4 py-2 rounded">
-                        Stack Item 2
-                      </div>
-                      <div className="bg-purple-100 text-purple-800 px-4 py-2 rounded">
-                        Stack Item 3
-                      </div>
-                    </Stack>
-                  </div>
-
-                  {/* Counter Demo */}
-                  <div className="text-center">
-                    <h4 className="heading-6 mb-3">Interactive Demo</h4>
-                    <Stack direction="column" spacing={4} align="center">
-                      <p className="body-regular">
-                        Count is{" "}
-                        <span className="font-semibold text-brand">
-                          {count}
-                        </span>
-                      </p>
-                      <Stack direction="row" spacing={3}>
-                        <Button onClick={() => setCount(count + 1)}>
-                          Increment
-                        </Button>
-                        <Button variant="secondary" onClick={() => setCount(0)}>
-                          Reset
-                        </Button>
-                      </Stack>
-                    </Stack>
-                  </div>
-                </Stack>
+                  </Stack>
+                </div>
               </CardContent>
             </Card>
           </Grid>
         </Container>
       </main>
 
-      {/* Modal */}
-      <Modal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        title="Example Modal"
-        description="This is a modal component demonstration"
-        size="md"
-      >
-        <Stack spacing={4}>
-          <p className="body-regular">
-            This is the modal content. You can put any content here like forms,
-            confirmations, or detailed information.
-          </p>
-
-          <Alert variant="info">
-            This modal can be closed by clicking the X button, pressing Escape,
-            or clicking outside the modal.
-          </Alert>
-
-          <Stack direction="row" spacing={3} justify="end">
-            <Button variant="secondary" onClick={() => setShowModal(false)}>
-              Cancel
-            </Button>
-            <Button onClick={() => setShowModal(false)}>Confirm</Button>
-          </Stack>
-        </Stack>
-      </Modal>
-
       {/* Footer */}
       <footer className="bg-white border-t mt-16">
         <Container className="py-8">
           <div className="text-center space-y-2">
             <p className="body-small text-muted">
-              Protextify Component Library v1.3 • Phase 1 Complete
+              Protextify Authentication System v2.1 • Phase 2 Ready
             </p>
             <p className="caption">
-              All components ready for development • {formatDate(new Date())}
+              Auth Context & Services implemented • {formatDate(new Date())}
             </p>
           </div>
         </Container>
