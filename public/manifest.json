@@ -1,0 +1,191 @@
+{
+    "name": "Protextify - Platform Deteksi Plagiarisme",
+    "short_name": "Protextify",
+    "description": "Platform deteksi plagiarisme dengan teknologi AI terdepan untuk institusi pendidikan. Menulis tugas, deteksi plagiarisme, dan manajemen kelas yang mudah.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#23407a",
+    "orientation": "portrait-primary",
+    "scope": "/",
+    "lang": "id-ID",
+    "dir": "ltr",
+    "categories": [
+        "education",
+        "productivity",
+        "utilities"
+    ],
+    "screenshots": [
+        {
+            "src": "/screenshots/desktop-dashboard.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "Dashboard view on desktop"
+        },
+        {
+            "src": "/screenshots/mobile-dashboard.png",
+            "sizes": "640x1136",
+            "type": "image/png",
+            "form_factor": "narrow",
+            "label": "Dashboard view on mobile"
+        },
+        {
+            "src": "/screenshots/mobile-editor.png",
+            "sizes": "640x1136",
+            "type": "image/png",
+            "form_factor": "narrow",
+            "label": "Writing editor on mobile"
+        }
+    ],
+    "icons": [
+        {
+            "src": "/icons/icon-72x72.png",
+            "sizes": "72x72",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-96x96.png",
+            "sizes": "96x96",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-128x128.png",
+            "sizes": "128x128",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-144x144.png",
+            "sizes": "144x144",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-152x152.png",
+            "sizes": "152x152",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icons/icon-384x384.png",
+            "sizes": "384x384",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Dashboard",
+            "short_name": "Dashboard",
+            "description": "Akses dashboard utama",
+            "url": "/dashboard",
+            "icons": [
+                {
+                    "src": "/icons/shortcut-dashboard.png",
+                    "sizes": "96x96",
+                    "type": "image/png"
+                }
+            ]
+        },
+        {
+            "name": "Tulis Tugas",
+            "short_name": "Tulis",
+            "description": "Mulai menulis tugas baru",
+            "url": "/dashboard/assignments",
+            "icons": [
+                {
+                    "src": "/icons/shortcut-write.png",
+                    "sizes": "96x96",
+                    "type": "image/png"
+                }
+            ]
+        },
+        {
+            "name": "Gabung Kelas",
+            "short_name": "Gabung",
+            "description": "Bergabung ke kelas baru",
+            "url": "/dashboard/join-class",
+            "icons": [
+                {
+                    "src": "/icons/shortcut-join.png",
+                    "sizes": "96x96",
+                    "type": "image/png"
+                }
+            ]
+        },
+        {
+            "name": "Profil",
+            "short_name": "Profil",
+            "description": "Kelola profil dan pengaturan",
+            "url": "/profile",
+            "icons": [
+                {
+                    "src": "/icons/shortcut-profile.png",
+                    "sizes": "96x96",
+                    "type": "image/png"
+                }
+            ]
+        }
+    ],
+    "related_applications": [],
+    "prefer_related_applications": false,
+    "protocol_handlers": [
+        {
+            "protocol": "web+protextify",
+            "url": "/join-class?token=%s"
+        }
+    ],
+    "file_handlers": [
+        {
+            "action": "/upload",
+            "accept": {
+                "application/pdf": [
+                    ".pdf"
+                ],
+                "application/msword": [
+                    ".doc"
+                ],
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [
+                    ".docx"
+                ]
+            }
+        }
+    ],
+    "share_target": {
+        "action": "/share",
+        "method": "POST",
+        "enctype": "multipart/form-data",
+        "params": {
+            "title": "title",
+            "text": "text",
+            "url": "url",
+            "files": [
+                {
+                    "name": "file",
+                    "accept": [
+                        "text/plain",
+                        ".txt",
+                        ".doc",
+                        ".docx",
+                        ".pdf"
+                    ]
+                }
+            ]
+        }
+    }
+}
