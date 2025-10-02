@@ -8,3 +8,12 @@ export { default as ErrorBoundary } from "./ErrorBoundary";
 
 // Layout components
 export * from "./layout";
+
+// Class components
+export * from "./class";
+
+// Dashboard components
+export * from "./dashboard";
+
+// Instructor components
+export * from "./instructor";

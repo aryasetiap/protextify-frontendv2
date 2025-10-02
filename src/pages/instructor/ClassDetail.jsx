@@ -29,11 +29,11 @@ import {
   TabsList,
   TabsTrigger,
   TabsContent,
+  MemberManagement,
 } from "../../components";
-import { MemberManagement } from "../../components/class";
-import { classesService } from "../../services";
-import { useAsyncData } from "../../hooks/useAsyncData";
-import { formatDate } from "../../utils/helpers";
+import { classesService } from "../../services"; // ✅ Add this import
+import { useAsyncData } from "../../hooks/useAsyncData"; // ✅ Add this import
+import { formatDate } from "../../utils/helpers"; // ✅ Add this import
 
 export default function ClassDetail() {
   const { classId } = useParams();

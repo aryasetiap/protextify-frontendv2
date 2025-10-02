@@ -25,9 +25,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   Modal,
+  Pagination, // ✅ Import from ui components
 } from "../ui";
 import { formatDate } from "../../utils/helpers";
-import Pagination from "../pagination"; // Import the Pagination component
 
 export default function MemberManagement({ classDetail, onRefresh }) {
   const [searchTerm, setSearchTerm] = useState("");

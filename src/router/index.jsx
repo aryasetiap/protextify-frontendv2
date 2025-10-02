@@ -38,6 +38,7 @@ import {
   InstructorClasses,
   CreateClass,
   ClassDetail,
+  ClassSettings,
   CreateAssignment,
   AssignmentDetail,
   MonitorSubmissions,

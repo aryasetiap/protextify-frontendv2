@@ -1,5 +1,5 @@
 // src/pages/instructor/ClassSettings.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react"; // ✅ Add useEffect
 import { useParams, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,9 +27,9 @@ import {
   Modal,
   LoadingSpinner,
 } from "../../components";
-import { classesService } from "../../services";
-import { useAsyncData } from "../../hooks/useAsyncData";
-import { updateClassSchema } from "../../utils/validation";
+import { classesService } from "../../services"; // ✅ Add this import
+import { useAsyncData } from "../../hooks/useAsyncData"; // ✅ Add this import
+import { updateClassSchema } from "../../utils/validation"; // ✅ Add this import
 
 export default function ClassSettings() {
   const { classId } = useParams();
@@ -59,7 +59,7 @@ export default function ClassSettings() {
   });
 
   // Reset form when data loads
-  React.useEffect(() => {
+  useEffect(() => {
     if (classDetail) {
       reset({
         name: classDetail.name,
