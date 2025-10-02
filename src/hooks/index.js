@@ -7,7 +7,10 @@ export { default as useStudentDashboard } from "./useStudentDashboard";
 export { default as useInstructorDashboard } from "./useInstructorDashboard";
 export { usePaymentCalculator } from "./usePaymentCalculator";
 export { usePaymentTracker } from "./usePaymentTracker";
+export { default as useFileManager } from "./useFileManager";
 
 // Placeholder untuk hooks lain yang akan dibuat
 // export { default as useLocalStorage } from "./useLocalStorage";
-// export { default as useDebounce } from "./useDebounce";
+// export { default as useDraftManager } from "./useDraftManager";
+// export { default as useAutoSave } from "./useAutoSave";
+// export { default as useTextAnalytics } from "./useTextAnalytics";

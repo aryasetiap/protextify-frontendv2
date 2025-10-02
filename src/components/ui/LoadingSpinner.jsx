@@ -94,4 +94,8 @@ const SkeletonCard = ({ className, ...props }) => {
   );
 };
 
+// Named exports
 export { LoadingSpinner, Skeleton, SkeletonText, SkeletonCard };
+
+// ✅ Add default export
+export default LoadingSpinner;

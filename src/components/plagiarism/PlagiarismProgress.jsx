@@ -1,7 +1,7 @@
 // src/components/plagiarism/PlagiarismProgress.jsx
 import { useState, useEffect } from "react";
 import { Clock, CheckCircle, XCircle, Loader, AlertCircle } from "lucide-react";
-import Card from "../ui/Card";
+import { Card } from "../ui/Card";
 import Button from "../ui/Button";
 import { plagiarismService } from "../../services";
 import { useWebSocket } from "../../contexts/WebSocketContext";

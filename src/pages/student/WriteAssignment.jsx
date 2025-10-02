@@ -19,6 +19,8 @@ import TextStatistics from "../../components/editor/TextStatistics";
 import DraftActions from "../../components/editor/DraftActions";
 import CitationManager from "../../components/editor/CitationManager";
 import CopyPasteMonitor from "../../components/editor/CopyPasteMonitor";
+import FileAttachment from "../../components/submission/FileAttachment";
+import SubmissionActions from "../../components/submission/SubmissionActions";
 
 import { useDraftManager } from "../../hooks/useDraftManager";
 import { useAutoSave } from "../../hooks/useAutoSave";
@@ -320,6 +322,35 @@ export default function WriteAssignment() {
                 />
               </CardContent>
             </Card>
+
+            {/* File Attachments Section */}
+            <Card className="p-6">
+              <FileAttachment
+                submission={submission}
+                onFileUploaded={(files) => {
+                  // Handle file upload
+                  console.log("Files uploaded:", files);
+                }}
+                onFileDeleted={(fileId) => {
+                  // Handle file deletion
+                  console.log("File deleted:", fileId);
+                }}
+                readOnly={submission?.status === "SUBMITTED"}
+              />
+            </Card>
+
+            {/* Submission Actions */}
+            {submission && (
+              <Card className="p-4">
+                <SubmissionActions
+                  submission={submission}
+                  type="single"
+                  onActionComplete={() => {
+                    // Refresh data if needed
+                  }}
+                />
+              </Card>
+            )}
           </div>
 
           {/* Sidebar */}

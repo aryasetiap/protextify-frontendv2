@@ -1558,9 +1558,9 @@ Estimasi: 2 hari
 
 **Tasks:**
 
-- [ ] File upload/download
-- [ ] PDF generation client
-- [ ] Export functionality
+- [✅] File upload/download
+- [✅] PDF generation client
+- [✅] Export functionality
 
 **Backend Integration:**
 

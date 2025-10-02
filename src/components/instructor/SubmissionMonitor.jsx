@@ -2,8 +2,10 @@
 import { Link } from "react-router-dom";
 import { FileText, Clock, CheckCircle, Eye, Star } from "lucide-react";
 import { Button, Card, CardHeader, CardTitle, CardContent } from "../ui";
+import ExportCenter from "../export/ExportCenter";
+import SubmissionActions from "../submission/SubmissionActions";
 
-const SubmissionMonitor = ({ submissions, pendingCount }) => {
+const SubmissionMonitor = ({ submissions, pendingCount, assignment }) => {
   const getStatusIcon = (status) => {
     switch (status) {
       case "SUBMITTED":
@@ -157,6 +159,27 @@ const SubmissionMonitor = ({ submissions, pendingCount }) => {
           )}
         </div>
       </CardContent>
+      <div className="space-y-6">
+        {/* Bulk Actions */}
+        <Card className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-semibold">Bulk Actions</h3>
+            <SubmissionActions
+              submissions={submissions}
+              type="bulk"
+              onActionComplete={() => {
+                // Handle completion
+              }}
+            />
+          </div>
+
+          {/* Export Center */}
+          <ExportCenter
+            submissions={submissions}
+            assignmentTitle={assignment?.title}
+          />
+        </Card>
+      </div>
     </Card>
   );
 };

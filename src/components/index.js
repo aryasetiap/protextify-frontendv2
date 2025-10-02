@@ -23,3 +23,18 @@ export * from "./instructor";
 
 // Payment components
 export * from "./payments";
+
+// Export components
+export * from "./export";
+
+// PDF components
+export * from "./pdf";
+
+// Upload components
+export * from "./upload";
+
+// Submission components
+export * from "./submission";
+
+// Plagiarism components
+export * from "./plagiarism";
