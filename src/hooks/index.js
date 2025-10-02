@@ -4,6 +4,7 @@ export { default as useAsyncData } from "./useAsyncData";
 export { default as useWebSocket } from "./useWebSocket";
 export { default as useFileUpload } from "./useFileUpload";
 export { default as useStudentDashboard } from "./useStudentDashboard";
+export { default as useInstructorDashboard } from "./useInstructorDashboard";
 
 // Placeholder untuk hooks lain yang akan dibuat
 // export { default as useLocalStorage } from "./useLocalStorage";
