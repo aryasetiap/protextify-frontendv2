@@ -4,3 +4,4 @@ export { default as JoinClass } from "./JoinClass";
 export { default as StudentAssignments } from "./Assignments";
 export { default as StudentSubmissions } from "./Submissions";
 export { default as WriteAssignment } from "./WriteAssignment";
+export { default as StudentClassDetail } from "./StudentClassDetail";

@@ -30,6 +30,7 @@ import {
   StudentAssignments,
   StudentSubmissions,
   WriteAssignment,
+  StudentClassDetail,
 } from "../pages/student";
 
 // Instructor Pages
@@ -136,12 +137,12 @@ export const router = createBrowserRouter([
             element: <StudentAssignments />,
           },
           {
-            path: "assignments/:assignmentId/write",
-            element: <WriteAssignment />,
-          },
-          {
             path: "submissions",
             element: <StudentSubmissions />,
+          },
+          {
+            path: "classes/:classId",
+            element: <StudentClassDetail />,
           },
         ],
       },

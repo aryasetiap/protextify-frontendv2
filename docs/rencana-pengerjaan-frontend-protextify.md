@@ -1412,10 +1412,10 @@ Estimasi: 2 hari
 
 **Tasks:**
 
-- [ ] Join class form dengan token validation
-- [ ] Class preview sebelum join
-- [ ] Success confirmation
-- [ ] Error handling
+- [✅] Join class form dengan token validation
+- [✅] Class preview sebelum join
+- [✅] Success confirmation
+- [✅] Error handling
 
 **Backend Integration:**
 

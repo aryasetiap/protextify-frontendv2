@@ -11,9 +11,17 @@ const QuickActions = ({ stats }) => {
       href: "/dashboard/join-class",
       variant: "default",
       description: "Bergabung dengan kelas menggunakan token",
+      className: "bg-[#23407a] hover:bg-[#1a2f5c] text-white",
     },
     {
-      label: "Lihat Tugas",
+      label: "Lihat Kelas Saya",
+      icon: BookOpen,
+      href: "/dashboard/classes",
+      variant: "outline",
+      description: `${stats.totalClasses} kelas diikuti`,
+    },
+    {
+      label: "Tugas Aktif",
       icon: FileText,
       href: "/dashboard/assignments",
       variant: "outline",
@@ -26,41 +34,46 @@ const QuickActions = ({ stats }) => {
       variant: "outline",
       description: `${stats.completedAssignments} tugas selesai`,
     },
-    {
-      label: "Kelas Saya",
-      icon: BookOpen,
-      href: "/dashboard/classes",
-      variant: "outline",
-      description: `${stats.totalClasses} kelas`,
-    },
   ];
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center">
-          <Clock className="h-5 w-5 mr-2" />
-          Aksi Cepat
-        </CardTitle>
+        <CardTitle>Quick Actions</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
-          {actions.map((action) => (
-            <Link key={action.href} to={action.href}>
-              <Button
-                variant={action.variant}
-                className="w-full justify-start h-auto p-4"
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {actions.map((action, index) => (
+            <Link key={index} to={action.href} className="group block">
+              <div
+                className={`
+                p-4 rounded-lg border transition-all duration-200 
+                hover:shadow-md hover:scale-105
+                ${action.className || "border-gray-200 hover:border-[#23407a]"}
+              `}
               >
-                <div className="flex items-center w-full">
-                  <action.icon className="h-5 w-5 mr-3 flex-shrink-0" />
-                  <div className="text-left flex-1">
-                    <div className="font-medium">{action.label}</div>
-                    <div className="text-sm text-gray-500 mt-1">
-                      {action.description}
-                    </div>
-                  </div>
+                <div className="flex items-center mb-2">
+                  <action.icon
+                    className={`h-5 w-5 mr-3 ${
+                      action.className ? "text-white" : "text-[#23407a]"
+                    }`}
+                  />
+                  <span
+                    className={`font-medium ${
+                      action.className ? "text-white" : "text-gray-900"
+                    }`}
+                  >
+                    {action.label}
+                  </span>
                 </div>
-              </Button>
+                <p
+                  className={`text-sm ${
+                    action.className ? "text-white/80" : "text-gray-600"
+                  }`}
+                >
+                  {action.description}
+                </p>
+              </div>
             </Link>
           ))}
         </div>

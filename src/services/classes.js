@@ -38,6 +38,24 @@ const classesService = {
       const response = await api.post("/classes/join", { classToken });
       return response;
     } catch (error) {
+      // Add specific error handling
+      if (error.response?.status === 404) {
+        throw {
+          ...error,
+          message:
+            "Token kelas tidak ditemukan. Periksa kembali token yang dimasukkan.",
+        };
+      } else if (error.response?.status === 409) {
+        throw {
+          ...error,
+          message: "Anda sudah bergabung di kelas ini.",
+        };
+      } else if (error.response?.status === 400) {
+        throw {
+          ...error,
+          message: "Format token tidak valid. Token harus 8 karakter.",
+        };
+      }
       throw error;
     }
   },
@@ -88,6 +106,20 @@ const classesService = {
       const response = await api.post(`/classes/${classId}/regenerate-token`);
       return response;
     } catch (error) {
+      throw error;
+    }
+  },
+
+  // Preview class by token (before joining)
+  previewClass: async (classToken) => {
+    try {
+      // We can use the existing endpoint with a different approach
+      // or create a specific preview endpoint if available
+      const response = await api.get(`/classes/preview/${classToken}`);
+      return response;
+    } catch (error) {
+      // If preview endpoint doesn't exist, we can try to get class info
+      // by attempting to join and catching specific errors
       throw error;
     }
   },
