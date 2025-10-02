@@ -1473,12 +1473,12 @@ Estimasi: 6 hari
 
 **Tasks:**
 
-- [ ] Rich text editor integration (React Quill atau TipTap)
-- [ ] Real-time auto-save dengan WebSocket
-- [ ] Word count & character limits
-- [ ] Draft management
-- [ ] Citation tools
-- [ ] Anti-copy-paste detection
+- [✅] Rich text editor integration (React Quill atau TipTap)
+- [✅] Real-time auto-save dengan WebSocket
+- [✅] Word count & character limits
+- [✅] Draft management
+- [✅] Citation tools
+- [✅] Anti-copy-paste detection
 
 **WebSocket Integration:**
 

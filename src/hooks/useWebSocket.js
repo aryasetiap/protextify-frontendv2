@@ -36,27 +36,27 @@ export const useWebSocket = () => {
     websocketService.leaveMonitoringRoom(assignmentId);
   }, []);
 
-  // Real-time submission tracking
-  const trackSubmission = useCallback((submissionId) => {
+  // Join submission room for student
+  const joinSubmission = useCallback((submissionId) => {
     websocketService.joinSubmissionRoom(submissionId);
   }, []);
 
-  const untrackSubmission = useCallback((submissionId) => {
+  const leaveSubmission = useCallback((submissionId) => {
     websocketService.leaveSubmissionRoom(submissionId);
   }, []);
 
-  // Add event listener
-  const on = useCallback((event, callback) => {
+  // Subscribe to events
+  const subscribe = useCallback((event, callback) => {
     websocketService.on(event, callback);
+
+    // Return unsubscribe function
+    return () => {
+      websocketService.off(event, callback);
+    };
   }, []);
 
-  // Remove event listener
-  const off = useCallback((event, callback) => {
-    websocketService.off(event, callback);
-  }, []);
-
-  // Get connection status
-  const isConnected = useCallback(() => {
+  // Check connection status
+  const isSocketConnected = useCallback(() => {
     return websocketService.isSocketConnected();
   }, []);
 
@@ -64,11 +64,10 @@ export const useWebSocket = () => {
     updateContent,
     joinMonitoring,
     leaveMonitoring,
-    trackSubmission,
-    untrackSubmission,
-    on,
-    off,
-    isConnected,
+    joinSubmission,
+    leaveSubmission,
+    subscribe,
+    isSocketConnected,
   };
 };
 

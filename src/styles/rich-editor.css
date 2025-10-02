@@ -63,3 +63,126 @@
 .rich-editor u {
   text-decoration: underline;
 }
+
+/* TipTap Editor Styles */
+.ProseMirror {
+  outline: none;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #374151;
+  min-height: 400px;
+  padding: 20px;
+}
+
+.ProseMirror p {
+  margin: 0.5em 0;
+}
+
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3 {
+  margin: 1em 0 0.5em 0;
+  font-weight: 600;
+}
+
+.ProseMirror h1 {
+  font-size: 1.5em;
+}
+
+.ProseMirror h2 {
+  font-size: 1.3em;
+}
+
+.ProseMirror h3 {
+  font-size: 1.1em;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 1.5em;
+  margin: 0.5em 0;
+}
+
+.ProseMirror li {
+  margin: 0.25em 0;
+}
+
+.ProseMirror blockquote {
+  border-left: 4px solid #23407a;
+  margin: 1em 0;
+  padding-left: 1em;
+  font-style: italic;
+  color: #6b7280;
+}
+
+.ProseMirror code {
+  background: #f3f4f6;
+  border-radius: 4px;
+  padding: 0.2em 0.4em;
+  font-family: "Monaco", "Consolas", monospace;
+  font-size: 0.9em;
+}
+
+.ProseMirror pre {
+  background: #f3f4f6;
+  border-radius: 8px;
+  padding: 1em;
+  margin: 1em 0;
+  overflow-x: auto;
+}
+
+.ProseMirror pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+.ProseMirror a {
+  color: #23407a;
+  text-decoration: underline;
+}
+
+.ProseMirror a:hover {
+  color: #1a2f5c;
+}
+
+/* Placeholder styling */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #9ca3af;
+  pointer-events: none;
+  height: 0;
+}
+
+/* Selection styles */
+.ProseMirror-selectednode {
+  outline: 2px solid #23407a;
+  outline-offset: 2px;
+}
+
+/* Focus styles */
+.ProseMirror-focused {
+  outline: none;
+}
+
+/* Toolbar button states */
+.editor-toolbar button.is-active {
+  background-color: #e5e7eb;
+  color: #23407a;
+}
+
+/* Text alignment */
+.ProseMirror .text-left {
+  text-align: left;
+}
+
+.ProseMirror .text-center {
+  text-align: center;
+}
+
+.ProseMirror .text-right {
+  text-align: right;
+}

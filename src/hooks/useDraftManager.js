@@ -1,0 +1,141 @@
+import { useState, useCallback, useEffect } from "react";
+import { submissionsService } from "../services";
+import toast from "react-hot-toast";
+
+export const useDraftManager = (submissionId) => {
+  const [submission, setSubmission] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Load submission data
+  const loadSubmission = useCallback(async () => {
+    if (!submissionId) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await submissionsService.getSubmissionById(submissionId);
+      setSubmission(data);
+    } catch (err) {
+      setError(err);
+      toast.error("Gagal memuat data submission");
+    } finally {
+      setLoading(false);
+    }
+  }, [submissionId]);
+
+  // Save draft
+  const saveDraft = useCallback(
+    async (content) => {
+      if (!submissionId || saving) return;
+
+      try {
+        setSaving(true);
+        setError(null);
+
+        const updatedSubmission =
+          await submissionsService.updateSubmissionContent(
+            submissionId,
+            content
+          );
+
+        setSubmission((prev) => ({
+          ...prev,
+          content,
+          updatedAt: updatedSubmission.updatedAt,
+        }));
+
+        return updatedSubmission;
+      } catch (err) {
+        setError(err);
+        throw err;
+      } finally {
+        setSaving(false);
+      }
+    },
+    [submissionId, saving]
+  );
+
+  // Submit final submission
+  const submitSubmission = useCallback(async () => {
+    if (!submissionId || submitting) return;
+
+    try {
+      setSubmitting(true);
+      setError(null);
+
+      const result = await submissionsService.submitSubmission(submissionId);
+
+      setSubmission((prev) => ({
+        ...prev,
+        status: "SUBMITTED",
+        submittedAt: result.submittedAt,
+      }));
+
+      toast.success("Tugas berhasil dikumpulkan!");
+      return result;
+    } catch (err) {
+      setError(err);
+      toast.error("Gagal mengumpulkan tugas");
+      throw err;
+    } finally {
+      setSubmitting(false);
+    }
+  }, [submissionId, submitting]);
+
+  // Check if can edit
+  const canEdit = useCallback(() => {
+    return submission?.status === "DRAFT";
+  }, [submission?.status]);
+
+  // Check if can submit
+  const canSubmit = useCallback(() => {
+    return submission?.status === "DRAFT" && submission?.content?.trim();
+  }, [submission?.status, submission?.content]);
+
+  // Get submission status info
+  const getStatusInfo = useCallback(() => {
+    if (!submission) return null;
+
+    const statusMap = {
+      DRAFT: {
+        label: "Draft",
+        color: "yellow",
+        description: "Sedang dikerjakan",
+      },
+      SUBMITTED: {
+        label: "Dikumpulkan",
+        color: "blue",
+        description: "Menunggu penilaian",
+      },
+      GRADED: {
+        label: "Dinilai",
+        color: "green",
+        description: "Sudah dinilai",
+      },
+    };
+
+    return statusMap[submission.status] || statusMap.DRAFT;
+  }, [submission]);
+
+  // Initialize
+  useEffect(() => {
+    loadSubmission();
+  }, [loadSubmission]);
+
+  return {
+    submission,
+    loading,
+    saving,
+    submitting,
+    error,
+    saveDraft,
+    submitSubmission,
+    loadSubmission,
+    canEdit,
+    canSubmit,
+    getStatusInfo,
+  };
+};
