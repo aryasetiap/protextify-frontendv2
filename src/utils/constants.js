@@ -293,3 +293,45 @@ export const RETRY_CONFIG = {
     return error.response?.status >= 500 || error.code === "NETWORK_ERROR";
   },
 };
+
+// Tambahkan ke src/utils/constants.js
+
+// File Upload
+export const FILE_UPLOAD = {
+  MAX_SIZE: {
+    PROFILE_PICTURE: 5 * 1024 * 1024, // 5MB
+    SUBMISSION_FILE: 10 * 1024 * 1024, // 10MB
+    ASSIGNMENT_DOCUMENT: 20 * 1024 * 1024, // 20MB
+  },
+  ALLOWED_TYPES: {
+    IMAGES: ["image/jpeg", "image/png", "image/gif", "image/webp"],
+    DOCUMENTS: [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "text/plain",
+    ],
+    ALL: [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "text/plain",
+    ],
+  },
+};
+
+// WebSocket Events
+export const WS_EVENTS = {
+  UPDATE_CONTENT: "updateContent",
+  NOTIFICATION: "notification",
+  SUBMISSION_UPDATED: "submissionUpdated",
+  SUBMISSION_LIST_UPDATED: "submissionListUpdated",
+  JOIN_MONITORING: "joinMonitoring",
+  LEAVE_MONITORING: "leaveMonitoring",
+  JOIN_SUBMISSION: "joinSubmission",
+  LEAVE_SUBMISSION: "leaveSubmission",
+};

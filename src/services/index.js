@@ -5,6 +5,8 @@ export { default as assignmentsService } from "./assignments";
 export { default as submissionsService } from "./submissions";
 export { default as plagiarismService } from "./plagiarism";
 export { default as paymentsService } from "./payments";
+export { default as uploadService } from "./upload";
+export { default as websocketService } from "./websocket";
 
 // Utility functions
 export { useApi } from "../hooks/useApi";

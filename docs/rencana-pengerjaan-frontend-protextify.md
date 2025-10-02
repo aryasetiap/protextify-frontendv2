@@ -1016,11 +1016,11 @@ Estimasi: 3 hari
 
 **Tasks:**
 
-- [ ] Auth service (login, register, profile)
-- [ ] Classes service (CRUD, join class)
-- [ ] Assignments service (CRUD, submissions)
-- [ ] File upload service
-- [ ] WebSocket service setup
+- [✅] Auth service (login, register, profile)
+- [✅] Classes service (CRUD, join class)
+- [✅] Assignments service (CRUD, submissions)
+- [✅] File upload service
+- [✅] WebSocket service setup
 
 **Implementation classes.js:**
 
