@@ -5,7 +5,7 @@ import { API_BASE_URL } from "@/utils/constants";
 // Create axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 15000,
+  timeout: 15000, // Sudah ditingkatkan dari 10000
   headers: {
     "Content-Type": "application/json",
   },
@@ -18,6 +18,14 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Add logging untuk development
+    if (import.meta.env.VITE_ENABLE_ROUTER_LOGGING === "true") {
+      console.log(
+        `🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`
+      );
+    }
+
     return config;
   },
   (error) => {
@@ -28,6 +36,15 @@ api.interceptors.request.use(
 // Response interceptor untuk error handling
 api.interceptors.response.use(
   (response) => {
+    // Add logging untuk development
+    if (import.meta.env.VITE_ENABLE_ROUTER_LOGGING === "true") {
+      console.log(
+        `✅ API Response: ${response.config.method?.toUpperCase()} ${
+          response.config.url
+        } - ${response.status}`
+      );
+    }
+
     // Return only data from response
     return response.data;
   },
@@ -37,14 +54,27 @@ api.interceptors.response.use(
       error.message ||
       "Terjadi kesalahan yang tidak diketahui";
 
+    // Add logging untuk development
+    if (import.meta.env.VITE_ENABLE_ROUTER_LOGGING === "true") {
+      console.error(
+        `❌ API Error: ${error.config?.method?.toUpperCase()} ${
+          error.config?.url
+        } - ${error.response?.status}`,
+        error
+      );
+    }
+
     // Handle specific error codes
     switch (error.response?.status) {
       case 401:
         // Unauthorized - redirect to login
         localStorage.removeItem("token");
-        if (window.location.pathname !== "/login") {
+        if (
+          window.location.pathname !== "/auth/login" &&
+          window.location.pathname !== "/login"
+        ) {
           toast.error("Sesi Anda telah berakhir. Silakan login kembali.");
-          window.location.href = "/login";
+          window.location.href = "/auth/login";
         }
         break;
       case 403:

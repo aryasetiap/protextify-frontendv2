@@ -224,3 +224,72 @@ export const TRANSITION_EASING = {
   easeInOut: "ease-in-out",
   linear: "linear",
 };
+
+// Tambahkan ke src/utils/constants.js
+export const API_ENDPOINTS = {
+  // Auth
+  LOGIN: "/auth/login",
+  REGISTER: "/auth/register",
+  GOOGLE_AUTH: "/auth/google",
+  VERIFY_EMAIL: "/auth/verify-email",
+  SEND_VERIFICATION: "/auth/send-verification",
+
+  // Users
+  CURRENT_USER: "/users/me",
+  UPDATE_PROFILE: "/users/me",
+
+  // Classes
+  CLASSES: "/classes",
+  JOIN_CLASS: "/classes/join",
+  CLASS_DETAIL: (id) => `/classes/${id}`,
+  CLASS_ASSIGNMENTS: (id) => `/classes/${id}/assignments`,
+  CLASS_HISTORY: (id) => `/classes/${id}/history`,
+
+  // Assignments
+  CREATE_ASSIGNMENT: (classId) => `/classes/${classId}/assignments`,
+  ASSIGNMENT_DETAIL: (id) => `/assignments/${id}`,
+  ASSIGNMENT_SUBMISSIONS: (classId, assignmentId) =>
+    `/classes/${classId}/assignments/${assignmentId}/submissions`,
+
+  // Submissions
+  CREATE_SUBMISSION: (assignmentId) =>
+    `/assignments/${assignmentId}/submissions`,
+  SUBMISSION_DETAIL: (id) => `/submissions/${id}`,
+  UPDATE_CONTENT: (id) => `/submissions/${id}/content`,
+  SUBMIT_SUBMISSION: (id) => `/submissions/${id}/submit`,
+  GRADE_SUBMISSION: (id) => `/submissions/${id}/grade`,
+  SUBMISSION_HISTORY: "/submissions/history",
+  DOWNLOAD_SUBMISSION: (id) => `/submissions/${id}/download`,
+
+  // Plagiarism
+  CHECK_PLAGIARISM: (id) => `/submissions/${id}/check-plagiarism`,
+  PLAGIARISM_REPORT: (id) => `/submissions/${id}/plagiarism-report`,
+  QUEUE_STATS: "/plagiarism/queue-stats",
+
+  // Payments
+  CREATE_TRANSACTION: "/payments/create-transaction",
+  PAYMENT_WEBHOOK: "/payments/webhook",
+  TRANSACTION_HISTORY: "/payments/transactions",
+  TRANSACTION_DETAIL: (id) => `/payments/transactions/${id}`,
+  PAYMENT_STATUS: (orderId) => `/payments/status/${orderId}`,
+};
+
+// Loading states
+export const LOADING_STATES = {
+  IDLE: "idle",
+  LOADING: "loading",
+  SUCCESS: "success",
+  ERROR: "error",
+};
+
+// Request timeout
+export const REQUEST_TIMEOUT = 15000;
+
+// Retry configuration
+export const RETRY_CONFIG = {
+  retries: 3,
+  retryDelay: 1000,
+  retryCondition: (error) => {
+    return error.response?.status >= 500 || error.code === "NETWORK_ERROR";
+  },
+};
