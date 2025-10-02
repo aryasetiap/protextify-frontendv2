@@ -1086,11 +1086,11 @@ Estimasi: 4 hari
 
 **Tasks:**
 
-- [ ] Dashboard overview dengan statistics
-- [ ] Recent assignments list
-- [ ] Quick actions (join class, view submissions)
-- [ ] Activity timeline
-- [ ] Progress indicators
+- [✅] Dashboard overview dengan statistics
+- [✅] Recent assignments list
+- [✅] Quick actions (join class, view submissions)
+- [✅] Activity timeline
+- [✅] Progress indicators
 
 **Backend Integration:**
 

@@ -3,6 +3,7 @@ export { default as useApi } from "./useApi";
 export { default as useAsyncData } from "./useAsyncData";
 export { default as useWebSocket } from "./useWebSocket";
 export { default as useFileUpload } from "./useFileUpload";
+export { default as useStudentDashboard } from "./useStudentDashboard";
 
 // Placeholder untuk hooks lain yang akan dibuat
 // export { default as useLocalStorage } from "./useLocalStorage";
