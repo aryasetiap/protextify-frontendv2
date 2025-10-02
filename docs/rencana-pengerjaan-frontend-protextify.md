@@ -1544,10 +1544,10 @@ Estimasi: 3 hari
 
 **Tasks:**
 
-- [ ] Setup WebSocket client
-- [ ] Real-time notifications
-- [ ] Live collaboration features
-- [ ] Connection status indicator
+- [✅] Setup WebSocket client
+- [✅] Real-time notifications
+- [✅] Live collaboration features
+- [✅] Connection status indicator
 
 #### 11.2 File Management
 

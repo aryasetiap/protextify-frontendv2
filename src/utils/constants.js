@@ -334,6 +334,45 @@ export const WS_EVENTS = {
   LEAVE_MONITORING: "leaveMonitoring",
   JOIN_SUBMISSION: "joinSubmission",
   LEAVE_SUBMISSION: "leaveSubmission",
+
+  // New events
+  PLAGIARISM_PROGRESS: "plagiarismProgress",
+  PLAGIARISM_COMPLETE: "plagiarismComplete",
+  PLAGIARISM_FAILED: "plagiarismFailed",
+  JOIN_CLASS: "joinClass",
+  LEAVE_CLASS: "leaveClass",
+  LEAVE_ALL_ROOMS: "leaveAllRooms",
+  PING: "ping",
+  PONG: "pong",
+
+  // Connection events
+  CONNECT: "connect",
+  DISCONNECT: "disconnect",
+  RECONNECT: "reconnect",
+  CONNECT_ERROR: "connect_error",
+  RECONNECT_ERROR: "reconnect_error",
+};
+
+// WebSocket Configuration
+export const WS_CONFIG = {
+  HEARTBEAT_INTERVAL: 30000, // 30 seconds
+  CONNECTION_TIMEOUT: 10000, // 10 seconds
+  MAX_RECONNECT_ATTEMPTS: 5,
+  RECONNECT_DELAY: 1000,
+  AUTO_SAVE_DEBOUNCE: 2000, // 2 seconds
+};
+
+// Notification Types
+export const NOTIFICATION_TYPES = {
+  SUCCESS: "success",
+  ERROR: "error",
+  WARNING: "warning",
+  INFO: "info",
+  PLAGIARISM_COMPLETE: "plagiarism_complete",
+  PLAGIARISM_FAILED: "plagiarism_failed",
+  PAYMENT_SUCCESS: "payment_success",
+  ASSIGNMENT_CREATED: "assignment_created",
+  SUBMISSION_GRADED: "submission_graded",
 };
 
 // Add to existing constants.js

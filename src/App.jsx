@@ -22,6 +22,9 @@ import {
   Stack,
 } from "./components";
 import "./App.css";
+import ConnectionStatus from "./components/ui/ConnectionStatus";
+import NotificationCenter from "./components/ui/NotificationCenter";
+import ToastProvider from "./components/ui/ToastProvider";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -438,6 +441,13 @@ function App() {
           </div>
         </Container>
       </footer>
+
+      {/* WebSocket Features */}
+      <ConnectionStatus showDetails={false} position="bottom-right" />
+      <ToastProvider />
+
+      {/* In your header/navbar */}
+      <NotificationCenter />
     </div>
   );
 }
