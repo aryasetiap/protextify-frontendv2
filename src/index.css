@@ -585,3 +585,55 @@ textarea,
 .backdrop-blur-lg {
   backdrop-filter: blur(16px);
 }
+
+/* Footer specific styles */
+.footer-link-hover {
+  @apply relative;
+}
+
+.footer-link-hover::before {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: currentColor;
+  transition: width 0.3s ease;
+}
+
+.footer-link-hover:hover::before {
+  width: 100%;
+}
+
+/* Newsletter input focus effects */
+.newsletter-input:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Social hover effects */
+.social-icon {
+  @apply transform transition-all duration-200;
+}
+
+.social-icon:hover {
+  @apply scale-110 rotate-3;
+}
+
+/* Footer gradient text */
+.footer-gradient-text {
+  background: linear-gradient(135deg, #60a5fa 0%, #a855f7 50%, #ec4899 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Improved grid pattern for footer */
+.bg-grid-white\/\[0\.02\] {
+  background-image: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.02) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+}
