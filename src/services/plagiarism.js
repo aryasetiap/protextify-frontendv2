@@ -1,7 +1,7 @@
 // src/services/plagiarism.js
 import api from "./api";
 
-const plagiarismService = {
+export const plagiarismService = {
   // Check plagiarism for submission (instructor only)
   checkPlagiarism: async (submissionId, options = {}) => {
     try {
@@ -27,7 +27,7 @@ const plagiarismService = {
     }
   },
 
-  // Get queue statistics (debugging)
+  // Get queue statistics
   getQueueStats: async () => {
     try {
       const response = await api.get("/plagiarism/queue-stats");
@@ -41,6 +41,18 @@ const plagiarismService = {
   cancelPlagiarismCheck: async (jobId) => {
     try {
       const response = await api.delete(`/plagiarism/jobs/${jobId}`);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Check if plagiarism check is in progress
+  getCheckStatus: async (submissionId) => {
+    try {
+      const response = await api.get(
+        `/submissions/${submissionId}/plagiarism-status`
+      );
       return response;
     } catch (error) {
       throw error;

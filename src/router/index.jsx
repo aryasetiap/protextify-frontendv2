@@ -46,6 +46,7 @@ import {
   BulkGrade,
   AssignmentAnalytics,
 } from "../pages/instructor";
+import PlagiarismAnalysis from "../pages/instructor/PlagiarismAnalysis";
 
 export const router = createBrowserRouter([
   {
@@ -146,6 +147,10 @@ export const router = createBrowserRouter([
             path: "classes/:classId",
             element: <StudentClassDetail />,
           },
+          {
+            path: "plagiarism/:submissionId",
+            element: <PlagiarismAnalysis />,
+          },
         ],
       },
 
@@ -201,6 +206,10 @@ export const router = createBrowserRouter([
           {
             path: "assignments/:assignmentId/analytics",
             element: <AssignmentAnalytics />,
+          },
+          {
+            path: "plagiarism/:submissionId",
+            element: <PlagiarismAnalysis />,
           },
         ],
       },

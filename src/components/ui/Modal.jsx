@@ -146,4 +146,8 @@ const ModalFooter = ({ className, children, ...props }) => (
   </div>
 );
 
+// ✅ Make sure exports are correct
 export { Modal, ModalHeader, ModalTitle, ModalDescription, ModalFooter };
+
+// ✅ Also add a default export if you want to use it as default
+export default Modal;

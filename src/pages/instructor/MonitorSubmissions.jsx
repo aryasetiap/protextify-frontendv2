@@ -509,6 +509,7 @@ function StatCard({ title, value, icon: Icon, color }) {
 
 function SubmissionRow({ submission, isSelected, onSelect, assignmentId }) {
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handlePlagiarismCheck = async () => {
     try {
@@ -632,6 +633,16 @@ function SubmissionRow({ submission, isSelected, onSelect, assignmentId }) {
             >
               <Download className="h-4 w-4 inline mr-2" />
               Download
+            </button>
+            <button
+              onClick={() =>
+                navigate(`/instructor/plagiarism/${submission.id}`)
+              }
+              disabled={!submission.plagiarismScore}
+              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Eye className="h-4 w-4 inline mr-2" />
+              Analisis Plagiarisme
             </button>
           </div>
         </Dropdown>
