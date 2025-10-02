@@ -11,6 +11,7 @@ import {
   Clock,
   ChevronLeft,
   ChevronRight,
+  CreditCard,
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { USER_ROLES } from "../../utils/constants";
@@ -37,6 +38,11 @@ export default function Sidebar() {
           label: "Buat Kelas",
           icon: PlusCircle,
           path: "/instructor/create-class",
+        },
+        {
+          label: "Transaksi",
+          icon: CreditCard,
+          path: "/instructor/transactions",
         },
         {
           label: "Analytics",

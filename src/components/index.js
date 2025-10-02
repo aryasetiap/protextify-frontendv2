@@ -20,3 +20,6 @@ export * from "./dashboard";
 
 // Instructor components
 export * from "./instructor";
+
+// Payment components
+export * from "./payments";

@@ -47,6 +47,8 @@ import {
   AssignmentAnalytics,
 } from "../pages/instructor";
 import PlagiarismAnalysis from "../pages/instructor/PlagiarismAnalysis";
+import TransactionHistory from "../pages/instructor/TransactionHistory";
+import TransactionDetail from "../pages/instructor/TransactionDetail";
 
 export const router = createBrowserRouter([
   {
@@ -210,6 +212,14 @@ export const router = createBrowserRouter([
           {
             path: "plagiarism/:submissionId",
             element: <PlagiarismAnalysis />,
+          },
+          {
+            path: "transactions",
+            element: <TransactionHistory />,
+          },
+          {
+            path: "transactions/:transactionId",
+            element: <TransactionDetail />,
           },
         ],
       },

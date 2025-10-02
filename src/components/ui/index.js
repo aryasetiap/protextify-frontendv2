@@ -6,7 +6,7 @@ export { default as Select } from "./Select";
 export { default as Checkbox } from "./Checkbox";
 export { default as Pagination } from "./Pagination";
 export { default as Tooltip } from "./Tooltip";
-export { default as Badge } from "./Badge"; // ✅ Add this
+export { default as Badge } from "./Badge";
 
 // UI Components
 export {
@@ -27,7 +27,6 @@ export {
   DropdownMenuItem,
 } from "./DropdownMenu";
 
-// ✅ Add new Dropdown export
 export {
   Dropdown,
   DropdownTrigger,
@@ -44,6 +43,19 @@ export {
 } from "./Modal";
 
 export { Alert, AlertTitle, AlertDescription } from "./Alert";
+
+// Table Components
+export {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableCaption,
+  DataTable,
+} from "./Table";
 
 // Feedback Components
 export {

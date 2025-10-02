@@ -1523,11 +1523,11 @@ Estimasi: 4 hari
 
 **Tasks:**
 
-- [ ] Midtrans integration
-- [ ] Payment calculator
-- [ ] Transaction history
-- [ ] Invoice management
-- [ ] Payment status tracking
+- [✅] Midtrans integration
+- [✅] Payment calculator
+- [✅] Transaction history
+- [✅] Invoice management
+- [✅] Payment status tracking
 
 **Backend Integration:**
 

@@ -335,3 +335,49 @@ export const WS_EVENTS = {
   JOIN_SUBMISSION: "joinSubmission",
   LEAVE_SUBMISSION: "leaveSubmission",
 };
+
+// Add to existing constants.js
+
+// Payment Configuration
+export const PAYMENT_CONFIG = {
+  MIDTRANS: {
+    ENVIRONMENT: import.meta.env.VITE_MIDTRANS_ENVIRONMENT || "sandbox",
+    CLIENT_KEY: import.meta.env.VITE_MIDTRANS_CLIENT_KEY,
+    SNAP_URL: {
+      sandbox: "https://app.sandbox.midtrans.com/snap/snap.js",
+      production: "https://app.midtrans.com/snap/snap.js",
+    },
+  },
+  ASSIGNMENT_PRICE_PER_STUDENT: 2500,
+  CURRENCY: "IDR",
+  MIN_STUDENTS: 1,
+  MAX_STUDENTS: 100,
+  PAYMENT_TIMEOUT: 24 * 60 * 60 * 1000, // 24 hours
+  POLLING_INTERVAL: 5000, // 5 seconds
+  MAX_POLLING_ATTEMPTS: 60, // 5 minutes total
+};
+
+// Payment Status
+export const PAYMENT_STATUS = {
+  PENDING: "PENDING",
+  SUCCESS: "SUCCESS",
+  FAILED: "FAILED",
+  CANCELLED: "CANCELLED",
+  EXPIRED: "EXPIRED",
+};
+
+// Payment Methods
+export const PAYMENT_METHODS = {
+  CREDIT_CARD: "credit_card",
+  BANK_TRANSFER: "bank_transfer",
+  E_WALLET: "echannel",
+  VIRTUAL_ACCOUNT: "bank_transfer",
+  CONVENIENCE_STORE: "cstore",
+};
+
+// Transaction Types
+export const TRANSACTION_TYPES = {
+  ASSIGNMENT_PAYMENT: "ASSIGNMENT_PAYMENT",
+  CREDIT_PURCHASE: "CREDIT_PURCHASE",
+  SUBSCRIPTION: "SUBSCRIPTION",
+};

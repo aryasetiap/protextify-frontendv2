@@ -9,28 +9,14 @@ export function cn(...inputs) {
 }
 
 /**
- * Format tanggal ke format Indonesia
- */
-export function formatDate(date, options = {}) {
-  const defaultOptions = {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    ...options,
-  };
-
-  return new Intl.DateTimeFormat("id-ID", defaultOptions).format(
-    new Date(date)
-  );
-}
-
-/**
  * Format mata uang Indonesia
  */
 export function formatCurrency(amount) {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(amount);
 }
 
@@ -101,3 +87,34 @@ export function getInitials(fullName) {
     .toUpperCase()
     .substring(0, 2);
 }
+
+/**
+ * Format date
+ */
+export const formatDate = (date, format = "dd/MM/yyyy") => {
+  if (!date) return "-";
+
+  const d = new Date(date);
+
+  if (format === "dd/MM/yyyy") {
+    return d.toLocaleDateString("id-ID");
+  } else if (format === "dd/MM/yyyy HH:mm") {
+    return d.toLocaleString("id-ID");
+  } else if (format === "dd MMMM yyyy") {
+    return d.toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+  } else if (format === "dd MMMM yyyy HH:mm") {
+    return d.toLocaleString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  return d.toLocaleDateString("id-ID");
+};

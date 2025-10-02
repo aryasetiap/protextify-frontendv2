@@ -23,6 +23,8 @@ import { createAssignmentSchema } from "../../utils/validation";
 import { useAsyncData } from "../../hooks/useAsyncData";
 import DateTimePicker from "../../components/forms/DateTimePicker";
 import RichTextEditor from "../../components/forms/RichTextEditor";
+import PaymentCalculator from "../../components/payments/PaymentCalculator";
+import PaymentStatusTracker from "../../components/payments/PaymentStatusTracker";
 
 export default function CreateAssignment() {
   const { classId } = useParams();
@@ -31,6 +33,8 @@ export default function CreateAssignment() {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [assignmentData, setAssignmentData] = useState(null);
   const [showPayment, setShowPayment] = useState(false);
+  const [paymentCalculation, setPaymentCalculation] = useState(null);
+  const [transactionData, setTransactionData] = useState(null);
 
   const {
     register,
@@ -306,61 +310,76 @@ function PaymentSection({
   onCancel,
 }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Selesaikan Pembayaran</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <Alert variant="success">
-          <div className="text-sm">
-            <strong>Assignment berhasil dibuat!</strong> Silakan lakukan
-            pembayaran untuk mengaktifkan assignment ini.
-          </div>
-        </Alert>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Konfirmasi Pembayaran Assignment</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <Alert variant="success">
+            <div className="text-sm">
+              <strong>Assignment berhasil dibuat!</strong> Silakan lakukan
+              pembayaran untuk mengaktifkan assignment ini.
+            </div>
+          </Alert>
 
-        <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-          <h3 className="font-medium text-gray-900">Detail Assignment:</h3>
-          <div className="text-sm space-y-1">
-            <p>
-              <span className="font-medium">Judul:</span>{" "}
-              {assignmentData.assignment.title}
-            </p>
-            <p>
-              <span className="font-medium">Deadline:</span>{" "}
-              {new Date(assignmentData.assignment.deadline).toLocaleDateString(
-                "id-ID"
-              )}
-            </p>
-            <p>
-              <span className="font-medium">Jumlah Siswa:</span>{" "}
-              {assignmentData.assignment.expectedStudentCount}
-            </p>
-          </div>
-        </div>
+          {/* Payment Calculator */}
+          <PaymentCalculator
+            initialStudentCount={assignmentData.assignment.expectedStudentCount}
+            showBreakdown={true}
+            onCalculationChange={setPaymentCalculation}
+          />
 
-        <div className="bg-blue-50 rounded-lg p-4">
-          <div className="flex justify-between items-center">
-            <span className="font-medium text-blue-900">Total Pembayaran:</span>
-            <span className="font-bold text-blue-900 text-xl">
-              Rp {totalPrice.toLocaleString("id-ID")}
-            </span>
+          {/* Assignment Details */}
+          <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+            <h3 className="font-medium text-gray-900">Detail Assignment:</h3>
+            <div className="text-sm space-y-1">
+              <p>
+                <span className="font-medium">Judul:</span>{" "}
+                {assignmentData.assignment.title}
+              </p>
+              <p>
+                <span className="font-medium">Deadline:</span>{" "}
+                {new Date(
+                  assignmentData.assignment.deadline
+                ).toLocaleDateString("id-ID")}
+              </p>
+              <p>
+                <span className="font-medium">Jumlah Siswa:</span>{" "}
+                {assignmentData.assignment.expectedStudentCount}
+              </p>
+            </div>
           </div>
-        </div>
 
-        <div className="flex justify-end space-x-3">
-          <Button variant="outline" onClick={onCancel}>
-            Batal
-          </Button>
-          <Button
-            onClick={onPayment}
-            loading={paymentLoading}
-            className="bg-green-600 hover:bg-green-700"
-          >
-            <DollarSign className="h-4 w-4 mr-2" />
-            Bayar Sekarang
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+          <div className="flex justify-end space-x-3">
+            <Button variant="outline" onClick={onCancel}>
+              Batal
+            </Button>
+            <Button
+              onClick={onPayment}
+              loading={paymentLoading}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <DollarSign className="h-4 w-4 mr-2" />
+              Bayar Sekarang
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Payment Status Tracker (if payment initiated) */}
+      {transactionData && (
+        <PaymentStatusTracker
+          transaction={transactionData}
+          onPaymentSuccess={(response) => {
+            toast.success("Pembayaran berhasil! Assignment telah aktif.");
+            navigate(`/instructor/classes/${classId}`);
+          }}
+          onPaymentFailure={(response) => {
+            toast.error("Pembayaran gagal. Silakan coba lagi.");
+          }}
+        />
+      )}
+    </div>
   );
 }

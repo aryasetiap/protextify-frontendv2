@@ -8,3 +8,6 @@ export { default as AssignmentAnalytics } from "./AssignmentAnalytics";
 export { default as ClassDetail } from "./ClassDetail";
 export { default as ClassSettings } from "./ClassSettings";
 export { default as AssignmentDetail } from "./AssignmentDetail";
+export { default as PlagiarismAnalysis } from "./PlagiarismAnalysis";
+export { default as TransactionHistory } from "./TransactionHistory";
+export { default as TransactionDetail } from "./TransactionDetail";
