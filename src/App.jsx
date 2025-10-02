@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { cn, formatDate } from "@/utils";
-import { BRAND_COLORS, USER_ROLES } from "@/utils/constants";
-import { useAuth } from "@/contexts";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { cn, formatDate } from "./utils";
+import { BRAND_COLORS, USER_ROLES } from "./utils/constants";
+import { useAuth } from "./contexts";
+import { getDefaultRoute, ROUTES } from "./router/routes";
 import {
   Button,
   Input,
@@ -15,17 +17,20 @@ import {
   Modal,
   Alert,
   LoadingSpinner,
-  SkeletonCard,
   Container,
   Grid,
   Stack,
-} from "@/components";
+} from "./components";
 import "./App.css";
 
 function App() {
   const [count, setCount] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Router testing
+  const location = useLocation();
+  const navigate = useNavigate();
 
   // Auth testing
   const {
@@ -37,7 +42,7 @@ function App() {
     register,
   } = useAuth();
 
-  const [showAuthDemo, setShowAuthDemo] = useState(false);
+  const [showRoutingDemo, setShowRoutingDemo] = useState(false);
 
   const handleLoadingTest = () => {
     setLoading(true);
@@ -69,27 +74,46 @@ function App() {
     }
   };
 
-  const navigateToAuthPages = (page) => {
-    window.open(`/${page}`, "_blank");
+  const navigateToRoute = (route) => {
+    navigate(route);
   };
+
+  const testRoutes = [
+    { name: "Home", path: ROUTES.HOME },
+    { name: "About", path: ROUTES.ABOUT },
+    { name: "Login", path: ROUTES.AUTH.LOGIN },
+    { name: "Register", path: ROUTES.AUTH.REGISTER },
+    { name: "Student Dashboard", path: ROUTES.STUDENT.DASHBOARD },
+    { name: "Instructor Dashboard", path: ROUTES.INSTRUCTOR.DASHBOARD },
+    { name: "Not Found (404)", path: "/non-existent-page" },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Development Mode Notice */}
+      <div className="bg-yellow-100 border-b border-yellow-200 px-4 py-2">
+        <Container>
+          <div className="flex items-center justify-center">
+            <p className="text-sm text-yellow-800 font-medium">
+              🚧 Development Mode - Router System Active (Phase 3.1)
+            </p>
+          </div>
+        </Container>
+      </div>
+
       {/* Header Section */}
       <header className="bg-white shadow-sm border-b">
         <Container className="py-6">
           <Stack direction="row" justify="between" align="center">
             <div>
-              <h1 className="heading-3 text-brand">
-                Protextify Authentication System
-              </h1>
+              <h1 className="heading-3 text-brand">Protextify Router Test</h1>
               <p className="body-small text-muted">
-                Testing Phase 2.2 - Authentication Pages
+                Testing Phase 3.1 - Router Setup & Route Structure
               </p>
             </div>
             <Stack direction="row" spacing={3}>
-              <span className="badge badge-primary">Phase 2.2</span>
-              <span className="badge badge-success">Auth Pages Ready</span>
+              <span className="badge badge-primary">Phase 3.1</span>
+              <span className="badge badge-success">Router Ready</span>
             </Stack>
           </Stack>
         </Container>
@@ -98,10 +122,108 @@ function App() {
       {/* Main Content */}
       <main>
         <Container className="content-padding">
-          {/* Auth Status Card */}
+          {/* Router Status Card */}
           <Card className="mb-8">
             <CardHeader>
-              <CardTitle>Authentication Status</CardTitle>
+              <CardTitle>Router Implementation Status</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Stack spacing={4}>
+                <Alert
+                  variant="success"
+                  title="Router Successfully Configured!"
+                >
+                  <p>
+                    All layout components have been created and router is
+                    working properly.
+                  </p>
+                </Alert>
+
+                <div>
+                  <h4 className="heading-6 mb-3">Current Route Information:</h4>
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <strong>Current Path:</strong>
+                        <code className="ml-2 px-2 py-1 bg-blue-100 rounded">
+                          {location.pathname}
+                        </code>
+                      </div>
+                      <div>
+                        <strong>Search:</strong>
+                        <code className="ml-2 px-2 py-1 bg-blue-100 rounded">
+                          {location.search || "(none)"}
+                        </code>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="heading-6 mb-3">
+                    Router Features Implemented:
+                  </h4>
+                  <Grid cols={1} mdCols={2} gap={4}>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <span className="w-2 h-2 bg-green-500 rounded-full" />
+                        <span className="text-sm">
+                          ✅ Layout Components (Header, Footer, Sidebar)
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className="w-2 h-2 bg-green-500 rounded-full" />
+                        <span className="text-sm">
+                          ✅ Protected Routes dengan Auth Guard
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className="w-2 h-2 bg-green-500 rounded-full" />
+                        <span className="text-sm">
+                          ✅ Role-based Routing (Student/Instructor)
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className="w-2 h-2 bg-green-500 rounded-full" />
+                        <span className="text-sm">
+                          ✅ Nested Route Structure
+                        </span>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <span className="w-2 h-2 bg-green-500 rounded-full" />
+                        <span className="text-sm">
+                          ✅ Error Boundary & 404 Handling
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className="w-2 h-2 bg-green-500 rounded-full" />
+                        <span className="text-sm">✅ Layout-based Routing</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className="w-2 h-2 bg-green-500 rounded-full" />
+                        <span className="text-sm">
+                          ✅ Legacy Route Redirects
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className="w-2 h-2 bg-green-500 rounded-full" />
+                        <span className="text-sm">
+                          ✅ Dynamic Route Parameters
+                        </span>
+                      </div>
+                    </div>
+                  </Grid>
+                </div>
+              </Stack>
+            </CardContent>
+          </Card>
+
+          {/* Authentication Test */}
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Authentication Testing</CardTitle>
             </CardHeader>
             <CardContent>
               <Stack spacing={4}>
@@ -127,7 +249,7 @@ function App() {
                     </div>
 
                     {isAuthenticated && user && (
-                      <div className="bg-green-50 p-4 rounded-lg">
+                      <div className="bg-green-50 p-4 rounded-lg mb-4">
                         <h4 className="font-medium text-green-900 mb-2">
                           User Information:
                         </h4>
@@ -142,11 +264,10 @@ function App() {
                             <strong>Role:</strong> {user.role}
                           </p>
                           <p>
-                            <strong>Institution:</strong> {user.institution}
-                          </p>
-                          <p>
-                            <strong>Email Verified:</strong>{" "}
-                            {user.emailVerified ? "Yes" : "No"}
+                            <strong>Default Route:</strong>
+                            <code className="ml-2 px-2 py-1 bg-green-100 rounded">
+                              {getDefaultRoute(user.role)}
+                            </code>
                           </p>
                         </div>
                       </div>
@@ -170,141 +291,63 @@ function App() {
                     </Button>
                   )}
                   <Button
-                    onClick={() => setShowAuthDemo(!showAuthDemo)}
+                    onClick={() => setShowRoutingDemo(!showRoutingDemo)}
                     variant="outline"
                   >
-                    {showAuthDemo ? "Hide" : "Show"} Auth Demo
+                    {showRoutingDemo ? "Hide" : "Show"} Route Tests
                   </Button>
                 </Stack>
               </Stack>
             </CardContent>
           </Card>
 
-          {/* Auth Pages Demo */}
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Authentication Pages</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Stack spacing={4}>
-                <Alert variant="info">
-                  <p>
-                    Semua halaman authentication sudah siap! Klik tombol di
-                    bawah untuk membuka halaman dalam tab baru.
-                  </p>
-                </Alert>
+          {/* Route Testing */}
+          {showRoutingDemo && (
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle>Route Navigation Testing</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Stack spacing={4}>
+                  <Alert variant="info">
+                    <p>
+                      Test navigasi ke berbagai route. Protected routes akan
+                      redirect jika belum authenticated.
+                    </p>
+                  </Alert>
 
-                <div>
-                  <h4 className="heading-6 mb-3">Available Pages:</h4>
-                  <Grid cols={1} mdCols={2} gap={4}>
-                    <div className="space-y-3">
-                      <Button
-                        onClick={() => navigateToAuthPages("login")}
-                        variant="outline"
-                        className="w-full justify-start"
-                      >
-                        📝 Login Page
-                      </Button>
-                      <Button
-                        onClick={() => navigateToAuthPages("register")}
-                        variant="outline"
-                        className="w-full justify-start"
-                      >
-                        📋 Register Page
-                      </Button>
-                    </div>
-                    <div className="space-y-3">
-                      <Button
-                        onClick={() =>
-                          navigateToAuthPages("auth/email-verification")
-                        }
-                        variant="outline"
-                        className="w-full justify-start"
-                      >
-                        📧 Email Verification
-                      </Button>
-                      <Button
-                        onClick={() =>
-                          navigateToAuthPages("auth/google/callback")
-                        }
-                        variant="outline"
-                        className="w-full justify-start"
-                      >
-                        🔗 Google Callback
-                      </Button>
-                    </div>
-                  </Grid>
-                </div>
+                  <div>
+                    <h4 className="heading-6 mb-3">Available Routes:</h4>
+                    <Grid cols={1} mdCols={2} gap={3}>
+                      {testRoutes.map((route, index) => (
+                        <Button
+                          key={index}
+                          onClick={() => navigateToRoute(route.path)}
+                          variant="outline"
+                          className="w-full justify-start"
+                        >
+                          <span className="font-mono text-xs mr-2">
+                            {route.path}
+                          </span>
+                          {route.name}
+                        </Button>
+                      ))}
+                    </Grid>
+                  </div>
+                </Stack>
+              </CardContent>
+            </Card>
+          )}
 
-                <div>
-                  <h4 className="heading-6 mb-3">Features Implemented:</h4>
-                  <Grid cols={1} mdCols={2} gap={4}>
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <span className="w-2 h-2 bg-green-500 rounded-full" />
-                        <span className="text-sm">
-                          Form Validation with Zod
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className="w-2 h-2 bg-green-500 rounded-full" />
-                        <span className="text-sm">
-                          Role Selection (Student/Instructor)
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className="w-2 h-2 bg-green-500 rounded-full" />
-                        <span className="text-sm">
-                          Password Visibility Toggle
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className="w-2 h-2 bg-green-500 rounded-full" />
-                        <span className="text-sm">
-                          Demo Credentials (Dev Mode)
-                        </span>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <span className="w-2 h-2 bg-green-500 rounded-full" />
-                        <span className="text-sm">Email Verification Flow</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className="w-2 h-2 bg-green-500 rounded-full" />
-                        <span className="text-sm">
-                          Google OAuth Integration
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className="w-2 h-2 bg-green-500 rounded-full" />
-                        <span className="text-sm">
-                          Resend Verification Email
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className="w-2 h-2 bg-green-500 rounded-full" />
-                        <span className="text-sm">
-                          Loading States & Error Handling
-                        </span>
-                      </div>
-                    </div>
-                  </Grid>
-                </div>
-              </Stack>
-            </CardContent>
-          </Card>
-
-          {/* Original Component Demo - Keep existing */}
+          {/* Original Demo Components */}
           <Grid cols={1} lgCols={2} gap={8}>
-            {/* Button Components */}
+            {/* Button Demo */}
             <Card>
               <CardHeader>
                 <CardTitle>Button Components</CardTitle>
               </CardHeader>
               <CardContent>
                 <Stack spacing={4}>
-                  {/* Variants */}
                   <div>
                     <h4 className="heading-6 mb-3">Variants</h4>
                     <Stack direction="row" spacing={3} wrap>
@@ -317,7 +360,6 @@ function App() {
                     </Stack>
                   </div>
 
-                  {/* Loading */}
                   <div>
                     <h4 className="heading-6 mb-3">Loading State</h4>
                     <Stack direction="row" spacing={3}>
@@ -333,80 +375,49 @@ function App() {
               </CardContent>
             </Card>
 
-            {/* Form Components */}
+            {/* Quick Navigation */}
             <Card>
               <CardHeader>
-                <CardTitle>Form Components</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Stack spacing={4}>
-                  <Input
-                    label="Email Address"
-                    type="email"
-                    placeholder="Enter your email"
-                    helperText="We'll never share your email"
-                  />
-
-                  <Input
-                    label="Password"
-                    type="password"
-                    placeholder="Enter password"
-                    showPasswordToggle
-                    required
-                  />
-
-                  <Select label="Role" placeholder="Select your role" required>
-                    <option value="STUDENT">Student</option>
-                    <option value="INSTRUCTOR">Instructor</option>
-                  </Select>
-                </Stack>
-              </CardContent>
-            </Card>
-
-            {/* Alert Components */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Alert Components</CardTitle>
+                <CardTitle>Quick Navigation</CardTitle>
               </CardHeader>
               <CardContent>
                 <Stack spacing={3}>
-                  <Alert variant="success" title="Success">
-                    Authentication pages berhasil diimplementasikan!
-                  </Alert>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Link to={ROUTES.HOME}>
+                      <Button variant="outline" className="w-full" size="sm">
+                        Home
+                      </Button>
+                    </Link>
+                    <Link to={ROUTES.ABOUT}>
+                      <Button variant="outline" className="w-full" size="sm">
+                        About
+                      </Button>
+                    </Link>
+                  </div>
 
-                  <Alert variant="warning" title="Warning">
-                    Password reset belum tersedia dari backend.
-                  </Alert>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Link to={ROUTES.AUTH.LOGIN}>
+                      <Button variant="outline" className="w-full" size="sm">
+                        Login
+                      </Button>
+                    </Link>
+                    <Link to={ROUTES.AUTH.REGISTER}>
+                      <Button variant="outline" className="w-full" size="sm">
+                        Register
+                      </Button>
+                    </Link>
+                  </div>
 
-                  <Alert variant="info">
-                    Auth Pages siap untuk Phase 3 - Routing & Layout System.
-                  </Alert>
+                  {isAuthenticated && (
+                    <div className="grid grid-cols-1 gap-2">
+                      <Link to={getDefaultRoute(user?.role)}>
+                        <Button className="w-full" size="sm">
+                          Go to Dashboard
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
                 </Stack>
-              </CardContent>
-            </Card>
-
-            {/* Counter Demo */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Interactive Demo</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center">
-                  <Stack direction="column" spacing={4} align="center">
-                    <p className="body-regular">
-                      Count is{" "}
-                      <span className="font-semibold text-brand">{count}</span>
-                    </p>
-                    <Stack direction="row" spacing={3}>
-                      <Button onClick={() => setCount(count + 1)}>
-                        Increment
-                      </Button>
-                      <Button variant="secondary" onClick={() => setCount(0)}>
-                        Reset
-                      </Button>
-                    </Stack>
-                  </Stack>
-                </div>
               </CardContent>
             </Card>
           </Grid>
@@ -418,10 +429,11 @@ function App() {
         <Container className="py-8">
           <div className="text-center space-y-2">
             <p className="body-small text-muted">
-              Protextify Authentication System v2.2 • Phase 2 Complete
+              Protextify Router System v3.1 • Phase 3.1 Complete
             </p>
             <p className="caption">
-              Auth Pages implemented • {formatDate(new Date())}
+              Layout Components & Router Structure Complete •{" "}
+              {formatDate(new Date())}
             </p>
           </div>
         </Container>

@@ -2,12 +2,10 @@
 export * from "./auth";
 
 // Public pages
-// export { default as Home } from "./Home";
-// export { default as About } from "./About";
-// export { default as NotFound } from "./NotFound";
+export * from "./public";
 
 // Student pages
-// export * from "./student";
+export * from "./student";
 
 // Instructor pages
-// export * from "./instructor";
+export * from "./instructor";

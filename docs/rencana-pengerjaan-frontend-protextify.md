@@ -574,11 +574,11 @@ Estimasi: 2 hari
 
 **Tasks:**
 
-- [ ] Setup React Router DOM
-- [ ] Implement route structure
-- [ ] Protected routes untuk authenticated users
-- [ ] Role-based routing (STUDENT vs INSTRUCTOR)
-- [ ] 404 dan error boundary pages
+- [✅] Setup React Router DOM
+- [✅] Implement route structure
+- [✅] Protected routes untuk authenticated users
+- [✅] Role-based routing (STUDENT vs INSTRUCTOR)
+- [✅] 404 dan error boundary pages
 
 **Files:**
 
