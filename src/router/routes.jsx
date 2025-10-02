@@ -19,7 +19,7 @@ export const ROUTES = {
 
   // Student routes
   STUDENT: {
-    DASHBOARD: "/dashboard/overview", // ✅ Pastikan ini konsisten
+    DASHBOARD: "/dashboard/overview",
     CLASSES: "/dashboard/classes",
     JOIN_CLASS: "/dashboard/join-class",
     ASSIGNMENTS: "/dashboard/assignments",
@@ -30,20 +30,12 @@ export const ROUTES = {
 
   // Instructor routes
   INSTRUCTOR: {
-    DASHBOARD: "/instructor/dashboard", // ✅ Pastikan ini konsisten
+    DASHBOARD: "/instructor/dashboard",
     CLASSES: "/instructor/classes",
     CREATE_CLASS: "/instructor/create-class",
-    CLASS_DETAIL: (classId) => `/instructor/classes/${classId}`,
-    CREATE_ASSIGNMENT: (classId) =>
-      `/instructor/classes/${classId}/create-assignment`,
-    ASSIGNMENT_DETAIL: (assignmentId) =>
-      `/instructor/assignments/${assignmentId}`,
-    MONITOR_SUBMISSIONS: (assignmentId) =>
-      `/instructor/assignments/${assignmentId}/monitor`,
+    TRANSACTIONS: "/instructor/transactions",
+    ANALYTICS: "/instructor/analytics",
   },
-
-  // Error routes
-  NOT_FOUND: "/404",
 };
 
 export const getPublicRoutes = () => [

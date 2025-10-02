@@ -74,7 +74,7 @@ export default function DashboardLayout() {
         {/* Main Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Mobile Header */}
-          <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 safe-area-top">
+          <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3">
             <div className="flex items-center justify-between">
               <button
                 onClick={() => setIsMobileSidebarOpen(true)}
@@ -92,23 +92,17 @@ export default function DashboardLayout() {
                   Protextify
                 </span>
               </div>
-              {/* Mobile header actions */}
               <div className="w-10"></div> {/* Spacer for balance */}
             </div>
           </div>
 
-          {/* Desktop Header */}
+          {/* Desktop Header - Hanya DashboardHeader */}
           <div className="hidden lg:block">
             <DashboardHeader />
           </div>
 
           {/* Main Content Area */}
-          <main
-            className={cn(
-              "flex-1 overflow-y-auto",
-              "pb-20 md:pb-0" // Add bottom padding for mobile nav
-            )}
-          >
+          <main className={cn("flex-1 overflow-y-auto", "pb-20 md:pb-0")}>
             <div className="safe-area-bottom">
               <Outlet />
             </div>

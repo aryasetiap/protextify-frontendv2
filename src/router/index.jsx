@@ -53,23 +53,16 @@ import {
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <RootLayout />,
-    errorElement: <ErrorBoundary />,
+    element: <RootLayout />, // Layout dengan Header untuk public pages
+    errorElement: <NotFound />,
     children: [
-      // ========== PUBLIC ROUTES ==========
-      {
-        index: true,
-        element: <Home />,
-      },
-      {
-        path: "about",
-        element: <About />,
-      },
+      // Public routes
+      { index: true, element: <Home /> },
+      { path: "about", element: <About /> },
 
-      // ========== AUTH ROUTES ==========
+      // Auth routes (gunakan RootLayout juga)
       {
         path: "auth",
-        element: <AuthLayout />,
         children: [
           {
             path: "login",
@@ -87,153 +80,131 @@ export const router = createBrowserRouter([
               </PublicRoute>
             ),
           },
-          {
-            path: "email-verification",
-            element: (
-              <PublicRoute>
-                <EmailVerification />
-              </PublicRoute>
-            ),
-          },
-          {
-            path: "google/callback",
-            element: <GoogleCallback />,
-          },
         ],
-      },
-
-      // ========== LEGACY REDIRECTS ==========
-      {
-        path: "login",
-        element: <Navigate to="/auth/login" replace />,
-      },
-      {
-        path: "register",
-        element: <Navigate to="/auth/register" replace />,
-      },
-
-      // ========== PROTECTED STUDENT ROUTES ==========
-      {
-        path: "dashboard",
-        element: (
-          <ProtectedRoute allowedRoles={[USER_ROLES.STUDENT]}>
-            <DashboardLayout />
-          </ProtectedRoute>
-        ),
-        children: [
-          {
-            index: true,
-            element: <Navigate to="overview" replace />, // ✅ Relative redirect
-          },
-          {
-            path: "overview",
-            element: <StudentDashboard />,
-          },
-          {
-            path: "classes",
-            element: <StudentClasses />,
-          },
-          {
-            path: "join-class",
-            element: <JoinClass />,
-          },
-          {
-            path: "assignments",
-            element: <StudentAssignments />,
-          },
-          {
-            path: "submissions",
-            element: <StudentSubmissions />,
-          },
-          {
-            path: "classes/:classId",
-            element: <StudentClassDetail />,
-          },
-          {
-            path: "assignments/:assignmentId/write",
-            element: <WriteAssignment />,
-          },
-          {
-            path: "plagiarism/:submissionId",
-            element: <PlagiarismAnalysis />,
-          },
-        ],
-      },
-
-      // ========== PROTECTED INSTRUCTOR ROUTES ==========
-      {
-        path: "instructor",
-        element: (
-          <ProtectedRoute allowedRoles={[USER_ROLES.INSTRUCTOR]}>
-            <DashboardLayout />
-          </ProtectedRoute>
-        ),
-        children: [
-          {
-            index: true,
-            element: <Navigate to="dashboard" replace />, // ✅ Relative redirect
-          },
-          {
-            path: "dashboard",
-            element: <InstructorDashboard />,
-          },
-          {
-            path: "classes",
-            element: <InstructorClasses />,
-          },
-          {
-            path: "create-class",
-            element: <CreateClass />,
-          },
-          {
-            path: "classes/:classId",
-            element: <ClassDetail />,
-          },
-          {
-            path: "classes/:classId/settings",
-            element: <ClassSettings />,
-          },
-          {
-            path: "classes/:classId/create-assignment",
-            element: <CreateAssignment />,
-          },
-          {
-            path: "assignments/:assignmentId",
-            element: <AssignmentDetail />,
-          },
-          {
-            path: "assignments/:assignmentId/monitor",
-            element: <MonitorSubmissions />,
-          },
-          {
-            path: "assignments/:assignmentId/bulk-grade",
-            element: <BulkGrade />,
-          },
-          {
-            path: "assignments/:assignmentId/analytics",
-            element: <AssignmentAnalytics />,
-          },
-          {
-            path: "plagiarism/:submissionId",
-            element: <PlagiarismAnalysis />,
-          },
-          {
-            path: "transactions",
-            element: <TransactionHistory />,
-          },
-          {
-            path: "transactions/:transactionId",
-            element: <TransactionDetail />,
-          },
-        ],
-      },
-
-      // ========== CATCH ALL ==========
-      {
-        path: "*",
-        element: <NotFound />,
       },
     ],
+  },
+
+  // Dashboard routes dengan layout terpisah (tanpa Header)
+  {
+    path: "/dashboard",
+    element: (
+      <ProtectedRoute allowedRoles={[USER_ROLES.STUDENT]}>
+        <DashboardLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <Navigate to="overview" replace />,
+      },
+      {
+        path: "overview",
+        element: <StudentDashboard />,
+      },
+      {
+        path: "classes",
+        element: <StudentClasses />,
+      },
+      {
+        path: "join-class",
+        element: <JoinClass />,
+      },
+      {
+        path: "assignments",
+        element: <StudentAssignments />,
+      },
+      {
+        path: "submissions",
+        element: <StudentSubmissions />,
+      },
+      {
+        path: "classes/:classId",
+        element: <StudentClassDetail />,
+      },
+      {
+        path: "assignments/:assignmentId/write",
+        element: <WriteAssignment />,
+      },
+      {
+        path: "plagiarism/:submissionId",
+        element: <PlagiarismAnalysis />,
+      },
+    ],
+  },
+
+  // Instructor routes dengan layout terpisah (tanpa Header)
+  {
+    path: "/instructor",
+    element: (
+      <ProtectedRoute allowedRoles={[USER_ROLES.INSTRUCTOR]}>
+        <DashboardLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        path: "dashboard",
+        element: <InstructorDashboard />,
+      },
+      {
+        path: "classes",
+        element: <InstructorClasses />,
+      },
+      {
+        path: "create-class",
+        element: <CreateClass />,
+      },
+      {
+        path: "classes/:classId",
+        element: <ClassDetail />,
+      },
+      {
+        path: "classes/:classId/settings",
+        element: <ClassSettings />,
+      },
+      {
+        path: "classes/:classId/create-assignment",
+        element: <CreateAssignment />,
+      },
+      {
+        path: "assignments/:assignmentId",
+        element: <AssignmentDetail />,
+      },
+      {
+        path: "assignments/:assignmentId/monitor",
+        element: <MonitorSubmissions />,
+      },
+      {
+        path: "assignments/:assignmentId/bulk-grade",
+        element: <BulkGrade />,
+      },
+      {
+        path: "assignments/:assignmentId/analytics",
+        element: <AssignmentAnalytics />,
+      },
+      {
+        path: "plagiarism/:submissionId",
+        element: <PlagiarismAnalysis />,
+      },
+      {
+        path: "transactions",
+        element: <TransactionHistory />,
+      },
+      {
+        path: "transactions/:transactionId",
+        element: <TransactionDetail />,
+      },
+    ],
+  },
+
+  // Legacy redirects
+  {
+    path: "login",
+    element: <Navigate to="/auth/login" replace />,
+  },
+  {
+    path: "register",
+    element: <Navigate to="/auth/register" replace />,
   },
 ]);
 
