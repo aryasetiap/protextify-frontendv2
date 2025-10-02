@@ -544,3 +544,44 @@ textarea,
 ::-webkit-scrollbar-thumb:hover {
   background: #1a2f5c;
 }
+
+/* Mobile Navigation Styles */
+.mobile-nav-item {
+  @apply flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-50 hover:text-[#23407a] transition-all duration-200;
+}
+
+.mobile-nav-item:hover {
+  @apply transform translate-x-1;
+}
+
+/* Header spacing for fixed header */
+.header-spacing {
+  padding-top: 4rem; /* 64px */
+}
+
+@media (min-width: 1024px) {
+  .header-spacing {
+    padding-top: 5rem; /* 80px */
+  }
+}
+
+/* Enhanced animations */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.2s ease-out;
+}
+
+/* Glass effect improvements */
+.backdrop-blur-lg {
+  backdrop-filter: blur(16px);
+}

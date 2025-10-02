@@ -12,13 +12,10 @@ export default function Footer() {
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center mb-4">
               <img
-                src="/src/assets/logo-protextify.png"
+                src="/src/assets/logo-protextify-warna.png"
                 alt="Protextify"
                 className="h-8 w-auto"
               />
-              <span className="ml-2 text-xl font-bold text-[#23407a]">
-                Protextify
-              </span>
             </div>
             <p className="text-gray-600 text-sm leading-relaxed max-w-md">
               Platform deteksi plagiarisme dengan teknologi AI terdepan untuk

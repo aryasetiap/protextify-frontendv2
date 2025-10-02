@@ -113,19 +113,13 @@ export default function CTASection() {
 
           <div className="flex justify-center items-center space-x-8 opacity-60">
             <div className="text-white/40 text-xs">Trusted by:</div>
-            {/* University logos placeholder */}
-            <div className="h-8 w-24 bg-white/20 rounded flex items-center justify-center">
-              <span className="text-white/60 text-xs">Univ A</span>
-            </div>
-            <div className="h-8 w-24 bg-white/20 rounded flex items-center justify-center">
-              <span className="text-white/60 text-xs">Univ B</span>
-            </div>
-            <div className="h-8 w-24 bg-white/20 rounded flex items-center justify-center">
-              <span className="text-white/60 text-xs">Univ C</span>
-            </div>
-            <div className="h-8 w-24 bg-white/20 rounded flex items-center justify-center">
-              <span className="text-white/60 text-xs">Univ D</span>
-            </div>
+            {/* Logo Unila */}
+            <img
+              src="/src/assets/logo-unila.png"
+              alt="Universitas Lampung"
+              className="h-7 w-auto object-contain"
+              title="Universitas Lampung"
+            />
           </div>
         </div>
       </Container>
