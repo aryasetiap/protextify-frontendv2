@@ -764,3 +764,43 @@ textarea,
     ),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
 }
+
+/* Minimalist footer styles */
+.footer-minimal {
+  background: linear-gradient(135deg, #23407a 0%, #1a2f5c 50%, #0f1b3a 100%);
+}
+
+/* Simplified grid pattern */
+.bg-grid-white\/\[0\.01\] {
+  background-image: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.01) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+}
+
+/* Clean hover effects */
+.footer-link {
+  transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+  color: white;
+}
+
+/* Simplified social icons */
+.footer-social {
+  transition: all 0.2s ease;
+}
+
+.footer-social:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  transform: translateY(-1px);
+}
+
+/* Newsletter input focus */
+.footer-newsletter-input:focus {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}

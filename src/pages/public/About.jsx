@@ -262,8 +262,8 @@ export default function About() {
             </h2>
           </div>
 
-          <Grid cols={1} lgCols={2} gap={12}>
-            <Card className="group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+          <Grid cols={1} lgCols={2} gap={12} className="place-items-center">
+            <Card className="group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 max-w-10/12">
               <div className="absolute inset-0 bg-gradient-to-br from-[#23407a]/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
               <CardHeader className="relative z-10">
@@ -286,7 +286,7 @@ export default function About() {
               </CardContent>
             </Card>
 
-            <Card className="group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+            <Card className="group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 max-w-10/12">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-[#23407a]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
               <CardHeader className="relative z-10">
