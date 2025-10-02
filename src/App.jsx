@@ -3,7 +3,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn, formatDate } from "./utils";
 import { BRAND_COLORS, USER_ROLES } from "./utils/constants";
 import { useAuth } from "./contexts";
-import { getDefaultRoute, ROUTES } from "./router/routes";
+import { ROUTES } from "./router/routes";
+import { getDefaultRoute } from "../../utils/constants";
 import {
   Button,
   Input,

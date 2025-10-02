@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, ArrowRight, Shield, Sparkles } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { loginSchema } from "../../utils/validation";
+import { getDefaultRoute } from "../../utils/constants"; // ✅ Pastikan import ini ada
 import {
   Button,
   Input,
@@ -23,7 +24,8 @@ export default function Login() {
   const { login, loading, error, clearError } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
 
-  const from = location.state?.from?.pathname || "/dashboard";
+  // Get the page user was trying to access
+  const from = location.state?.from?.pathname;
 
   const {
     register,
@@ -41,10 +43,32 @@ export default function Login() {
   const onSubmit = async (data) => {
     try {
       clearError();
-      await login(data);
-      navigate(from, { replace: true });
+      console.log("🚀 Starting login process...");
+
+      const response = await login(data);
+
+      console.log("✅ Login successful, response:", {
+        user: response.user,
+        userRole: response.user?.role,
+        from,
+      });
+
+      // ✅ PERBAIKAN: Pastikan menggunakan getDefaultRoute
+      const redirectPath = getDefaultRoute(response.user.role);
+
+      console.log("🎯 Redirecting to:", {
+        userRole: response.user.role,
+        from,
+        redirectPath,
+        getDefaultRouteResult: getDefaultRoute(response.user.role),
+      });
+
+      // ✅ Navigate dengan delay untuk memastikan state terupdate
+      setTimeout(() => {
+        navigate(redirectPath, { replace: true });
+      }, 100);
     } catch (error) {
-      console.error("Login failed:", error);
+      console.error("❌ Login failed:", error);
     }
   };
 

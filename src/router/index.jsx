@@ -45,10 +45,10 @@ import {
   MonitorSubmissions,
   BulkGrade,
   AssignmentAnalytics,
+  PlagiarismAnalysis,
+  TransactionHistory,
+  TransactionDetail,
 } from "../pages/instructor";
-import PlagiarismAnalysis from "../pages/instructor/PlagiarismAnalysis";
-import TransactionHistory from "../pages/instructor/TransactionHistory";
-import TransactionDetail from "../pages/instructor/TransactionDetail";
 
 export const router = createBrowserRouter([
   {
@@ -56,7 +56,7 @@ export const router = createBrowserRouter([
     element: <RootLayout />,
     errorElement: <ErrorBoundary />,
     children: [
-      // Public routes
+      // ========== PUBLIC ROUTES ==========
       {
         index: true,
         element: <Home />,
@@ -66,7 +66,7 @@ export const router = createBrowserRouter([
         element: <About />,
       },
 
-      // Auth routes (only for non-authenticated users)
+      // ========== AUTH ROUTES ==========
       {
         path: "auth",
         element: <AuthLayout />,
@@ -102,7 +102,7 @@ export const router = createBrowserRouter([
         ],
       },
 
-      // Legacy auth routes (for backward compatibility)
+      // ========== LEGACY REDIRECTS ==========
       {
         path: "login",
         element: <Navigate to="/auth/login" replace />,
@@ -112,7 +112,7 @@ export const router = createBrowserRouter([
         element: <Navigate to="/auth/register" replace />,
       },
 
-      // Protected Dashboard Routes (STUDENT)
+      // ========== PROTECTED STUDENT ROUTES ==========
       {
         path: "dashboard",
         element: (
@@ -123,7 +123,7 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <Navigate to="/dashboard/overview" replace />,
+            element: <Navigate to="overview" replace />, // ✅ Relative redirect
           },
           {
             path: "overview",
@@ -150,13 +150,17 @@ export const router = createBrowserRouter([
             element: <StudentClassDetail />,
           },
           {
+            path: "assignments/:assignmentId/write",
+            element: <WriteAssignment />,
+          },
+          {
             path: "plagiarism/:submissionId",
             element: <PlagiarismAnalysis />,
           },
         ],
       },
 
-      // Protected Instructor Routes (INSTRUCTOR)
+      // ========== PROTECTED INSTRUCTOR ROUTES ==========
       {
         path: "instructor",
         element: (
@@ -167,7 +171,7 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <Navigate to="/instructor/dashboard" replace />,
+            element: <Navigate to="dashboard" replace />, // ✅ Relative redirect
           },
           {
             path: "dashboard",
@@ -224,7 +228,7 @@ export const router = createBrowserRouter([
         ],
       },
 
-      // Fallback for unmatched routes
+      // ========== CATCH ALL ==========
       {
         path: "*",
         element: <NotFound />,

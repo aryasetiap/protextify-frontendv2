@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Home, ArrowLeft, Search } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
-import { getDefaultRoute } from "../../router/routes";
+import { getDefaultRoute } from "../../utils/constants";
 import { Button, Container, Card, CardContent, Stack } from "../../components";
 
 export default function NotFound() {

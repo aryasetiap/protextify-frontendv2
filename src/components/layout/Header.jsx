@@ -1,33 +1,33 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Menu, X, User, LogOut, Bell, Search, ChevronDown } from "lucide-react";
-import { useAuth } from "../../contexts/AuthContext";
-import Button from "../ui/Button";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Menu, X, User, LogOut, Bell, ChevronDown } from "lucide-react";
 import { cn } from "../../utils/helpers";
+import { useAuth } from "../../contexts/AuthContext";
+import { getDefaultRoute } from "../../utils/constants"; // ✅ Import dari constants
+import { Button } from "../ui";
 
 export default function Header() {
+  const [scrolled, setScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const { user, isAuthenticated, logout } = useAuth();
-  const navigate = useNavigate();
+  const { isAuthenticated, user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
-  // Handle scroll for header transparency effect
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      const isScrolled = window.scrollY > 10;
+      setScrolled(isScrolled);
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setIsMenuOpen(false);
     setIsUserMenuOpen(false);
-  }, [location.pathname]);
+  }, [location]);
 
   // Prevent body scroll when mobile menu is open
   useEffect(() => {
@@ -46,10 +46,6 @@ export default function Header() {
     logout();
     navigate("/");
     setIsUserMenuOpen(false);
-  };
-
-  const getDefaultRoute = (role) => {
-    return role === "INSTRUCTOR" ? "/instructor/dashboard" : "/dashboard";
   };
 
   const isHomePage = location.pathname === "/";
@@ -121,10 +117,12 @@ export default function Header() {
                     <Bell
                       className={cn(
                         "h-5 w-5 transition-colors",
-                        scrolled ? "text-gray-600" : "text-white"
+                        scrolled
+                          ? "text-gray-600 group-hover:text-[#23407a]"
+                          : "text-white/80 group-hover:text-white"
                       )}
                     />
-                    <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-white"></span>
+                    <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
                   </button>
 
                   {/* User Menu */}
@@ -133,48 +131,35 @@ export default function Header() {
                       onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                       className={cn(
                         "flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 hover:scale-105",
+                        "focus:outline-none focus:ring-2 focus:ring-[#23407a]/20",
                         scrolled
-                          ? "bg-gray-50 hover:bg-gray-100 border border-gray-200"
-                          : "bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-sm"
+                          ? "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                          : "bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm"
                       )}
                     >
-                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#23407a] to-[#3b5fa4] text-white flex items-center justify-center text-sm font-semibold shadow-lg">
+                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[#23407a] to-[#3b5fa4] text-white flex items-center justify-center font-semibold text-sm">
                         {user?.fullName?.charAt(0)?.toUpperCase()}
                       </div>
                       <div className="hidden md:block text-left">
-                        <p
-                          className={cn(
-                            "text-sm font-medium",
-                            scrolled ? "text-gray-900" : "text-white"
-                          )}
-                        >
+                        <p className="text-sm font-medium leading-tight">
                           {user?.fullName}
                         </p>
-                        <p
-                          className={cn(
-                            "text-xs",
-                            scrolled ? "text-gray-500" : "text-white/70"
-                          )}
-                        >
+                        <p className="text-xs opacity-75 capitalize">
                           {user?.role?.toLowerCase()}
                         </p>
                       </div>
-                      <ChevronDown
-                        className={cn(
-                          "h-4 w-4 transition-transform",
-                          isUserMenuOpen && "rotate-180",
-                          scrolled ? "text-gray-500" : "text-white/70"
-                        )}
-                      />
+                      <ChevronDown className="h-4 w-4 opacity-60" />
                     </button>
 
-                    {/* User Dropdown */}
                     {isUserMenuOpen && (
                       <>
+                        {/* Backdrop */}
                         <div
                           className="fixed inset-0 z-10"
                           onClick={() => setIsUserMenuOpen(false)}
                         />
+
+                        {/* Dropdown */}
                         <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-20 animate-slide-up">
                           {/* User Info Header */}
                           <div className="px-4 py-3 border-b border-gray-100">
@@ -250,12 +235,7 @@ export default function Header() {
                   <Link to="/auth/register">
                     <Button
                       size="sm"
-                      className={cn(
-                        "font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105",
-                        scrolled
-                          ? "bg-[#23407a] hover:bg-[#1a2f5c]"
-                          : "bg-white text-[#23407a] hover:bg-gray-50"
-                      )}
+                      className="bg-[#23407a] hover:bg-[#1a2f5c] shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
                     >
                       Daftar Gratis
                     </Button>
@@ -264,39 +244,15 @@ export default function Header() {
               )}
             </div>
 
-            {/* Mobile Controls */}
-            <div className="lg:hidden flex items-center space-x-2">
-              {/* Mobile Search */}
-              <button className="p-2 rounded-lg hover:bg-gray-100/80 transition-colors">
-                <Search
-                  className={cn(
-                    "h-5 w-5",
-                    scrolled ? "text-gray-600" : "text-white"
-                  )}
-                />
-              </button>
-
-              {/* Mobile Notifications */}
-              {isAuthenticated && (
-                <button className="relative p-2 rounded-lg hover:bg-gray-100/80 transition-colors">
-                  <Bell
-                    className={cn(
-                      "h-5 w-5",
-                      scrolled ? "text-gray-600" : "text-white"
-                    )}
-                  />
-                  <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
-                </button>
-              )}
-
-              {/* Mobile Menu Toggle */}
+            {/* Mobile menu button */}
+            <div className="lg:hidden">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className={cn(
-                  "p-2 rounded-lg transition-all duration-200 hover:scale-105",
+                  "p-2 rounded-lg transition-colors",
                   scrolled
-                    ? "hover:bg-gray-100 text-gray-600"
-                    : "hover:bg-white/10 text-white"
+                    ? "text-gray-700 hover:text-[#23407a] hover:bg-gray-100"
+                    : "text-white/90 hover:text-white hover:bg-white/10"
                 )}
               >
                 {isMenuOpen ? (
@@ -397,19 +353,21 @@ export default function Header() {
                 {isAuthenticated ? (
                   <div className="space-y-4">
                     <div className="flex items-center space-x-3">
-                      <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[#23407a] to-[#3b5fa4] text-white flex items-center justify-center font-semibold">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#23407a] to-[#3b5fa4] text-white flex items-center justify-center font-semibold">
                         {user?.fullName?.charAt(0)?.toUpperCase()}
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-gray-900">
                           {user?.fullName}
                         </p>
-                        <p className="text-xs text-gray-500">{user?.email}</p>
+                        <p className="text-xs text-gray-500 capitalize">
+                          {user?.role?.toLowerCase()}
+                        </p>
                       </div>
                     </div>
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center justify-center px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                      className="w-full flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                     >
                       <LogOut className="h-4 w-4 mr-2" />
                       Logout

@@ -19,7 +19,7 @@ export const ROUTES = {
 
   // Student routes
   STUDENT: {
-    DASHBOARD: "/dashboard/overview",
+    DASHBOARD: "/dashboard/overview", // ✅ Pastikan ini konsisten
     CLASSES: "/dashboard/classes",
     JOIN_CLASS: "/dashboard/join-class",
     ASSIGNMENTS: "/dashboard/assignments",
@@ -30,7 +30,7 @@ export const ROUTES = {
 
   // Instructor routes
   INSTRUCTOR: {
-    DASHBOARD: "/instructor/dashboard",
+    DASHBOARD: "/instructor/dashboard", // ✅ Pastikan ini konsisten
     CLASSES: "/instructor/classes",
     CREATE_CLASS: "/instructor/create-class",
     CLASS_DETAIL: (classId) => `/instructor/classes/${classId}`,
@@ -46,15 +46,6 @@ export const ROUTES = {
   NOT_FOUND: "/404",
 };
 
-export const ROLE_ROUTES = {
-  [USER_ROLES.STUDENT]: ROUTES.STUDENT.DASHBOARD,
-  [USER_ROLES.INSTRUCTOR]: ROUTES.INSTRUCTOR.DASHBOARD,
-};
-
-export const getDefaultRoute = (userRole) => {
-  return ROLE_ROUTES[userRole] || ROUTES.HOME;
-};
-
 export const getPublicRoutes = () => [
   ROUTES.HOME,
   ROUTES.ABOUT,
@@ -64,13 +55,6 @@ export const getPublicRoutes = () => [
   ROUTES.AUTH.GOOGLE_CALLBACK,
   ROUTES.LOGIN, // legacy
   ROUTES.REGISTER, // legacy
-];
-
-export const getProtectedRoutes = () => [
-  ...Object.values(ROUTES.STUDENT),
-  ...Object.values(ROUTES.INSTRUCTOR).filter(
-    (route) => typeof route === "string"
-  ),
 ];
 
 export default ROUTES;

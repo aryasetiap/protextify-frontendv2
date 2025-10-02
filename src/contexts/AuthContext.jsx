@@ -121,6 +121,8 @@ export const AuthProvider = ({ children }) => {
       });
 
       toast.success(`Selamat datang, ${response.user.fullName}!`);
+
+      // Return response agar bisa digunakan di Login component
       return response;
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Login gagal";

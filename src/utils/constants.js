@@ -7,6 +7,33 @@ export const USER_ROLES = {
   INSTRUCTOR: "INSTRUCTOR",
 };
 
+// ✅ Perbaiki ROUTES mapping
+export const ROUTES = {
+  HOME: "/",
+  LOGIN: "/login",
+  REGISTER: "/register",
+  DASHBOARD: "/dashboard/overview", // Student dashboard
+  CLASSES: "/dashboard/classes",
+  JOIN_CLASS: "/dashboard/join-class",
+  INSTRUCTOR_DASHBOARD: "/instructor/dashboard", // Instructor dashboard
+  INSTRUCTOR_CLASSES: "/instructor/classes",
+  CREATE_CLASS: "/instructor/create-class",
+  GOOGLE_CALLBACK: "/auth/google/callback",
+};
+
+// ✅ Perbaiki role-based routing constants
+export const ROLE_ROUTES = {
+  [USER_ROLES.STUDENT]: "/dashboard/overview", // ✅ Sesuai dengan route definition
+  [USER_ROLES.INSTRUCTOR]: "/instructor/dashboard", // ✅ Sesuai dengan route definition
+};
+
+// ✅ Pastikan function ini benar
+export const getDefaultRoute = (userRole) => {
+  const route = ROLE_ROUTES[userRole];
+  console.log("getDefaultRoute called:", { userRole, route });
+  return route || ROUTES.HOME;
+};
+
 export const SUBMISSION_STATUS = {
   DRAFT: "DRAFT",
   SUBMITTED: "SUBMITTED",
@@ -17,19 +44,6 @@ export const ASSIGNMENT_STATUS = {
   ACTIVE: "ACTIVE",
   INACTIVE: "INACTIVE",
   ARCHIVED: "ARCHIVED",
-};
-
-export const ROUTES = {
-  HOME: "/",
-  LOGIN: "/login",
-  REGISTER: "/register",
-  DASHBOARD: "/dashboard",
-  CLASSES: "/dashboard/classes",
-  JOIN_CLASS: "/dashboard/join-class",
-  INSTRUCTOR_DASHBOARD: "/instructor/dashboard",
-  INSTRUCTOR_CLASSES: "/instructor/classes",
-  CREATE_CLASS: "/instructor/create-class",
-  GOOGLE_CALLBACK: "/auth/google/callback",
 };
 
 // Auth related constants

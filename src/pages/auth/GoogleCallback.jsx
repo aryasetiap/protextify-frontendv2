@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { useAuth } from "../../contexts/AuthContext";
 import { authService } from "../../services";
+import { getDefaultRoute } from "../../utils/constants"; // ✅ Import dari constants
 import {
   LoadingSpinner,
   Container,
@@ -26,16 +27,13 @@ const GoogleCallback = () => {
         const errorMessage = errorDescription || "Google login failed";
         dispatch({ type: "LOGIN_ERROR", payload: errorMessage });
         toast.error(`Login Google gagal: ${errorMessage}`);
-        navigate("/login", { replace: true });
+        navigate("/auth/login", { replace: true }); // ✅ Update route
         return;
       }
 
       if (token) {
         try {
-          // Store token
           localStorage.setItem("token", token);
-
-          // Get user info
           const user = await authService.getCurrentUser();
 
           dispatch({
@@ -44,30 +42,32 @@ const GoogleCallback = () => {
           });
 
           toast.success(`Selamat datang, ${user.fullName}!`);
-          
-          // Redirect based on user role
-          const redirectPath = user.role === "INSTRUCTOR" 
-            ? "/instructor/dashboard" 
-            : "/dashboard";
-            
+
+          // ✅ Use getDefaultRoute function
+          const redirectPath = getDefaultRoute(user.role);
+          console.log("Google login success:", {
+            userRole: user.role,
+            redirectPath,
+          });
+
           navigate(redirectPath, { replace: true });
         } catch (error) {
           console.error("Failed to get user info:", error);
-          dispatch({ 
-            type: "LOGIN_ERROR", 
-            payload: "Gagal mendapatkan informasi pengguna" 
+          dispatch({
+            type: "LOGIN_ERROR",
+            payload: "Gagal mendapatkan informasi pengguna",
           });
           localStorage.removeItem("token");
           toast.error("Gagal mendapatkan informasi pengguna");
-          navigate("/login", { replace: true });
+          navigate("/auth/login", { replace: true }); // ✅ Update route
         }
       } else {
-        dispatch({ 
-          type: "LOGIN_ERROR", 
-          payload: "Token tidak ditemukan" 
+        dispatch({
+          type: "LOGIN_ERROR",
+          payload: "Token tidak ditemukan",
         });
         toast.error("Token tidak ditemukan");
-        navigate("/login", { replace: true });
+        navigate("/auth/login", { replace: true }); // ✅ Update route
       }
     };
 
@@ -87,7 +87,7 @@ const GoogleCallback = () => {
                   alt="Protextify"
                 />
               </div>
-              
+
               <LoadingSpinner size="lg" className="mb-4" />
               <h2 className="text-xl font-semibold text-gray-900 mb-2">
                 Memproses Login Google

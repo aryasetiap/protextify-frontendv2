@@ -11,8 +11,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
-import { getDefaultRoute } from "../../router/routes";
-import { USER_ROLES } from "../../utils/constants";
+import { getDefaultRoute, USER_ROLES } from "../../utils/constants";
 
 export default function UserMenu({
   variant = "header", // "header" | "sidebar" | "mobile"

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Bell, Search, User, Settings, LogOut, Menu } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
-import { getDefaultRoute } from "../../router/routes";
+import { getDefaultRoute } from "../../utils/constants";
 
 export default function DashboardHeader() {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
