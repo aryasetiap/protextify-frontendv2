@@ -73,7 +73,7 @@ export default function Login() {
       </div>
 
       <Container className="relative z-10 min-h-screen flex items-center justify-center py-32">
-        <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-12 items-center">
+        <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-12 place-items-center items-center">
           {/* Left Side - Branding & Information */}
           <div className="hidden lg:block text-white">
             <div className="space-y-8">
@@ -227,35 +227,6 @@ export default function Login() {
                     </Button>
                   </div>
 
-                  {/* Demo Credentials - Enhanced */}
-                  {import.meta.env.DEV && (
-                    <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                      <p className="text-xs text-gray-500 text-center mb-3 font-medium">
-                        🚀 Demo Credentials (Development)
-                      </p>
-                      <div className="grid grid-cols-2 gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="text-xs"
-                          onClick={() => handleDemoCredentials("student")}
-                        >
-                          👨‍🎓 Student
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="text-xs"
-                          onClick={() => handleDemoCredentials("instructor")}
-                        >
-                          👨‍🏫 Instructor
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
                   {/* Divider */}
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
@@ -272,7 +243,7 @@ export default function Login() {
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full h-12 border-2 border-gray-200 hover:border-[#23407a] hover:bg-gray-50 transition-all duration-200"
+                    className="w-full h-12 border-2 border-gray-200 hover:border-[#23407a] hover:bg-gray-50 transition-all duration-200 hover:text-gray-600"
                     onClick={handleGoogleLogin}
                     disabled={loading}
                   >

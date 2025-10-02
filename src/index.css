@@ -574,6 +574,55 @@ textarea,
   transform: scale(1.02);
 }
 
+/* Register page specific enhancements */
+.register-role-card {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.register-role-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(35, 64, 122, 0.15);
+}
+
+.register-role-card.selected {
+  background: rgba(35, 64, 122, 0.05);
+  border-color: #23407a;
+  box-shadow: 0 8px 25px rgba(35, 64, 122, 0.2);
+}
+
+/* Enhanced terms checkbox styling */
+.register-terms {
+  transition: all 0.15s ease;
+}
+
+.register-terms:checked {
+  background-color: #23407a;
+  border-color: #23407a;
+}
+
+.register-terms:focus {
+  box-shadow: 0 0 0 3px rgba(35, 64, 122, 0.1);
+}
+
+/* Form field enhancements */
+.register-input {
+  transition: all 0.2s ease;
+}
+
+.register-input:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px rgba(35, 64, 122, 0.15);
+}
+
+/* Social proof grid animation */
+.social-proof-stat {
+  transition: all 0.3s ease;
+}
+
+.social-proof-stat:hover {
+  transform: translateY(-2px);
+}
+
 /* Focus Utilities */
 .focus-ring {
   @apply focus:outline-none focus:ring-2 focus:ring-[#23407a] focus:ring-offset-2;

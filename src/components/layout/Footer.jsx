@@ -41,33 +41,6 @@ export default function Footer() {
       <div className="absolute top-10 right-10 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl"></div>
 
       <Container className="relative z-10">
-        {/* Newsletter Section - Simplified */}
-        <div className="border-b border-white/10 py-16">
-          <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">
-              Tetap Update dengan{" "}
-              <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                Protextify
-              </span>
-            </h2>
-            <p className="text-white/70 mb-8">
-              Dapatkan update terbaru tentang fitur dan tips akademik.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="Email Anda"
-                className="flex-1 px-4 py-3 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
-              />
-              <Button className="bg-white text-[#23407a] hover:bg-gray-100 px-6 py-3 font-medium whitespace-nowrap">
-                Subscribe
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            </div>
-          </div>
-        </div>
-
         {/* Main Footer Content - Simplified */}
         <div className="py-16">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
