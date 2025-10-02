@@ -66,3 +66,4 @@ export { default as LoadingSpinner } from "./LoadingSpinner";
 // Form Controls
 export { Switch } from "./Switch";
 export { DatePicker } from "./DatePicker";
+export { default as AnimatedCounter } from "./AnimatedCounter";

@@ -9,6 +9,9 @@ export { default as ErrorBoundary } from "./ErrorBoundary";
 // Layout components
 export * from "./layout";
 
+// Home components
+export * from "./home";
+
 // Forms components
 export * from "./forms";
 
