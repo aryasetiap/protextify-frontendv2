@@ -400,11 +400,11 @@ Estimasi: 3 hari
 
 **Tasks:**
 
-- [ ] Login page dengan form validation
-- [ ] Register page dengan role selection
-- [ ] Email verification flow
-- [ ] Google OAuth integration
-- [ ] Password reset (jika tersedia di backend)
+- [✅] Login page dengan form validation
+- [✅] Register page dengan role selection
+- [✅] Email verification flow
+- [✅] Google OAuth integration
+- [⚠️] Password reset (jika tersedia di backend | Masih di lewati, BE belum menyediakan)
 
 **Files:**
 
