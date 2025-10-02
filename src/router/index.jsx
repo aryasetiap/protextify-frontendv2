@@ -43,6 +43,8 @@ import {
   CreateAssignment,
   AssignmentDetail,
   MonitorSubmissions,
+  BulkGrade,
+  AssignmentAnalytics,
 } from "../pages/instructor";
 
 export const router = createBrowserRouter([
@@ -191,6 +193,14 @@ export const router = createBrowserRouter([
           {
             path: "assignments/:assignmentId/monitor",
             element: <MonitorSubmissions />,
+          },
+          {
+            path: "assignments/:assignmentId/bulk-grade",
+            element: <BulkGrade />,
+          },
+          {
+            path: "assignments/:assignmentId/analytics",
+            element: <AssignmentAnalytics />,
           },
         ],
       },

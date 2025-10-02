@@ -6,6 +6,7 @@ export { default as Select } from "./Select";
 export { default as Checkbox } from "./Checkbox";
 export { default as Pagination } from "./Pagination";
 export { default as Tooltip } from "./Tooltip";
+export { default as Badge } from "./Badge"; // ✅ Add this
 
 // UI Components
 export {
@@ -25,6 +26,14 @@ export {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "./DropdownMenu";
+
+// ✅ Add new Dropdown export
+export {
+  Dropdown,
+  DropdownTrigger,
+  DropdownContent,
+  DropdownItem,
+} from "./Dropdown";
 
 export {
   Modal,

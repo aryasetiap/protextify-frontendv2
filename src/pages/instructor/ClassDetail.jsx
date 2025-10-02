@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import {
   ArrowLeft,
   BookOpen,
@@ -30,6 +30,7 @@ import {
   TabsTrigger,
   TabsContent,
   MemberManagement,
+  Badge,
 } from "../../components";
 import { classesService } from "../../services"; // ✅ Add this import
 import { useAsyncData } from "../../hooks/useAsyncData"; // ✅ Add this import
@@ -389,18 +390,23 @@ function AssignmentsTab({ classDetail }) {
                   </div>
                   <div className="flex items-center space-x-2">
                     {assignment.active ? (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Aktif
-                      </span>
+                      <>
+                        <Link
+                          to={`/instructor/assignments/${assignment.id}/monitor`}
+                          className="text-blue-600 hover:text-blue-700 text-sm"
+                        >
+                          Monitor
+                        </Link>
+                        <Link
+                          to={`/instructor/assignments/${assignment.id}/analytics`}
+                          className="text-purple-600 hover:text-purple-700 text-sm"
+                        >
+                          Analytics
+                        </Link>
+                      </>
                     ) : (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                        Tidak Aktif
-                      </span>
+                      <Badge variant="secondary">Inactive</Badge>
                     )}
-                    <Button size="sm" variant="outline">
-                      <Eye className="h-4 w-4 mr-1" />
-                      Detail
-                    </Button>
                   </div>
                 </div>
               </CardContent>

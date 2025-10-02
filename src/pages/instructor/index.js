@@ -1,8 +1,10 @@
 export { default as InstructorDashboard } from "./Dashboard";
 export { default as InstructorClasses } from "./Classes";
 export { default as CreateClass } from "./CreateClass";
+export { default as CreateAssignment } from "./CreateAssignment";
+export { default as MonitorSubmissions } from "./MonitorSubmissions";
+export { default as BulkGrade } from "./BulkGrade";
+export { default as AssignmentAnalytics } from "./AssignmentAnalytics";
 export { default as ClassDetail } from "./ClassDetail";
 export { default as ClassSettings } from "./ClassSettings";
-export { default as CreateAssignment } from "./CreateAssignment";
 export { default as AssignmentDetail } from "./AssignmentDetail";
-export { default as MonitorSubmissions } from "./MonitorSubmissions";

@@ -1452,10 +1452,10 @@ Estimasi: 4 hari
 
 **Tasks:**
 
-- [ ] Real-time submission monitoring
-- [ ] Bulk grading interface
-- [ ] Export submissions
-- [ ] Analytics dashboard
+- [✅] Real-time submission monitoring
+- [✅] Bulk grading interface
+- [✅] Export submissions
+- [✅] Analytics dashboard
 
 **WebSocket Integration:**
 

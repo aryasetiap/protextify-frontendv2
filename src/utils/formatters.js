@@ -29,6 +29,22 @@ export function formatDuration(ms) {
 }
 
 /**
+ * Format tanggal ke format Indonesia
+ */
+export function formatDate(date, options = {}) {
+  const defaultOptions = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    ...options,
+  };
+
+  return new Intl.DateTimeFormat("id-ID", defaultOptions).format(
+    new Date(date)
+  );
+}
+
+/**
  * Format relative time (timeago)
  */
 export function formatRelativeTime(date) {

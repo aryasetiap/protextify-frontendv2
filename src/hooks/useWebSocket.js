@@ -27,23 +27,21 @@ export const useWebSocket = () => {
     websocketService.updateContent(submissionId, content);
   }, []);
 
-  // Join monitoring room
+  // Enhanced monitoring functions
   const joinMonitoring = useCallback((assignmentId) => {
     websocketService.joinMonitoringRoom(assignmentId);
   }, []);
 
-  // Leave monitoring room
   const leaveMonitoring = useCallback((assignmentId) => {
     websocketService.leaveMonitoringRoom(assignmentId);
   }, []);
 
-  // Join submission room
-  const joinSubmission = useCallback((submissionId) => {
+  // Real-time submission tracking
+  const trackSubmission = useCallback((submissionId) => {
     websocketService.joinSubmissionRoom(submissionId);
   }, []);
 
-  // Leave submission room
-  const leaveSubmission = useCallback((submissionId) => {
+  const untrackSubmission = useCallback((submissionId) => {
     websocketService.leaveSubmissionRoom(submissionId);
   }, []);
 
@@ -66,8 +64,8 @@ export const useWebSocket = () => {
     updateContent,
     joinMonitoring,
     leaveMonitoring,
-    joinSubmission,
-    leaveSubmission,
+    trackSubmission,
+    untrackSubmission,
     on,
     off,
     isConnected,
