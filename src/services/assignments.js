@@ -2,6 +2,16 @@
 import api from "./api";
 
 const assignmentsService = {
+  // Get all assignments (for admin or instructor)
+  getAssignments: async () => {
+    try {
+      const response = await api.get("/assignments");
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // Create assignment in class (instructor only)
   createAssignment: async (classId, assignmentData) => {
     try {
@@ -28,55 +38,10 @@ const assignmentsService = {
     }
   },
 
-  // Get assignments for a class
-  getAssignments: async (classId) => {
-    try {
-      const response = await api.get(`/classes/${classId}/assignments`);
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  },
-
   // Get assignment detail by ID
-  getAssignmentById: async (assignmentId) => {
+  getAssignmentById: async (id) => {
     try {
-      const response = await api.get(`/assignments/${assignmentId}`);
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  // Get submissions for assignment (instructor only)
-  getAssignmentSubmissions: async (classId, assignmentId) => {
-    try {
-      const response = await api.get(
-        `/classes/${classId}/assignments/${assignmentId}/submissions`
-      );
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  // Update assignment (instructor only)
-  updateAssignment: async (assignmentId, updateData) => {
-    try {
-      const response = await api.patch(
-        `/assignments/${assignmentId}`,
-        updateData
-      );
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  // Delete assignment (instructor only)
-  deleteAssignment: async (assignmentId) => {
-    try {
-      const response = await api.delete(`/assignments/${assignmentId}`);
+      const response = await api.get(`/assignments/${id}`);
       return response;
     } catch (error) {
       throw error;

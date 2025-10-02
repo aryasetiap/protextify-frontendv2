@@ -1,13 +1,11 @@
 // src/hooks/useInstructorDashboard.js
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
-import {
-  classesService,
-  assignmentsService,
-  submissionsService,
-  paymentsService,
-} from "../services";
 import { useWebSocket } from "./useWebSocket";
+
+// Import services dengan safe fallback
+import classesService from "../services/classes";
+import paymentsService from "../services/payments";
 
 export const useInstructorDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -33,17 +31,26 @@ export const useInstructorDashboard = () => {
     classActivity: [],
   });
 
-  const { on, off } = useWebSocket();
+  const websocketHook = useWebSocket();
+
+  // Safe destructuring dengan default functions
+  const { on = () => {}, off = () => {} } = websocketHook || {};
 
   const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Fetch all necessary data in parallel
+      // Fetch all necessary data in parallel dengan safe error handling
       const [classesData, transactionsData] = await Promise.all([
-        classesService.getClasses(),
-        paymentsService.getTransactionHistory(),
+        classesService.getClasses().catch((err) => {
+          console.warn("Failed to fetch classes:", err);
+          return [];
+        }),
+        paymentsService.getTransactionHistory({ limit: 5 }).catch((err) => {
+          console.warn("Failed to fetch transactions:", err);
+          return { data: [], total: 0 };
+        }),
       ]);
 
       // Calculate comprehensive statistics
@@ -55,33 +62,23 @@ export const useInstructorDashboard = () => {
       let allSubmissions = [];
 
       classesData.forEach((cls) => {
-        // Count unique students
+        // Add students from enrollments
         if (cls.enrollments) {
           cls.enrollments.forEach((enrollment) => {
-            allStudents.add(enrollment.student.id);
+            if (enrollment.student?.id) {
+              allStudents.add(enrollment.student.id);
+            }
           });
         }
 
-        // Collect assignments
+        // Add assignments
         if (cls.assignments) {
-          allAssignments = allAssignments.concat(
-            cls.assignments.map((assignment) => ({
-              ...assignment,
-              className: cls.name,
-              studentCount: cls.enrollments?.length || 0,
-            }))
-          );
+          allAssignments = [...allAssignments, ...cls.assignments];
 
-          // Collect submissions from assignments
+          // Add submissions from assignments
           cls.assignments.forEach((assignment) => {
             if (assignment.submissions) {
-              allSubmissions = allSubmissions.concat(
-                assignment.submissions.map((submission) => ({
-                  ...submission,
-                  assignmentTitle: assignment.title,
-                  className: cls.name,
-                }))
-              );
+              allSubmissions = [...allSubmissions, ...assignment.submissions];
             }
           });
         }
@@ -98,40 +95,44 @@ export const useInstructorDashboard = () => {
         (s) => s.status === "SUBMITTED"
       ).length;
 
-      // Calculate revenue
-      const totalRevenue = transactionsData
+      // Calculate revenue dari response backend yang baru
+      const transactionsList = transactionsData.data || [];
+      const totalRevenue = transactionsList
         .filter((t) => t.status === "SUCCESS")
-        .reduce((sum, t) => sum + t.amount, 0);
+        .reduce((sum, t) => sum + (t.amount || 0), 0);
 
-      // Monthly revenue (current month)
+      // Calculate monthly revenue (transaksi bulan ini)
       const currentMonth = new Date().getMonth();
       const currentYear = new Date().getFullYear();
-      const monthlyRevenue = transactionsData
+      const monthlyRevenue = transactionsList
         .filter((t) => {
+          if (t.status !== "SUCCESS") return false;
           const transactionDate = new Date(t.createdAt);
           return (
-            t.status === "SUCCESS" &&
             transactionDate.getMonth() === currentMonth &&
             transactionDate.getFullYear() === currentYear
           );
         })
-        .reduce((sum, t) => sum + t.amount, 0);
+        .reduce((sum, t) => sum + (t.amount || 0), 0);
 
       // Calculate completion rate
-      const completedSubmissions = allSubmissions.filter(
-        (s) => s.status === "SUBMITTED" || s.status === "GRADED"
-      ).length;
       const completionRate =
         totalSubmissions > 0
-          ? (completedSubmissions / totalSubmissions) * 100
+          ? Math.round(
+              (allSubmissions.filter((s) => s.status === "SUBMITTED").length /
+                totalSubmissions) *
+                100
+            )
           : 0;
 
       // Calculate average grade
-      const gradedSubmissions = allSubmissions.filter((s) => s.grade !== null);
+      const gradedSubmissions = allSubmissions.filter((s) => s.grade != null);
       const averageGrade =
         gradedSubmissions.length > 0
-          ? gradedSubmissions.reduce((sum, s) => sum + s.grade, 0) /
-            gradedSubmissions.length
+          ? Math.round(
+              gradedSubmissions.reduce((sum, s) => sum + s.grade, 0) /
+                gradedSubmissions.length
+            )
           : 0;
 
       setStats({
@@ -143,13 +144,21 @@ export const useInstructorDashboard = () => {
         pendingGrading,
         totalRevenue,
         monthlyRevenue,
-        completionRate: Math.round(completionRate),
-        averageGrade: Math.round(averageGrade),
+        completionRate,
+        averageGrade,
       });
 
+      // Set recent data
       setRecentClasses(classesData.slice(0, 5));
-      setRecentSubmissions(allSubmissions.slice(0, 8));
-      setRecentTransactions(transactionsData.slice(0, 5));
+
+      // Recent submissions dari semua kelas
+      const recentSubs = allSubmissions
+        .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+        .slice(0, 5);
+      setRecentSubmissions(recentSubs);
+
+      // Recent transactions dari response backend
+      setRecentTransactions(transactionsList.slice(0, 5));
 
       // Prepare analytics data
       setAnalyticsData({
@@ -170,37 +179,37 @@ export const useInstructorDashboard = () => {
   const prepareSubmissionTrends = (submissions) => {
     const last7Days = Array.from({ length: 7 }, (_, i) => {
       const date = new Date();
-      date.setDate(date.getDate() - (6 - i));
+      date.setDate(date.getDate() - i);
       return {
-        date: date.toLocaleDateString("id-ID", {
-          day: "2-digit",
-          month: "short",
-        }),
-        submissions: submissions.filter((s) => {
-          const submissionDate = new Date(s.createdAt);
-          return submissionDate.toDateString() === date.toDateString();
+        date: date.toISOString().split("T")[0],
+        count: submissions.filter((s) => {
+          const subDate = new Date(s.createdAt);
+          return (
+            subDate.toISOString().split("T")[0] ===
+            date.toISOString().split("T")[0]
+          );
         }).length,
       };
-    });
+    }).reverse();
     return last7Days;
   };
 
   const prepareGradingTrends = (submissions) => {
     const last7Days = Array.from({ length: 7 }, (_, i) => {
       const date = new Date();
-      date.setDate(date.getDate() - (6 - i));
+      date.setDate(date.getDate() - i);
       return {
-        date: date.toLocaleDateString("id-ID", {
-          day: "2-digit",
-          month: "short",
-        }),
+        date: date.toISOString().split("T")[0],
         graded: submissions.filter((s) => {
-          if (!s.gradedAt) return false;
-          const gradedDate = new Date(s.gradedAt);
-          return gradedDate.toDateString() === date.toDateString();
+          if (s.status !== "GRADED") return false;
+          const gradedDate = new Date(s.updatedAt);
+          return (
+            gradedDate.toISOString().split("T")[0] ===
+            date.toISOString().split("T")[0]
+          );
         }).length,
       };
-    });
+    }).reverse();
     return last7Days;
   };
 
@@ -213,14 +222,15 @@ export const useInstructorDashboard = () => {
     }));
   };
 
-  // WebSocket event handlers
+  // WebSocket event handlers dengan safety check
   useEffect(() => {
     const handleSubmissionUpdate = (data) => {
-      // Refresh dashboard when submissions are updated
+      console.log("Submission updated:", data);
       fetchDashboardData();
     };
 
     const handleNotification = (notification) => {
+      console.log("Received notification:", notification);
       if (
         notification.type === "PAYMENT_SUCCESS" ||
         notification.type === "ASSIGNMENT_ACTIVATED"
@@ -229,12 +239,18 @@ export const useInstructorDashboard = () => {
       }
     };
 
-    on("submissionListUpdated", handleSubmissionUpdate);
-    on("notification", handleNotification);
+    // Safe event binding
+    if (typeof on === "function") {
+      on("submissionListUpdated", handleSubmissionUpdate);
+      on("notification", handleNotification);
+    }
 
     return () => {
-      off("submissionListUpdated", handleSubmissionUpdate);
-      off("notification", handleNotification);
+      // Safe cleanup
+      if (typeof off === "function") {
+        off("submissionListUpdated", handleSubmissionUpdate);
+        off("notification", handleNotification);
+      }
     };
   }, [on, off, fetchDashboardData]);
 

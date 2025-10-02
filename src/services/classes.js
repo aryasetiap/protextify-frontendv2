@@ -8,6 +8,7 @@ const classesService = {
       const response = await api.get("/classes");
       return response;
     } catch (error) {
+      console.error("Error fetching classes:", error);
       throw error;
     }
   },
@@ -113,13 +114,9 @@ const classesService = {
   // Preview class by token (before joining)
   previewClass: async (classToken) => {
     try {
-      // We can use the existing endpoint with a different approach
-      // or create a specific preview endpoint if available
       const response = await api.get(`/classes/preview/${classToken}`);
       return response;
     } catch (error) {
-      // If preview endpoint doesn't exist, we can try to get class info
-      // by attempting to join and catching specific errors
       throw error;
     }
   },

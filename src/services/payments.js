@@ -34,8 +34,12 @@ const paymentsService = {
           assignmentId: filters.assignmentId,
         },
       });
+
+      // Backend sekarang mengembalikan format:
+      // { data: [...], page: 1, limit: 10, total: 50, totalPages: 5 }
       return response;
     } catch (error) {
+      console.error("Error fetching transaction history:", error);
       throw error;
     }
   },

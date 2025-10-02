@@ -1,6 +1,7 @@
 // src/pages/instructor/TransactionHistory.jsx
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import toast from "react-hot-toast"; // ✅ Fix: Change from react-toastify to react-hot-toast
 import {
   CreditCard,
   Filter,
@@ -65,6 +66,7 @@ export default function TransactionHistory() {
 
       const response = await paymentsService.getTransactionHistory(params);
 
+      // Backend sekarang mengembalikan format yang benar
       setTransactions(response.data || []);
       setPagination({
         page: response.page || 1,
@@ -81,6 +83,7 @@ export default function TransactionHistory() {
       setSearchParams(newParams);
     } catch (error) {
       console.error("Error fetching transactions:", error);
+      toast.error("Gagal memuat data transaksi");
     } finally {
       setLoading(false);
     }

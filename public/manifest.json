@@ -1,5 +1,5 @@
 {
-    "name": "Protextify - Platform Deteksi Plagiarisme",
+    "name": "Protextify",
     "short_name": "Protextify",
     "description": "Platform deteksi plagiarisme dengan teknologi AI terdepan untuk institusi pendidikan. Menulis tugas, deteksi plagiarisme, dan manajemen kelas yang mudah.",
     "start_url": "/",
@@ -86,6 +86,12 @@
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "any maskable"
+        },
+        {
+            "src": "/vite.svg",
+            "sizes": "144x144",
+            "type": "image/svg+xml",
+            "purpose": "any"
         }
     ],
     "shortcuts": [

@@ -70,9 +70,6 @@ export default function Header() {
                   alt="Protextify"
                   className="h-8 md:h-10 w-auto"
                 />
-                <span className="ml-2 text-xl md:text-2xl font-bold text-[#23407a]">
-                  Protextify
-                </span>
               </Link>
             </div>
 

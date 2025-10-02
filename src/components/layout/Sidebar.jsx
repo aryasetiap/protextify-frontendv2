@@ -201,16 +201,6 @@ export default function Sidebar() {
           })}
         </ul>
       </nav>
-
-      {/* Version Info */}
-      {!isCollapsed && (
-        <div className="absolute bottom-4 left-4 right-4">
-          <div className="text-xs text-gray-500 text-center">
-            <p>Protextify v2.1.0</p>
-            <p>Phase 3.1 - Routing System</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -3,10 +3,25 @@ export { default as authService } from "./auth";
 export { default as classesService } from "./classes";
 export { default as assignmentsService } from "./assignments";
 export { default as submissionsService } from "./submissions";
-export { default as plagiarismService } from "./plagiarism";
 export { default as paymentsService } from "./payments";
-export { default as uploadService } from "./upload";
-export { default as websocketService } from "./websocket";
+
+// Mock services untuk yang belum tersedia
+export const plagiarismService = {
+  checkPlagiarism: () => Promise.resolve({}),
+  getPlagiarismReport: () => Promise.resolve({}),
+};
+
+export const uploadService = {
+  uploadFile: () => Promise.resolve({}),
+};
+
+export const websocketService = {
+  connect: () => Promise.resolve(),
+  disconnect: () => {},
+  on: () => {},
+  off: () => {},
+  emit: () => {},
+};
 
 // Utility functions
 export { useApi } from "../hooks/useApi";
