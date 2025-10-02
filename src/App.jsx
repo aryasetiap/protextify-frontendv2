@@ -69,6 +69,10 @@ function App() {
     }
   };
 
+  const navigateToAuthPages = (page) => {
+    window.open(`/${page}`, "_blank");
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Section */}
@@ -80,12 +84,12 @@ function App() {
                 Protextify Authentication System
               </h1>
               <p className="body-small text-muted">
-                Testing Phase 2.1 Implementation
+                Testing Phase 2.2 - Authentication Pages
               </p>
             </div>
             <Stack direction="row" spacing={3}>
-              <span className="badge badge-primary">Phase 2.1</span>
-              <span className="badge badge-success">Auth Ready</span>
+              <span className="badge badge-primary">Phase 2.2</span>
+              <span className="badge badge-success">Auth Pages Ready</span>
             </Stack>
           </Stack>
         </Container>
@@ -140,6 +144,10 @@ function App() {
                           <p>
                             <strong>Institution:</strong> {user.institution}
                           </p>
+                          <p>
+                            <strong>Email Verified:</strong>{" "}
+                            {user.emailVerified ? "Yes" : "No"}
+                          </p>
                         </div>
                       </div>
                     )}
@@ -172,71 +180,122 @@ function App() {
             </CardContent>
           </Card>
 
-          {/* Auth Demo Section */}
-          {showAuthDemo && (
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle>Authentication Demo</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Stack spacing={4}>
-                  <Alert variant="info">
-                    <p>
-                      Authentication system sudah terintegrasi dengan backend
-                      API. Context menyediakan state management untuk login,
-                      logout, dan user data.
-                    </p>
-                  </Alert>
+          {/* Auth Pages Demo */}
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Authentication Pages</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Stack spacing={4}>
+                <Alert variant="info">
+                  <p>
+                    Semua halaman authentication sudah siap! Klik tombol di
+                    bawah untuk membuka halaman dalam tab baru.
+                  </p>
+                </Alert>
 
-                  <div>
-                    <h4 className="heading-6 mb-3">Features Implemented:</h4>
-                    <Grid cols={1} mdCols={2} gap={4}>
-                      <div className="space-y-2">
-                        <div className="flex items-center space-x-2">
-                          <span className="w-2 h-2 bg-green-500 rounded-full" />
-                          <span className="text-sm">JWT Token Management</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <span className="w-2 h-2 bg-green-500 rounded-full" />
-                          <span className="text-sm">
-                            Persistent Authentication
-                          </span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <span className="w-2 h-2 bg-green-500 rounded-full" />
-                          <span className="text-sm">Auto-refresh Token</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <span className="w-2 h-2 bg-green-500 rounded-full" />
-                          <span className="text-sm">Protected Routes</span>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex items-center space-x-2">
-                          <span className="w-2 h-2 bg-green-500 rounded-full" />
-                          <span className="text-sm">Role-based Access</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <span className="w-2 h-2 bg-green-500 rounded-full" />
-                          <span className="text-sm">Error Handling</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <span className="w-2 h-2 bg-green-500 rounded-full" />
-                          <span className="text-sm">Google OAuth Ready</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <span className="w-2 h-2 bg-green-500 rounded-full" />
-                          <span className="text-sm">Loading States</span>
-                        </div>
-                      </div>
-                    </Grid>
-                  </div>
-                </Stack>
-              </CardContent>
-            </Card>
-          )}
+                <div>
+                  <h4 className="heading-6 mb-3">Available Pages:</h4>
+                  <Grid cols={1} mdCols={2} gap={4}>
+                    <div className="space-y-3">
+                      <Button
+                        onClick={() => navigateToAuthPages("login")}
+                        variant="outline"
+                        className="w-full justify-start"
+                      >
+                        📝 Login Page
+                      </Button>
+                      <Button
+                        onClick={() => navigateToAuthPages("register")}
+                        variant="outline"
+                        className="w-full justify-start"
+                      >
+                        📋 Register Page
+                      </Button>
+                    </div>
+                    <div className="space-y-3">
+                      <Button
+                        onClick={() =>
+                          navigateToAuthPages("auth/email-verification")
+                        }
+                        variant="outline"
+                        className="w-full justify-start"
+                      >
+                        📧 Email Verification
+                      </Button>
+                      <Button
+                        onClick={() =>
+                          navigateToAuthPages("auth/google/callback")
+                        }
+                        variant="outline"
+                        className="w-full justify-start"
+                      >
+                        🔗 Google Callback
+                      </Button>
+                    </div>
+                  </Grid>
+                </div>
 
-          {/* Original Component Demo */}
+                <div>
+                  <h4 className="heading-6 mb-3">Features Implemented:</h4>
+                  <Grid cols={1} mdCols={2} gap={4}>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <span className="w-2 h-2 bg-green-500 rounded-full" />
+                        <span className="text-sm">
+                          Form Validation with Zod
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className="w-2 h-2 bg-green-500 rounded-full" />
+                        <span className="text-sm">
+                          Role Selection (Student/Instructor)
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className="w-2 h-2 bg-green-500 rounded-full" />
+                        <span className="text-sm">
+                          Password Visibility Toggle
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className="w-2 h-2 bg-green-500 rounded-full" />
+                        <span className="text-sm">
+                          Demo Credentials (Dev Mode)
+                        </span>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <span className="w-2 h-2 bg-green-500 rounded-full" />
+                        <span className="text-sm">Email Verification Flow</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className="w-2 h-2 bg-green-500 rounded-full" />
+                        <span className="text-sm">
+                          Google OAuth Integration
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className="w-2 h-2 bg-green-500 rounded-full" />
+                        <span className="text-sm">
+                          Resend Verification Email
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className="w-2 h-2 bg-green-500 rounded-full" />
+                        <span className="text-sm">
+                          Loading States & Error Handling
+                        </span>
+                      </div>
+                    </div>
+                  </Grid>
+                </div>
+              </Stack>
+            </CardContent>
+          </Card>
+
+          {/* Original Component Demo - Keep existing */}
           <Grid cols={1} lgCols={2} gap={8}>
             {/* Button Components */}
             <Card>
@@ -312,15 +371,15 @@ function App() {
               <CardContent>
                 <Stack spacing={3}>
                   <Alert variant="success" title="Success">
-                    Authentication system berhasil diimplementasikan!
+                    Authentication pages berhasil diimplementasikan!
                   </Alert>
 
                   <Alert variant="warning" title="Warning">
-                    Pastikan untuk menguji semua fitur auth sebelum deploy.
+                    Password reset belum tersedia dari backend.
                   </Alert>
 
                   <Alert variant="info">
-                    Auth Context siap untuk Phase 2.2 - Authentication Pages.
+                    Auth Pages siap untuk Phase 3 - Routing & Layout System.
                   </Alert>
                 </Stack>
               </CardContent>
@@ -359,10 +418,10 @@ function App() {
         <Container className="py-8">
           <div className="text-center space-y-2">
             <p className="body-small text-muted">
-              Protextify Authentication System v2.1 • Phase 2 Ready
+              Protextify Authentication System v2.2 • Phase 2 Complete
             </p>
             <p className="caption">
-              Auth Context & Services implemented • {formatDate(new Date())}
+              Auth Pages implemented • {formatDate(new Date())}
             </p>
           </div>
         </Container>
