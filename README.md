@@ -215,6 +215,90 @@ Dokumentasi lengkap sistem desain Protextify dengan brand color utama `#23407a`.
 </div>
 ```
 
+# Layout Components Usage Guide
+
+## Components Overview
+
+### 1. Breadcrumb Component
+
+```jsx
+import { Breadcrumb } from "../../components/layout";
+
+// Auto-generated breadcrumb
+<Breadcrumb />
+
+// Custom breadcrumb
+<Breadcrumb
+  customItems={[
+    { label: "Dashboard", path: "/dashboard" },
+    { label: "Kelas", path: "/dashboard/classes" },
+    { label: "Detail Kelas", path: null }, // null = current page
+  ]}
+/>
+
+// Without home link
+<Breadcrumb showHome={false} />
+```
+
+### 2. UserMenu Component
+
+```jsx
+import { UserMenu } from "../../components/layout";
+
+// Header variant (default)
+<UserMenu />
+
+// Sidebar variant
+<UserMenu variant="sidebar" />
+
+// Mobile variant
+<UserMenu variant="mobile" />
+
+// Customized
+<UserMenu
+  variant="header"
+  showFullName={true}
+  showRole={true}
+  className="custom-class"
+/>
+```
+
+### 3. Layout Usage
+
+```jsx
+// In router configuration
+import { MainLayout, DashboardLayout, AuthLayout } from "../layouts";
+
+{
+  path: "/",
+  element: <MainLayout />,
+  children: [...]
+}
+
+{
+  path: "/dashboard",
+  element: <DashboardLayout />,
+  children: [...]
+}
+```
+
+## Features
+
+- ✅ Fully responsive design
+- ✅ Mobile-optimized navigation
+- ✅ Role-based menu items
+- ✅ Auto-generated breadcrumbs
+- ✅ Keyboard navigation support
+- ✅ Accessible components
+- ✅ Brand color consistency
+
+## Responsive Breakpoints
+
+- `sm`: 640px and up
+- `md`: 768px and up
+- `lg`: 1024px and up
+- `xl`: 1280px and up
+
 ## 📱 Responsive Guidelines
 
 ### Breakpoints

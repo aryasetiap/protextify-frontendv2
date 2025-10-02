@@ -19,6 +19,7 @@ import {
   LoadingSpinner,
   Container,
 } from "../../components";
+import { Breadcrumb } from "../../components/layout";
 
 export default function StudentDashboard() {
   const { user } = useAuth();
@@ -31,11 +32,11 @@ export default function StudentDashboard() {
   });
 
   useEffect(() => {
-    // Simulate loading
+    // Simulate API call
     setTimeout(() => {
       setStats({
-        totalClasses: 3,
-        activeAssignments: 5,
+        totalClasses: 5,
+        activeAssignments: 3,
         completedAssignments: 12,
         pendingSubmissions: 2,
       });
@@ -45,14 +46,19 @@ export default function StudentDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <LoadingSpinner size="lg" />
-      </div>
+      <Container className="py-6">
+        <div className="flex items-center justify-center min-h-64">
+          <LoadingSpinner size="lg" />
+        </div>
+      </Container>
     );
   }
 
   return (
     <Container className="py-6">
+      {/* Breadcrumb */}
+      <Breadcrumb />
+
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-[#23407a] to-[#1a2f5c] rounded-lg p-6 text-white mb-8">
         <h1 className="text-2xl font-bold">
@@ -85,7 +91,7 @@ export default function StudentDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center">
               <div className="p-2 bg-yellow-100 rounded-lg">
-                <Clock className="h-6 w-6 text-yellow-600" />
+                <FileText className="h-6 w-6 text-yellow-600" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Tugas Aktif</p>
@@ -104,7 +110,9 @@ export default function StudentDashboard() {
                 <CheckCircle className="h-6 w-6 text-green-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Selesai</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Tugas Selesai
+                </p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats.completedAssignments}
                 </p>
@@ -117,10 +125,12 @@ export default function StudentDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center">
               <div className="p-2 bg-red-100 rounded-lg">
-                <FileText className="h-6 w-6 text-red-600" />
+                <Clock className="h-6 w-6 text-red-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Draft</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Menunggu Review
+                </p>
                 <p className="text-2xl font-bold text-gray-900">
                   {stats.pendingSubmissions}
                 </p>
@@ -130,6 +140,7 @@ export default function StudentDashboard() {
         </Card>
       </Grid>
 
+      {/* Quick Actions and Recent Activity */}
       <Grid cols={1} lgCols={2} gap={8}>
         {/* Quick Actions */}
         <Card>
@@ -168,10 +179,13 @@ export default function StudentDashboard() {
           <CardContent>
             <div className="text-center py-8">
               <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">Belum ada aktivitas</p>
-              <p className="text-sm text-gray-400">
-                Aktivitas tugas akan muncul di sini
-              </p>
+              <p className="text-gray-500 mb-4">Belum ada aktivitas terbaru</p>
+              <Link to="/dashboard/classes">
+                <Button size="sm">
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Lihat Kelas
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
