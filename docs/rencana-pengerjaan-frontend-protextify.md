@@ -1432,11 +1432,11 @@ Estimasi: 4 hari
 
 **Tasks:**
 
-- [ ] Rich assignment creation form
-- [ ] Deadline picker
-- [ ] Instructions editor (rich text)
-- [ ] Payment integration untuk assignment activation
-- [ ] Expected student count input
+- [✅] Rich assignment creation form
+- [✅] Deadline picker
+- [✅] Instructions editor (rich text)
+- [✅] Payment integration untuk assignment activation
+- [✅] Expected student count input
 
 **Backend Integration:**
 

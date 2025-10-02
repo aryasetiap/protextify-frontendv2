@@ -11,6 +11,19 @@ const assignmentsService = {
       );
       return response;
     } catch (error) {
+      // Handle specific error cases
+      if (error.response?.status === 422) {
+        throw {
+          ...error,
+          message: "Data assignment tidak valid. Periksa kembali form Anda.",
+        };
+      } else if (error.response?.status === 403) {
+        throw {
+          ...error,
+          message:
+            "Anda tidak memiliki akses untuk membuat assignment di kelas ini.",
+        };
+      }
       throw error;
     }
   },

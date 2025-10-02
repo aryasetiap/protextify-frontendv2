@@ -1,0 +1,22 @@
+/* src/styles/quill-custom.css */
+.ql-editor {
+  min-height: 150px;
+  font-family: inherit;
+}
+
+.ql-toolbar {
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.ql-container {
+  border: none;
+  font-family: inherit;
+}
+
+.ql-editor.ql-blank::before {
+  font-style: normal;
+  color: #9ca3af;
+}

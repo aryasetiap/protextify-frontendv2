@@ -5,6 +5,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import AppRouter from "./router/AppRouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import "./index.css";
+import "./styles/rich-editor.css"; // Update this line
 import { testApiServices } from "./utils/apiTesting";
 
 // Test API services in development

@@ -69,8 +69,11 @@ export const joinClassSchema = z.object({
 
 // Assignment schemas
 export const createAssignmentSchema = z.object({
-  title: requiredStringSchema.min(3, "Judul tugas minimal 3 karakter"),
-  instructions: requiredStringSchema.min(10, "Instruksi minimal 10 karakter"),
+  title: z
+    .string()
+    .min(3, "Judul tugas minimal 3 karakter")
+    .max(200, "Judul tugas maksimal 200 karakter"),
+  instructions: z.string().min(10, "Instruksi minimal 10 karakter"),
   deadline: z.string().datetime("Deadline tidak valid"),
   expectedStudentCount: z
     .number()
