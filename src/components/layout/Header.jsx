@@ -59,7 +59,7 @@ export default function Header() {
       <header
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-          scrolled || !isHomePage
+          scrolled
             ? "bg-white/95 backdrop-blur-lg border-b border-gray-200/50 shadow-sm"
             : "bg-transparent"
         )}
@@ -72,7 +72,7 @@ export default function Header() {
                 <div className="relative">
                   <img
                     src={
-                      scrolled || !isHomePage
+                      scrolled
                         ? "/src/assets/logo-protextify-warna.png"
                         : "/src/assets/logo-protextify-putih.png"
                     }
@@ -92,7 +92,7 @@ export default function Header() {
                     "relative px-3 py-2 text-sm font-medium transition-all duration-200 hover:scale-105",
                     "before:absolute before:bottom-0 before:left-0 before:w-0 before:h-0.5 before:bg-current before:transition-all before:duration-300",
                     "hover:before:w-full",
-                    scrolled || !isHomePage
+                    scrolled
                       ? "text-gray-700 hover:text-[#23407a]"
                       : "text-white/90 hover:text-white"
                   )}
@@ -105,7 +105,7 @@ export default function Header() {
                     "relative px-3 py-2 text-sm font-medium transition-all duration-200 hover:scale-105",
                     "before:absolute before:bottom-0 before:left-0 before:w-0 before:h-0.5 before:bg-current before:transition-all before:duration-300",
                     "hover:before:w-full",
-                    scrolled || !isHomePage
+                    scrolled
                       ? "text-gray-700 hover:text-[#23407a]"
                       : "text-white/90 hover:text-white"
                   )}
@@ -121,7 +121,7 @@ export default function Header() {
                     <Bell
                       className={cn(
                         "h-5 w-5 transition-colors",
-                        scrolled || !isHomePage ? "text-gray-600" : "text-white"
+                        scrolled ? "text-gray-600" : "text-white"
                       )}
                     />
                     <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-white"></span>
@@ -133,7 +133,7 @@ export default function Header() {
                       onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                       className={cn(
                         "flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 hover:scale-105",
-                        scrolled || !isHomePage
+                        scrolled
                           ? "bg-gray-50 hover:bg-gray-100 border border-gray-200"
                           : "bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-sm"
                       )}
@@ -145,9 +145,7 @@ export default function Header() {
                         <p
                           className={cn(
                             "text-sm font-medium",
-                            scrolled || !isHomePage
-                              ? "text-gray-900"
-                              : "text-white"
+                            scrolled ? "text-gray-900" : "text-white"
                           )}
                         >
                           {user?.fullName}
@@ -155,9 +153,7 @@ export default function Header() {
                         <p
                           className={cn(
                             "text-xs",
-                            scrolled || !isHomePage
-                              ? "text-gray-500"
-                              : "text-white/70"
+                            scrolled ? "text-gray-500" : "text-white/70"
                           )}
                         >
                           {user?.role?.toLowerCase()}
@@ -167,9 +163,7 @@ export default function Header() {
                         className={cn(
                           "h-4 w-4 transition-transform",
                           isUserMenuOpen && "rotate-180",
-                          scrolled || !isHomePage
-                            ? "text-gray-500"
-                            : "text-white/70"
+                          scrolled ? "text-gray-500" : "text-white/70"
                         )}
                       />
                     </button>
@@ -241,11 +235,11 @@ export default function Header() {
                 <div className="flex items-center space-x-3">
                   <Link to="/auth/login">
                     <Button
-                      variant={scrolled || !isHomePage ? "ghost" : "outline"}
+                      variant={scrolled ? "ghost" : "outline"}
                       size="sm"
                       className={cn(
                         "font-medium",
-                        scrolled || !isHomePage
+                        scrolled
                           ? "text-gray-700 hover:text-[#23407a]"
                           : "border-white/30 text-white hover:bg-white/10"
                       )}
@@ -258,7 +252,7 @@ export default function Header() {
                       size="sm"
                       className={cn(
                         "font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105",
-                        scrolled || !isHomePage
+                        scrolled
                           ? "bg-[#23407a] hover:bg-[#1a2f5c]"
                           : "bg-white text-[#23407a] hover:bg-gray-50"
                       )}
@@ -277,7 +271,7 @@ export default function Header() {
                 <Search
                   className={cn(
                     "h-5 w-5",
-                    scrolled || !isHomePage ? "text-gray-600" : "text-white"
+                    scrolled ? "text-gray-600" : "text-white"
                   )}
                 />
               </button>
@@ -288,7 +282,7 @@ export default function Header() {
                   <Bell
                     className={cn(
                       "h-5 w-5",
-                      scrolled || !isHomePage ? "text-gray-600" : "text-white"
+                      scrolled ? "text-gray-600" : "text-white"
                     )}
                   />
                   <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
@@ -300,7 +294,7 @@ export default function Header() {
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className={cn(
                   "p-2 rounded-lg transition-all duration-200 hover:scale-105",
-                  scrolled || !isHomePage
+                  scrolled
                     ? "hover:bg-gray-100 text-gray-600"
                     : "hover:bg-white/10 text-white"
                 )}
@@ -333,7 +327,7 @@ export default function Header() {
                 <div className="flex items-center">
                   <img
                     src={
-                      scrolled || !isHomePage
+                      scrolled
                         ? "/src/assets/logo-protextify-warna.png"
                         : "/src/assets/logo-protextify-putih.png"
                     }
