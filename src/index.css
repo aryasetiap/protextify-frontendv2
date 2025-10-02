@@ -506,6 +506,74 @@ textarea,
   box-shadow: 0 4px 12px rgba(35, 64, 122, 0.3);
 }
 
+/* Login page specific animations */
+.login-card-enter {
+  animation: loginCardSlide 0.6s ease-out;
+}
+
+@keyframes loginCardSlide {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Enhanced form focus states */
+.auth-input:focus-within {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px rgba(35, 64, 122, 0.15);
+}
+
+/* Enhanced button hover states */
+.auth-button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px rgba(35, 64, 122, 0.25);
+}
+
+/* Glass morphism effects */
+.auth-glass {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .auth-container {
+    padding: 1rem;
+  }
+
+  .auth-card {
+    margin: 0;
+    min-height: auto;
+  }
+}
+
+/* Enhanced demo credentials styling */
+.demo-credentials {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.demo-button {
+  transition: all 0.15s ease;
+}
+
+.demo-button:hover {
+  background: #23407a;
+  color: white;
+  transform: scale(1.02);
+}
+
 /* Focus Utilities */
 .focus-ring {
   @apply focus:outline-none focus:ring-2 focus:ring-[#23407a] focus:ring-offset-2;
