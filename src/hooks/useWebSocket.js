@@ -4,12 +4,39 @@ import { useAuth } from "../contexts/AuthContext";
 
 export const useWebSocket = () => {
   const { isAuthenticated, token } = useAuth();
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  // Monitor browser online/offline status
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  // Update connection state berdasarkan kombinasi auth + online status
   const [connectionState, setConnectionState] = useState({
-    isConnected: false,
+    isConnected: isAuthenticated && isOnline,
     isConnecting: false,
-    lastConnected: null,
+    lastConnected: isAuthenticated ? new Date() : null,
     error: null,
   });
+
+  // Update connection state when auth or online status changes
+  useEffect(() => {
+    setConnectionState((prev) => ({
+      ...prev,
+      isConnected: isAuthenticated && isOnline,
+      lastConnected:
+        isAuthenticated && isOnline ? new Date() : prev.lastConnected,
+    }));
+  }, [isAuthenticated, isOnline]);
 
   // Mock implementation untuk sementara jika websocketService belum tersedia
   const mockWebSocketService = {
@@ -106,6 +133,7 @@ export const useWebSocket = () => {
   return {
     // Connection state
     ...connectionState,
+    isConnected: isAuthenticated && isOnline, // ✅ KOMBINASI AUTH + ONLINE STATUS
 
     // Connection methods
     connect,
