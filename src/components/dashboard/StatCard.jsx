@@ -6,48 +6,71 @@ const StatCard = ({
   value,
   icon: Icon,
   color = "blue",
+  gradient,
   trend = "neutral",
   onClick = null,
 }) => {
   const colorClasses = {
-    blue: "bg-blue-100 text-blue-600",
-    green: "bg-green-100 text-green-600",
-    yellow: "bg-yellow-100 text-yellow-600",
-    purple: "bg-purple-100 text-purple-600",
-    red: "bg-red-100 text-red-600",
+    blue: "from-blue-100 to-blue-50 border-blue-200",
+    green: "from-green-100 to-green-50 border-green-200",
+    yellow: "from-yellow-100 to-yellow-50 border-yellow-200",
+    purple: "from-purple-100 to-purple-50 border-purple-200",
+    red: "from-red-100 to-red-50 border-red-200",
   };
 
-  const trendClasses = {
-    positive: "text-green-600",
-    warning: "text-yellow-600",
-    negative: "text-red-600",
-    neutral: "text-gray-600",
+  const iconColors = {
+    blue: "text-blue-600",
+    green: "text-green-600",
+    yellow: "text-yellow-600",
+    purple: "text-purple-600",
+    red: "text-red-600",
   };
 
   return (
     <Card
-      className={`${
-        onClick ? "cursor-pointer hover:shadow-md transition-shadow" : ""
-      }`}
+      className={`group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 ${
+        onClick ? "cursor-pointer" : ""
+      } bg-gradient-to-br ${colorClasses[color]}`}
       onClick={onClick}
     >
-      <CardContent className="p-6">
-        <div className="flex items-center">
-          <div className={`p-3 rounded-lg ${colorClasses[color]}`}>
-            <Icon className="h-6 w-6" />
-          </div>
-          <div className="ml-4 flex-1">
-            <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
-            <div className="flex items-center space-x-2">
-              <p className="text-2xl font-bold text-gray-900">{value}</p>
+      {/* Decorative background pattern */}
+      <div className="absolute inset-0 opacity-30">
+        <div className="absolute top-0 right-0 w-24 h-24 transform translate-x-8 -translate-y-8">
+          <div
+            className={`w-full h-full rounded-full bg-gradient-to-br ${gradient} opacity-20`}
+          ></div>
+        </div>
+      </div>
+
+      <CardContent className="p-6 relative z-10">
+        <div className="flex items-center justify-between">
+          <div className="flex-1">
+            <p className="text-sm font-medium text-gray-600 mb-2">{title}</p>
+            <div className="flex items-baseline space-x-2">
+              <p className="text-3xl font-bold text-gray-900 group-hover:scale-105 transition-transform">
+                {value}
+              </p>
               {trend !== "neutral" && (
-                <span className={`text-xs ${trendClasses[trend]}`}>
-                  {trend === "positive" && "↗"}
-                  {trend === "warning" && "⚠"}
-                  {trend === "negative" && "↘"}
+                <span
+                  className={`text-xs px-2 py-1 rounded-full bg-white/50 ${
+                    trend === "positive"
+                      ? "text-green-600"
+                      : trend === "warning"
+                      ? "text-yellow-600"
+                      : "text-red-600"
+                  }`}
+                >
+                  {trend === "positive" && "↗ +12%"}
+                  {trend === "warning" && "⚠ -5%"}
+                  {trend === "negative" && "↘ -8%"}
                 </span>
               )}
             </div>
+          </div>
+          <div
+            className={`p-3 rounded-2xl bg-white/70 backdrop-blur-sm shadow-lg group-hover:scale-110 transition-transform ${iconColors[color]}`}
+          >
+            <Icon className="h-7 w-7" />
           </div>
         </div>
       </CardContent>

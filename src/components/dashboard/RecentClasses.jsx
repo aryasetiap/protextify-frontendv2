@@ -5,16 +5,24 @@ import { Button, Card, CardHeader, CardTitle, CardContent } from "../ui";
 
 const RecentClasses = ({ classes, totalClasses }) => {
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+      <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center">
-            <BookOpen className="h-5 w-5 mr-2" />
-            Kelas Terbaru
-          </CardTitle>
+          <div className="flex items-center">
+            <div className="w-2 h-2 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full mr-3"></div>
+            <CardTitle className="text-lg font-bold text-gray-900 flex items-center">
+              <BookOpen className="h-5 w-5 mr-2 text-[#23407a]" />
+              Kelas Terbaru
+            </CardTitle>
+          </div>
           <Link to="/dashboard/classes">
-            <Button variant="ghost" size="sm">
-              Lihat Semua ({totalClasses})
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[#23407a] hover:bg-[#23407a]/10"
+            >
+              <span className="hidden sm:inline">Lihat Semua</span> (
+              {totalClasses})
             </Button>
           </Link>
         </div>
@@ -26,33 +34,57 @@ const RecentClasses = ({ classes, totalClasses }) => {
               <Link
                 key={cls.id}
                 to={`/dashboard/classes/${cls.id}`}
-                className="block"
+                className="group block"
               >
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                  <div className="flex-1">
-                    <h3 className="font-medium text-gray-900 truncate">
-                      {cls.name}
-                    </h3>
-                    <div className="flex items-center text-sm text-gray-600 mt-1">
-                      <Users className="h-3 w-3 mr-1" />
-                      <span className="truncate">
-                        {cls.instructor?.fullName || "Loading..."}
-                      </span>
+                <div className="relative overflow-hidden p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-200 hover:border-[#23407a]/30 hover:shadow-md transition-all duration-300">
+                  {/* Hover gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#23407a]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                  <div className="relative z-10 flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-gray-900 truncate group-hover:text-[#23407a] transition-colors">
+                        {cls.name}
+                      </h3>
+                      <div className="flex items-center text-sm text-gray-600 mt-1">
+                        <Users className="h-3 w-3 mr-1" />
+                        <span className="truncate">
+                          {cls.instructor?.fullName || "Loading..."}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center text-sm text-gray-500 ml-3">
-                    <FileText className="h-3 w-3 mr-1" />
-                    <span>{cls.assignments?.length || 0}</span>
+                    <div className="flex items-center space-x-3 ml-4">
+                      <div className="flex items-center text-sm text-gray-500">
+                        <FileText className="h-3 w-3 mr-1" />
+                        <span>{cls.assignments?.length || 0}</span>
+                      </div>
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity text-[#23407a]">
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </Link>
             ))
           ) : (
             <div className="text-center py-8">
-              <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <div className="w-16 h-16 bg-gradient-to-br from-[#23407a]/10 to-[#3b5fa4]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <BookOpen className="h-8 w-8 text-[#23407a]" />
+              </div>
               <p className="text-gray-500 mb-4">Belum ada kelas</p>
               <Link to="/dashboard/join-class">
-                <Button size="sm">
+                <Button size="sm" className="bg-[#23407a] hover:bg-[#1a2f5c]">
                   <Plus className="h-4 w-4 mr-2" />
                   Gabung Kelas
                 </Button>

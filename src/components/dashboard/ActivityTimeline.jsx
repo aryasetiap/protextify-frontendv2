@@ -38,16 +38,23 @@ const ActivityTimeline = ({ submissions, className = "" }) => {
   };
 
   return (
-    <Card className={className}>
-      <CardHeader>
+    <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+      <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center">
-            <FileText className="h-5 w-5 mr-2" />
-            Aktivitas Terbaru
-          </CardTitle>
+          <div className="flex items-center">
+            <div className="w-2 h-2 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full mr-3"></div>
+            <CardTitle className="text-lg font-bold text-gray-900 flex items-center">
+              <FileText className="h-5 w-5 mr-2 text-[#23407a]" />
+              Aktivitas Terbaru
+            </CardTitle>
+          </div>
           <Link to="/dashboard/submissions">
-            <Button variant="ghost" size="sm">
-              Lihat Semua
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[#23407a] hover:bg-[#23407a]/10"
+            >
+              <span className="hidden sm:inline">Lihat Semua</span>
             </Button>
           </Link>
         </div>
@@ -56,21 +63,29 @@ const ActivityTimeline = ({ submissions, className = "" }) => {
         <div className="space-y-4">
           {submissions.length > 0 ? (
             submissions.map((submission, index) => (
-              <div key={submission.id} className="flex items-start space-x-3">
+              <div
+                key={submission.id}
+                className="group flex items-start space-x-4 p-3 rounded-xl hover:bg-gray-50 transition-colors"
+              >
                 <div
-                  className={`p-2 rounded-full ${getStatusColor(
+                  className={`relative flex-shrink-0 p-2 rounded-full ${getStatusColor(
                     submission.status
                   )}`}
                 >
                   {getStatusIcon(submission.status)}
+                  {index < submissions.length - 1 && (
+                    <div className="absolute top-8 left-1/2 transform -translate-x-1/2 w-0.5 h-6 bg-gray-200"></div>
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
+                  <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-[#23407a] transition-colors">
                     {submission.assignment?.title || "Tugas"}
                   </p>
-                  <div className="flex items-center text-xs text-gray-500 mt-1">
-                    <span>{getStatusText(submission.status)}</span>
-                    <span className="mx-2">•</span>
+                  <div className="flex items-center text-xs text-gray-500 mt-1 space-x-2">
+                    <span className="px-2 py-1 bg-gray-100 rounded-full">
+                      {getStatusText(submission.status)}
+                    </span>
+                    <span>•</span>
                     <span>
                       {new Date(submission.updatedAt).toLocaleDateString(
                         "id-ID",
@@ -84,7 +99,7 @@ const ActivityTimeline = ({ submissions, className = "" }) => {
                     </span>
                   </div>
                   {submission.grade && (
-                    <div className="mt-1">
+                    <div className="mt-2">
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                         Nilai: {submission.grade}
                       </span>
@@ -95,10 +110,12 @@ const ActivityTimeline = ({ submissions, className = "" }) => {
             ))
           ) : (
             <div className="text-center py-8">
-              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <div className="w-16 h-16 bg-gradient-to-br from-[#23407a]/10 to-[#3b5fa4]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <FileText className="h-8 w-8 text-[#23407a]" />
+              </div>
               <p className="text-gray-500 mb-4">Belum ada aktivitas terbaru</p>
               <Link to="/dashboard/classes">
-                <Button size="sm">
+                <Button size="sm" className="bg-[#23407a] hover:bg-[#1a2f5c]">
                   <BookOpen className="h-4 w-4 mr-2" />
                   Lihat Kelas
                 </Button>
