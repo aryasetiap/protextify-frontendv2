@@ -46,27 +46,31 @@ export default function Breadcrumb({ customItems = null, showHome = true }) {
   }
 
   return (
-    <nav className="flex items-center space-x-1 text-sm text-gray-600 mb-6">
-      {breadcrumbs.map((crumb, index) => (
-        <div key={index} className="flex items-center">
-          {index > 0 && <ChevronRight className="h-4 w-4 text-gray-400 mx-2" />}
+    <nav className="flex items-center space-x-1 text-sm mb-6">
+      <div className="flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-gray-200/50 shadow-sm">
+        {breadcrumbs.map((crumb, index) => (
+          <div key={index} className="flex items-center">
+            {index > 0 && (
+              <ChevronRight className="h-3 w-3 text-gray-400 mx-2" />
+            )}
 
-          {crumb.path ? (
-            <Link
-              to={crumb.path}
-              className="hover:text-[#23407a] transition-colors flex items-center"
-            >
-              {index === 0 && showHome && <Home className="h-4 w-4 mr-1" />}
-              {crumb.label}
-            </Link>
-          ) : (
-            <span className="text-gray-900 font-medium flex items-center">
-              {index === 0 && showHome && <Home className="h-4 w-4 mr-1" />}
-              {crumb.label}
-            </span>
-          )}
-        </div>
-      ))}
+            {crumb.path ? (
+              <Link
+                to={crumb.path}
+                className="hover:text-[#23407a] transition-colors flex items-center text-gray-600 hover:bg-[#23407a]/10 px-2 py-1 rounded-md"
+              >
+                {index === 0 && showHome && <Home className="h-3 w-3 mr-1" />}
+                <span className="font-medium">{crumb.label}</span>
+              </Link>
+            ) : (
+              <span className="text-[#23407a] font-semibold flex items-center px-2 py-1 bg-[#23407a]/10 rounded-md">
+                {index === 0 && showHome && <Home className="h-3 w-3 mr-1" />}
+                {crumb.label}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
     </nav>
   );
 }
