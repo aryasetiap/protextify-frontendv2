@@ -23,24 +23,29 @@ const RecentClasses = ({ classes, totalClasses }) => {
         <div className="space-y-3">
           {classes.length > 0 ? (
             classes.map((cls) => (
-              <div
+              <Link
                 key={cls.id}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                to={`/dashboard/classes/${cls.id}`}
+                className="block"
               >
-                <div className="flex-1">
-                  <h3 className="font-medium text-gray-900 truncate">
-                    {cls.name}
-                  </h3>
-                  <div className="flex items-center text-sm text-gray-600 mt-1">
-                    <Users className="h-3 w-3 mr-1" />
-                    <span className="truncate">{cls.instructor?.fullName}</span>
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <div className="flex-1">
+                    <h3 className="font-medium text-gray-900 truncate">
+                      {cls.name}
+                    </h3>
+                    <div className="flex items-center text-sm text-gray-600 mt-1">
+                      <Users className="h-3 w-3 mr-1" />
+                      <span className="truncate">
+                        {cls.instructor?.fullName || "Loading..."}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-500 ml-3">
+                    <FileText className="h-3 w-3 mr-1" />
+                    <span>{cls.assignments?.length || 0}</span>
                   </div>
                 </div>
-                <div className="flex items-center text-sm text-gray-500 ml-3">
-                  <FileText className="h-3 w-3 mr-1" />
-                  <span>{cls._count?.assignments || 0}</span>
-                </div>
-              </div>
+              </Link>
             ))
           ) : (
             <div className="text-center py-8">

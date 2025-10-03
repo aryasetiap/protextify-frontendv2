@@ -6,7 +6,36 @@ const classesService = {
   getClasses: async () => {
     try {
       const response = await api.get("/classes");
-      return response;
+
+      // Pastikan response adalah array
+      const data = Array.isArray(response) ? response : [];
+
+      // Transform response to match frontend expectations
+      // Backend returns enrollment objects with nested class data
+      const transformedClasses = data.map((enrollment) => {
+        // Safe handling untuk enrollment object
+        const classData = enrollment?.class || {};
+
+        return {
+          ...classData,
+          // Add enrollment metadata
+          enrollmentId: enrollment?.id,
+          enrolledAt: enrollment?.joinedAt,
+          // Transform assignments if they exist (set empty array for now)
+          assignments: classData.assignments || [],
+          // Transform enrollments if they exist (we don't have this data yet)
+          enrollments: [],
+          // Add instructor info (we need to get this from backend later)
+          instructor: classData.instructor || { fullName: "Instructor" },
+          // Add student enrollment info for this user
+          currentUserEnrollment: {
+            id: enrollment?.id,
+            joinedAt: enrollment?.joinedAt,
+          },
+        };
+      });
+
+      return transformedClasses;
     } catch (error) {
       console.error("Error fetching classes:", error);
       throw error;
@@ -61,6 +90,16 @@ const classesService = {
     }
   },
 
+  // Preview class by token (before joining)
+  previewClass: async (classToken) => {
+    try {
+      const response = await api.get(`/classes/preview/${classToken}`);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // Get assignments for a class
   getClassAssignments: async (classId) => {
     try {
@@ -105,16 +144,6 @@ const classesService = {
   regenerateClassToken: async (classId) => {
     try {
       const response = await api.post(`/classes/${classId}/regenerate-token`);
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  // Preview class by token (before joining)
-  previewClass: async (classToken) => {
-    try {
-      const response = await api.get(`/classes/preview/${classToken}`);
       return response;
     } catch (error) {
       throw error;

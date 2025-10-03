@@ -122,10 +122,14 @@ export default function StudentClasses() {
 function ClassCard({ classData, isNew = false }) {
   const navigate = useNavigate();
 
-  const studentsCount = classData.enrollments?.length || 0;
+  // Handle potential undefined values safely dengan data struktur baru
+  const studentsCount = 0; // Akan diupdate ketika backend menyediakan data enrollments
   const assignmentsCount = classData.assignments?.length || 0;
   const activeAssignments =
-    classData.assignments?.filter((a) => a.active).length || 0;
+    classData.assignments?.filter((a) => a?.active).length || 0;
+
+  // Use enrolledAt dari enrollment data
+  const joinedDate = classData.enrolledAt || classData.createdAt;
 
   return (
     <Card
@@ -154,11 +158,11 @@ function ClassCard({ classData, isNew = false }) {
       </CardHeader>
 
       <CardContent>
-        {/* Instructor Info */}
+        {/* Instructor Info - temporary until backend provides instructor data */}
         <div className="mb-4">
           <p className="text-sm text-gray-600">
             <span className="font-medium">Instruktur:</span>{" "}
-            {classData.instructor?.fullName || "Tidak diketahui"}
+            {classData.instructor?.fullName || "Loading..."}
           </p>
         </div>
 
@@ -184,7 +188,7 @@ function ClassCard({ classData, isNew = false }) {
           </div>
         </div>
 
-        {/* Active Assignments */}
+        {/* Active Assignments - hanya tampil jika ada tugas aktif */}
         {activeAssignments > 0 && (
           <div className="mb-4">
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
@@ -197,7 +201,7 @@ function ClassCard({ classData, isNew = false }) {
         <div className="text-xs text-gray-500 mb-4">
           <div className="flex items-center">
             <Calendar className="h-3 w-3 mr-1" />
-            Bergabung: {formatDate(classData.enrolledAt || classData.createdAt)}
+            Bergabung: {formatDate(joinedDate)}
           </div>
         </div>
 
@@ -211,17 +215,17 @@ function ClassCard({ classData, isNew = false }) {
           >
             Lihat Detail
           </Button>
-          {activeAssignments > 0 && (
-            <Button
-              size="sm"
-              className="flex-1 bg-[#23407a] hover:bg-[#1a2f5c]"
-              onClick={() =>
-                navigate(`/dashboard/classes/${classData.id}/assignments`)
-              }
-            >
-              Lihat Tugas
-            </Button>
-          )}
+          {/* Temporary disable until assignments are available */}
+          <Button
+            size="sm"
+            className="flex-1 bg-[#23407a] hover:bg-[#1a2f5c]"
+            onClick={() =>
+              navigate(`/dashboard/classes/${classData.id}/assignments`)
+            }
+            disabled={activeAssignments === 0}
+          >
+            {activeAssignments > 0 ? "Lihat Tugas" : "Belum Ada Tugas"}
+          </Button>
         </div>
       </CardContent>
     </Card>

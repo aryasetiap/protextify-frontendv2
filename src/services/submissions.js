@@ -64,9 +64,10 @@ const submissionsService = {
   getHistory: async () => {
     try {
       const response = await api.get("/submissions/history");
-      return response;
+      return Array.isArray(response) ? response : [];
     } catch (error) {
-      throw error;
+      console.error("Error fetching submissions history:", error);
+      return []; // Return empty array on error
     }
   },
 

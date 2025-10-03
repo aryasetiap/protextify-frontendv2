@@ -10,25 +10,23 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useStudentDashboard } from "../../hooks/useStudentDashboard";
 import {
-  Button,
+  Container,
   Card,
   CardHeader,
   CardTitle,
   CardContent,
-  Grid,
   LoadingSpinner,
-  Container,
   Alert,
+  Button,
 } from "../../components";
-import { Breadcrumb } from "../../components/layout";
 import {
-  StatCard,
+  QuickActions,
   RecentClasses,
   ActivityTimeline,
-  QuickActions,
 } from "../../components/dashboard";
-import { useStudentDashboard } from "../../hooks/useStudentDashboard";
+import { Grid } from "../../components/ui";
 
 export default function StudentDashboard() {
   const { user } = useAuth();
@@ -37,18 +35,17 @@ export default function StudentDashboard() {
     error,
     stats,
     recentClasses,
-    recentSubmissions,
-    upcomingDeadlines,
+    recentAssignments,
+    activityTimeline,
     refetch,
+    isConnected,
   } = useStudentDashboard();
 
   if (loading) {
     return (
       <Container className="py-6">
-        <Breadcrumb />
-        <div className="flex items-center justify-center min-h-64">
+        <div className="flex justify-center py-12">
           <LoadingSpinner size="lg" />
-          <span className="ml-3 text-gray-600">Memuat dashboard...</span>
         </div>
       </Container>
     );
@@ -57,9 +54,8 @@ export default function StudentDashboard() {
   if (error) {
     return (
       <Container className="py-6">
-        <Breadcrumb />
-        <Alert variant="error" title="Error" className="mb-6">
-          <p>Gagal memuat data dashboard. Silakan coba lagi.</p>
+        <Alert variant="error">
+          <p>Gagal memuat data dashboard: {error.message}</p>
           <Button onClick={refetch} size="sm" className="mt-3">
             Coba Lagi
           </Button>
@@ -68,152 +64,103 @@ export default function StudentDashboard() {
     );
   }
 
+  // Safe fallback untuk stats
+  const safeStats = {
+    totalClasses: stats?.totalClasses || 0,
+    activeAssignments: stats?.activeAssignments || 0,
+    completedAssignments: stats?.completedAssignments || 0,
+    pendingSubmissions: stats?.pendingSubmissions || 0,
+  };
+
+  // Safe fallback untuk arrays
+  const safeRecentClasses = Array.isArray(recentClasses) ? recentClasses : [];
+  const safeRecentAssignments = Array.isArray(recentAssignments)
+    ? recentAssignments
+    : [];
+  const safeActivityTimeline = Array.isArray(activityTimeline)
+    ? activityTimeline
+    : [];
+
   return (
     <Container className="py-6">
-      {/* Breadcrumb */}
-      <Breadcrumb />
-
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-[#23407a] to-[#1a2f5c] rounded-lg p-6 text-white mb-8">
         <h1 className="text-2xl font-bold">
-          Selamat datang, {user?.fullName}! 👋
+          Selamat datang, {user?.fullName || "Student"}!
         </h1>
         <p className="mt-2 opacity-90">
-          Kelola tugas dan kelas Anda dengan mudah.{" "}
-          {stats.activeAssignments > 0 &&
-            `Anda memiliki ${stats.activeAssignments} tugas aktif.`}
+          Kelola tugas dan kelas Anda dengan mudah
         </p>
       </div>
-
-      {/* Upcoming Deadlines Alert */}
-      {upcomingDeadlines.length > 0 && (
-        <Alert variant="warning" title="Deadline Mendekat" className="mb-6">
-          <div className="space-y-2">
-            {upcomingDeadlines.map((assignment) => (
-              <div
-                key={assignment.id}
-                className="flex items-center justify-between"
-              >
-                <span className="text-sm">
-                  <strong>{assignment.title}</strong> - {assignment.className}
-                </span>
-                <span className="text-sm text-gray-600">
-                  {new Date(assignment.deadline).toLocaleDateString("id-ID")}
-                </span>
-              </div>
-            ))}
-          </div>
-        </Alert>
-      )}
 
       {/* Statistics Cards */}
       <Grid cols={1} mdCols={2} lgCols={4} gap={6} className="mb-8">
         <StatCard
           title="Total Kelas"
-          value={stats.totalClasses}
+          value={safeStats.totalClasses}
           icon={BookOpen}
           color="blue"
-          trend={stats.totalClasses > 0 ? "positive" : "neutral"}
         />
         <StatCard
           title="Tugas Aktif"
-          value={stats.activeAssignments}
+          value={safeStats.activeAssignments}
           icon={Clock}
           color="yellow"
-          trend={stats.activeAssignments > 0 ? "warning" : "positive"}
         />
         <StatCard
           title="Tugas Selesai"
-          value={stats.completedAssignments}
+          value={safeStats.completedAssignments}
           icon={CheckCircle}
           color="green"
-          trend="positive"
         />
         <StatCard
-          title="Menunggu Review"
-          value={stats.pendingSubmissions}
+          title="Draft"
+          value={safeStats.pendingSubmissions}
           icon={FileText}
-          color="purple"
-          trend={stats.pendingSubmissions > 0 ? "warning" : "positive"}
+          color="gray"
         />
       </Grid>
 
-      {/* Main Content Grid */}
+      {/* Main Content */}
       <Grid cols={1} lgCols={3} gap={8}>
         {/* Quick Actions */}
-        <QuickActions stats={stats} />
+        <QuickActions stats={safeStats} />
 
         {/* Recent Classes */}
         <RecentClasses
-          classes={recentClasses}
-          totalClasses={stats.totalClasses}
+          classes={safeRecentClasses}
+          totalClasses={safeStats.totalClasses}
         />
 
         {/* Activity Timeline */}
-        <ActivityTimeline
-          submissions={recentSubmissions}
-          className="lg:col-span-1"
-        />
+        <ActivityTimeline submissions={safeActivityTimeline} />
       </Grid>
-
-      {/* Progress Overview */}
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>Progress Overview</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {/* Assignment Completion Rate */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-700">
-                  Tingkat Penyelesaian Tugas
-                </span>
-                <span className="text-sm text-gray-600">
-                  {stats.completedAssignments} / {stats.totalAssignments}
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-[#23407a] h-2 rounded-full transition-all duration-300"
-                  style={{
-                    width: `${
-                      stats.totalAssignments > 0
-                        ? (stats.completedAssignments /
-                            stats.totalAssignments) *
-                          100
-                        : 0
-                    }%`,
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Activity This Week */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-700">
-                  Aktivitas Minggu Ini
-                </span>
-                <span className="text-sm text-gray-600">
-                  {stats.weeklyActivity} submission
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-green-500 h-2 rounded-full transition-all duration-300"
-                  style={{
-                    width: `${Math.min(
-                      (stats.weeklyActivity / 7) * 100,
-                      100
-                    )}%`,
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </Container>
+  );
+}
+
+// Stat Card Component
+function StatCard({ title, value, icon: Icon, color }) {
+  const colorClasses = {
+    blue: "bg-blue-100 text-blue-600",
+    yellow: "bg-yellow-100 text-yellow-600",
+    green: "bg-green-100 text-green-600",
+    gray: "bg-gray-100 text-gray-600",
+  };
+
+  return (
+    <Card>
+      <CardContent className="p-6">
+        <div className="flex items-center">
+          <div className={`p-2 rounded-lg ${colorClasses[color]}`}>
+            <Icon className="h-6 w-6" />
+          </div>
+          <div className="ml-4">
+            <p className="text-sm font-medium text-gray-600">{title}</p>
+            <p className="text-2xl font-bold text-gray-900">{value}</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
