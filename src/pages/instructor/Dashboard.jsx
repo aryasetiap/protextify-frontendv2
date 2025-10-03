@@ -80,88 +80,186 @@ export default function InstructorDashboard() {
       {/* Breadcrumb */}
       <Breadcrumb />
 
-      {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-[#23407a] to-[#1a2f5c] rounded-lg p-6 text-white mb-8">
-        <h1 className="text-2xl font-bold">
-          Selamat datang, {user?.fullName}! 👨‍🏫
-        </h1>
-        <p className="mt-2 opacity-90">
-          Kelola kelas dan monitor progress siswa dengan mudah.
-          {stats.pendingGrading > 0 &&
-            ` Ada ${stats.pendingGrading} submission menunggu penilaian.`}
-        </p>
+      {/* Enhanced Welcome Section with Gradient Background */}
+      <div className="relative overflow-hidden mb-12">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#23407a] via-[#1a2f5c] to-[#162849] rounded-2xl"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent rounded-2xl"></div>
+
+        <div className="relative px-8 py-10">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+            <div className="mb-6 lg:mb-0">
+              <div className="flex items-center mb-4">
+                <div className="w-3 h-3 bg-white rounded-full mr-3 animate-pulse"></div>
+                <span className="text-white/70 text-sm font-medium">
+                  Dashboard Instructor
+                </span>
+              </div>
+              <h1 className="text-3xl lg:text-4xl font-bold text-white mb-3">
+                Selamat datang, {user?.fullName}! 👨‍🏫
+              </h1>
+              <p className="text-white/80 text-lg leading-relaxed max-w-2xl">
+                Kelola kelas dan monitor progress siswa dengan mudah.
+                {stats.pendingGrading > 0 &&
+                  ` Ada ${stats.pendingGrading} submission menunggu penilaian.`}
+              </p>
+            </div>
+
+            {/* Enhanced Quick Stats Indicator */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex items-center px-4 py-2 rounded-full backdrop-blur-sm border border-white/20 bg-white/10">
+                <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                <span className="text-white text-sm font-medium">
+                  {stats.totalClasses} Kelas Aktif
+                </span>
+              </div>
+              {stats.pendingGrading > 0 && (
+                <div className="flex items-center px-4 py-2 rounded-full backdrop-blur-sm border border-orange-300/50 bg-orange-500/20">
+                  <div className="w-2 h-2 bg-orange-400 rounded-full mr-2 animate-pulse"></div>
+                  <span className="text-white text-sm font-medium">
+                    {stats.pendingGrading} Perlu Review
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Pending Actions Alert */}
       {stats.pendingGrading > 0 && (
-        <Alert variant="warning" title="Perlu Perhatian" className="mb-6">
-          <div className="flex items-center justify-between">
-            <span>
-              Anda memiliki {stats.pendingGrading} submission yang menunggu
-              penilaian
-            </span>
-            <Link to="/instructor/submissions">
-              <Button size="sm">Lihat Sekarang</Button>
-            </Link>
+        <div className="mb-8 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl"></div>
+          <div className="relative p-6 border border-orange-200/50 rounded-2xl">
+            <div className="flex items-start space-x-4">
+              <div className="p-3 bg-orange-500 rounded-2xl shadow-lg">
+                <AlertCircle className="h-6 w-6 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-orange-900 mb-2">
+                  Perlu Perhatian
+                </h3>
+                <p className="text-orange-800 mb-4">
+                  Anda memiliki {stats.pendingGrading} submission yang menunggu
+                  penilaian dari siswa.
+                </p>
+                <Link to="/instructor/submissions">
+                  <Button className="bg-orange-500 hover:bg-orange-600 text-white shadow-lg">
+                    <FileText className="h-4 w-4 mr-2" />
+                    Review Sekarang
+                  </Button>
+                </Link>
+              </div>
+            </div>
           </div>
-        </Alert>
+        </div>
       )}
 
-      {/* Tab Navigation */}
-      <div className="border-b border-gray-200 mb-8">
-        <nav className="-mb-px flex space-x-8">
-          {[
-            { id: "overview", label: "Overview", icon: BarChart3 },
-            { id: "classes", label: "Kelas", icon: BookOpen },
-            { id: "monitoring", label: "Monitoring", icon: TrendingUp },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center ${
-                activeTab === tab.id
-                  ? "border-[#23407a] text-[#23407a]"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-            >
-              <tab.icon className="h-4 w-4 mr-2" />
-              {tab.label}
-            </button>
-          ))}
-        </nav>
+      {/* Enhanced Tab Navigation */}
+      <div className="mb-8">
+        <div className="flex items-center mb-6">
+          <div className="w-1 h-8 bg-gradient-to-b from-[#23407a] to-[#3b5fa4] rounded-full mr-4"></div>
+          <h2 className="text-2xl font-bold text-gray-900">
+            Dashboard Sections
+          </h2>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 p-2">
+          <nav className="flex space-x-2">
+            {[
+              {
+                id: "overview",
+                label: "Overview",
+                icon: BarChart3,
+                description: "Ringkasan aktivitas",
+              },
+              {
+                id: "classes",
+                label: "Kelas",
+                icon: BookOpen,
+                description: "Manajemen kelas",
+              },
+              {
+                id: "monitoring",
+                label: "Monitoring",
+                icon: TrendingUp,
+                description: "Monitor submission",
+              },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 p-4 rounded-xl transition-all duration-300 group ${
+                  activeTab === tab.id
+                    ? "bg-[#23407a] text-white shadow-lg"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-[#23407a]"
+                }`}
+              >
+                <div className="flex flex-col items-center space-y-2">
+                  <tab.icon
+                    className={`h-5 w-5 ${
+                      activeTab === tab.id
+                        ? "text-white"
+                        : "text-gray-500 group-hover:text-[#23407a]"
+                    }`}
+                  />
+                  <span className="font-medium text-sm">{tab.label}</span>
+                  <span
+                    className={`text-xs ${
+                      activeTab === tab.id ? "text-white/80" : "text-gray-400"
+                    }`}
+                  >
+                    {tab.description}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </nav>
+        </div>
       </div>
 
-      {/* Statistics Cards */}
-      <Grid cols={1} mdCols={2} lgCols={4} gap={6} className="mb-8">
-        <StatCard
-          title="Total Kelas"
-          value={stats.totalClasses}
-          icon={BookOpen}
-          color="blue"
-          trend={stats.totalClasses > 0 ? "positive" : "neutral"}
-        />
-        <StatCard
-          title="Total Siswa"
-          value={stats.totalStudents}
-          icon={Users}
-          color="green"
-          trend="positive"
-        />
-        <StatCard
-          title="Tugas Aktif"
-          value={stats.activeAssignments}
-          icon={Clock}
-          color="yellow"
-          trend={stats.activeAssignments > 0 ? "warning" : "positive"}
-        />
-        <StatCard
-          title="Pendapatan Bulan Ini"
-          value={`Rp ${stats.monthlyRevenue.toLocaleString()}`}
-          icon={DollarSign}
-          color="purple"
-          trend="positive"
-        />
-      </Grid>
+      {/* Enhanced Statistics Cards */}
+      <div className="mb-12">
+        <div className="flex items-center mb-6">
+          <div className="w-1 h-8 bg-gradient-to-b from-[#23407a] to-[#3b5fa4] rounded-full mr-4"></div>
+          <h2 className="text-2xl font-bold text-gray-900">
+            Statistik Performa
+          </h2>
+        </div>
+        <Grid cols={1} mdCols={2} lgCols={4} gap={6}>
+          <StatCard
+            title="Total Kelas"
+            value={stats.totalClasses}
+            icon={BookOpen}
+            color="blue"
+            gradient="from-blue-500 to-blue-600"
+            trend={stats.totalClasses > 0 ? "positive" : "neutral"}
+          />
+          <StatCard
+            title="Total Siswa"
+            value={stats.totalStudents}
+            icon={Users}
+            color="green"
+            gradient="from-green-500 to-emerald-600"
+            trend="positive"
+          />
+          <StatCard
+            title="Tugas Aktif"
+            value={stats.activeAssignments}
+            icon={Clock}
+            color="yellow"
+            gradient="from-yellow-500 to-orange-500"
+            trend={stats.activeAssignments > 0 ? "warning" : "positive"}
+          />
+          <StatCard
+            title="Pendapatan Bulan Ini"
+            value={`Rp ${stats.monthlyRevenue.toLocaleString()}`}
+            icon={DollarSign}
+            color="purple"
+            gradient="from-purple-500 to-indigo-600"
+            trend="positive"
+          />
+        </Grid>
+      </div>
 
       {/* Tab Content */}
       {activeTab === "overview" && (
@@ -225,58 +323,101 @@ export default function InstructorDashboard() {
         </div>
       )}
 
-      {/* Summary Statistics */}
-      <Grid cols={1} mdCols={3} gap={6} className="mt-8">
-        <Card>
-          <CardContent className="p-6 text-center">
-            <div className="text-2xl font-bold text-gray-900 mb-2">
-              {stats.completionRate}%
-            </div>
-            <div className="text-sm text-gray-600">Tingkat Penyelesaian</div>
-            <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
-              <div
-                className="bg-green-500 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${stats.completionRate}%` }}
-              />
-            </div>
-          </CardContent>
-        </Card>
+      {/* Enhanced Summary Statistics */}
+      <div className="mt-12">
+        <div className="flex items-center mb-6">
+          <div className="w-1 h-8 bg-gradient-to-b from-[#23407a] to-[#3b5fa4] rounded-full mr-4"></div>
+          <h2 className="text-2xl font-bold text-gray-900">
+            Analisis Performa
+          </h2>
+        </div>
 
-        <Card>
-          <CardContent className="p-6 text-center">
-            <div className="text-2xl font-bold text-gray-900 mb-2">
-              {stats.averageGrade}
-            </div>
-            <div className="text-sm text-gray-600">Rata-rata Nilai</div>
-            <div className="flex items-center justify-center mt-3">
-              <CheckCircle className="h-4 w-4 text-green-500 mr-1" />
-              <span className="text-sm text-green-600">
-                {stats.averageGrade >= 75
-                  ? "Sangat Baik"
-                  : stats.averageGrade >= 60
-                  ? "Baik"
-                  : "Perlu Perbaikan"}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+        <Grid cols={1} mdCols={3} gap={8}>
+          <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-green-50 to-emerald-50">
+            <CardContent className="p-8 text-center">
+              <div className="w-16 h-16 bg-green-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <CheckCircle className="h-8 w-8 text-white" />
+              </div>
+              <div className="text-3xl font-bold text-gray-900 mb-2">
+                {stats.completionRate}%
+              </div>
+              <div className="text-sm font-medium text-gray-600 mb-4">
+                Tingkat Penyelesaian
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div
+                  className="bg-gradient-to-r from-green-500 to-emerald-600 h-3 rounded-full transition-all duration-500"
+                  style={{ width: `${stats.completionRate}%` }}
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Rata-rata completion rate siswa
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardContent className="p-6 text-center">
-            <div className="text-2xl font-bold text-gray-900 mb-2">
-              Rp {stats.totalRevenue.toLocaleString()}
-            </div>
-            <div className="text-sm text-gray-600">Total Pendapatan</div>
-            <div className="flex items-center justify-center mt-3">
-              <TrendingUp className="h-4 w-4 text-blue-500 mr-1" />
-              <span className="text-sm text-blue-600">
-                +{Math.round((stats.monthlyRevenue / stats.totalRevenue) * 100)}
-                % bulan ini
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-      </Grid>
+          <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-blue-50 to-indigo-50">
+            <CardContent className="p-8 text-center">
+              <div className="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <CheckCircle className="h-8 w-8 text-white" />
+              </div>
+              <div className="text-3xl font-bold text-gray-900 mb-2">
+                {stats.averageGrade}
+              </div>
+              <div className="text-sm font-medium text-gray-600 mb-4">
+                Rata-rata Nilai
+              </div>
+              <div className="flex items-center justify-center">
+                <div
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    stats.averageGrade >= 75
+                      ? "bg-green-100 text-green-700"
+                      : stats.averageGrade >= 60
+                      ? "bg-blue-100 text-blue-700"
+                      : "bg-yellow-100 text-yellow-700"
+                  }`}
+                >
+                  {stats.averageGrade >= 75
+                    ? "Sangat Baik"
+                    : stats.averageGrade >= 60
+                    ? "Baik"
+                    : "Perlu Perbaikan"}
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Berdasarkan semua submission
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-purple-50 to-indigo-50">
+            <CardContent className="p-8 text-center">
+              <div className="w-16 h-16 bg-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <DollarSign className="h-8 w-8 text-white" />
+              </div>
+              <div className="text-2xl font-bold text-gray-900 mb-2">
+                Rp {stats.totalRevenue.toLocaleString()}
+              </div>
+              <div className="text-sm font-medium text-gray-600 mb-4">
+                Total Pendapatan
+              </div>
+              <div className="flex items-center justify-center">
+                <TrendingUp className="h-4 w-4 text-purple-500 mr-1" />
+                <span className="text-sm text-purple-600 font-medium">
+                  +
+                  {Math.round(
+                    (stats.monthlyRevenue / (stats.totalRevenue || 1)) * 100
+                  )}
+                  % bulan ini
+                </span>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Dari assignment yang dibuat
+              </p>
+            </CardContent>
+          </Card>
+        </Grid>
+      </div>
     </Container>
   );
 }
