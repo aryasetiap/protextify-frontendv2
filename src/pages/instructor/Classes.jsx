@@ -50,11 +50,14 @@ export default function InstructorClasses() {
 
     let filtered = classes.filter((cls) => {
       const matchesSearch =
-        cls.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        cls.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        false ||
         cls.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        false ||
         cls.instructor?.fullName
           ?.toLowerCase()
-          .includes(searchTerm.toLowerCase());
+          .includes(searchTerm.toLowerCase()) ||
+        false;
 
       const matchesFilter =
         filterStatus === "all" ||
@@ -76,8 +79,8 @@ export default function InstructorClasses() {
 
       switch (sortBy) {
         case "name":
-          aValue = a.name.toLowerCase();
-          bValue = b.name.toLowerCase();
+          aValue = (a.name ?? "").toLowerCase();
+          bValue = (b.name ?? "").toLowerCase();
           break;
         case "created":
           aValue = new Date(a.createdAt);
