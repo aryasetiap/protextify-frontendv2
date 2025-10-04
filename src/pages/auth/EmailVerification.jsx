@@ -57,15 +57,20 @@ export default function EmailVerification() {
 
       // Redirect to login after 3 seconds
       setTimeout(() => {
-        navigate("/login", {
+        navigate("/auth/login", {
           state: { message: "Email berhasil diverifikasi. Silakan login." },
         });
       }, 3000);
     } catch (error) {
       setStatus("error");
-      toast.error(
-        "Verifikasi email gagal. Token mungkin tidak valid atau sudah kadaluarsa."
-      );
+      const errorMessage =
+        error.response?.status === 404
+          ? "Token verifikasi tidak ditemukan atau sudah kadaluarsa"
+          : error.response?.status === 400
+          ? "Token verifikasi tidak valid"
+          : "Verifikasi email gagal. Silakan coba lagi.";
+
+      toast.error(errorMessage);
     }
   };
 
