@@ -26,7 +26,7 @@ const submissionsService = {
   },
 
   // Update submission content (auto-save)
-  updateSubmissionContent: async (submissionId, content) => {
+  updateContent: async (submissionId, content) => {
     try {
       const response = await api.patch(`/submissions/${submissionId}/content`, {
         content,
@@ -38,7 +38,7 @@ const submissionsService = {
   },
 
   // Submit final submission (student only)
-  submitSubmission: async (submissionId) => {
+  submitAssignment: async (submissionId) => {
     try {
       const response = await api.post(`/submissions/${submissionId}/submit`);
       return response;
@@ -67,7 +67,7 @@ const submissionsService = {
       return Array.isArray(response) ? response : [];
     } catch (error) {
       console.error("Error fetching submissions history:", error);
-      return []; // Return empty array on error
+      return []; // Return empty array on error for UI stability
     }
   },
 
@@ -177,6 +177,17 @@ const submissionsService = {
       return { success: true, filename };
     } catch (error) {
       throw error;
+    }
+  },
+
+  // Get class history (instructor only)
+  getClassHistory: async (classId) => {
+    try {
+      const response = await api.get(`/classes/${classId}/history`);
+      return Array.isArray(response) ? response : [];
+    } catch (error) {
+      console.error("Error fetching class history:", error);
+      return [];
     }
   },
 };

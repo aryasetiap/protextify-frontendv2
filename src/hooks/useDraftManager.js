@@ -35,11 +35,10 @@ export const useDraftManager = (submissionId) => {
         setSaving(true);
         setError(null);
 
-        const updatedSubmission =
-          await submissionsService.updateSubmissionContent(
-            submissionId,
-            content
-          );
+        const updatedSubmission = await submissionsService.updateContent(
+          submissionId,
+          content
+        );
 
         setSubmission((prev) => ({
           ...prev,
@@ -66,7 +65,7 @@ export const useDraftManager = (submissionId) => {
       setSubmitting(true);
       setError(null);
 
-      const result = await submissionsService.submitSubmission(submissionId);
+      const result = await submissionsService.submitAssignment(submissionId);
 
       setSubmission((prev) => ({
         ...prev,

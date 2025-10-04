@@ -60,11 +60,11 @@ export const useStudentDashboard = () => {
 
       // Since assignments data is not yet available from backend, set to 0
       const activeAssignments = 0;
-      const completedAssignments = safeSubmissionsData.filter(
-        (s) => s?.status === "SUBMITTED"
+      const completedAssignments = submissionsData.filter(
+        (s) => s.status === "SUBMITTED" || s.status === "GRADED"
       ).length;
-      const pendingSubmissions = safeSubmissionsData.filter(
-        (s) => s?.status === "DRAFT"
+      const pendingSubmissions = submissionsData.filter(
+        (s) => s.status === "DRAFT"
       ).length;
 
       setStats({

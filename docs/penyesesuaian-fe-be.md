@@ -206,7 +206,7 @@ export { default as assignmentsService } from "./assignments";
 
 ---
 
-### **Task 4: Submissions Service Implementation**
+### **Task 4: Submissions Service Implementation** ✅
 
 **Priority: High | Estimasi: 2 hari**
 
