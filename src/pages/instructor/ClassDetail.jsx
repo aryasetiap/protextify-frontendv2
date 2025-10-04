@@ -350,7 +350,10 @@ function OverviewTab({ classDetail }) {
 // Assignments Tab Component
 function AssignmentsTab({ classDetail }) {
   const navigate = useNavigate();
-  const assignments = classDetail?.assignments || [];
+  const { data: assignments } = useAsyncData(
+    () => assignmentsService.getClassAssignments(classId),
+    [classId]
+  );
 
   return (
     <div className="space-y-4">

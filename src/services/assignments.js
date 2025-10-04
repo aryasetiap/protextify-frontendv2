@@ -33,6 +33,11 @@ const assignmentsService = {
           message:
             "Anda tidak memiliki akses untuk membuat assignment di kelas ini.",
         };
+      } else if (error.response?.status === 404) {
+        throw {
+          ...error,
+          message: "Kelas tidak ditemukan.",
+        };
       }
       throw error;
     }
@@ -44,6 +49,29 @@ const assignmentsService = {
       const response = await api.get(`/assignments/${id}`);
       return response;
     } catch (error) {
+      throw error;
+    }
+  },
+
+  // Get assignments for a specific class
+  getClassAssignments: async (classId) => {
+    try {
+      const response = await api.get(`/classes/${classId}/assignments`);
+      return response;
+    } catch (error) {
+      // Handle specific error cases
+      if (error.response?.status === 404) {
+        throw {
+          ...error,
+          message: "Kelas tidak ditemukan atau Anda tidak memiliki akses.",
+        };
+      } else if (error.response?.status === 403) {
+        throw {
+          ...error,
+          message:
+            "Anda tidak memiliki akses untuk melihat tugas di kelas ini.",
+        };
+      }
       throw error;
     }
   },

@@ -6,6 +6,7 @@ import { useWebSocket } from "./useWebSocket";
 // Import services dengan safe fallback
 import classesService from "../services/classes";
 import submissionsService from "../services/submissions";
+import assignmentsService from "../services/assignments";
 
 export const useStudentDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -49,6 +50,13 @@ export const useStudentDashboard = () => {
 
       // Calculate statistics from transformed data
       const totalClasses = safeClassesData.length;
+
+      // Fetch class assignments
+      const classAssignments = await Promise.all(
+        safeClassesData.map((cls) =>
+          assignmentsService.getClassAssignments(cls.id)
+        )
+      );
 
       // Since assignments data is not yet available from backend, set to 0
       const activeAssignments = 0;

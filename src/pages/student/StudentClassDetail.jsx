@@ -25,7 +25,7 @@ import {
   TabsTrigger,
   TabsContent,
 } from "../../components";
-import { classesService } from "../../services";
+import { classesService, assignmentsService } from "../../services";
 import { useAsyncData } from "../../hooks/useAsyncData";
 import { formatDate } from "../../utils/helpers";
 
@@ -295,7 +295,46 @@ function OverviewTab({ classDetail }) {
 
 // Assignments Tab Component
 function AssignmentsTab({ classDetail }) {
-  const assignments = classDetail?.assignments || [];
+  const [assignments, setAssignments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchAssignments = async () => {
+      try {
+        setLoading(true);
+        const data = await assignmentsService.getClassAssignments(
+          classDetail.id
+        );
+        setAssignments(data);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAssignments();
+  }, [classDetail.id]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-12">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert variant="error">
+        <p>Gagal memuat tugas: {error.message}</p>
+        <Button onClick={() => setAssignments([])} size="sm" className="mt-3">
+          Coba Lagi
+        </Button>
+      </Alert>
+    );
+  }
 
   return (
     <div className="space-y-4">

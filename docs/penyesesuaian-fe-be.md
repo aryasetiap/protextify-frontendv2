@@ -164,7 +164,7 @@ getClassById: async (id) => {
 
 ---
 
-### **Task 3: Assignments Service Implementation**
+### **Task 3: Assignments Service Implementation** ✅
 
 **Priority: High | Estimasi: 2 hari**
 
