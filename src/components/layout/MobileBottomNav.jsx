@@ -86,54 +86,78 @@ export default function MobileBottomNav() {
   const navItems = getNavItems();
 
   return (
-    <nav className="mobile-nav md:hidden">
-      <div className="flex justify-around items-center">
-        {navItems.map((item) => {
-          const Icon = item.icon;
+    <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden">
+      {/* Enhanced Backdrop with Glass Effect */}
+      <div className="absolute inset-0 bg-white/80 backdrop-blur-xl border-t border-gray-200/50"></div>
 
-          if (item.isPrimary) {
+      {/* Safe area padding */}
+      <div className="relative safe-area-bottom px-4 py-3">
+        <div className="flex justify-around items-center">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+
+            if (item.isPrimary) {
+              return (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  className="flex flex-col items-center justify-center p-2 group"
+                >
+                  <div className="relative">
+                    <div className="w-14 h-14 bg-gradient-to-br from-[#23407a] to-[#3b5fa4] rounded-2xl flex items-center justify-center mb-1 shadow-xl shadow-[#23407a]/25 transition-all duration-300 group-active:scale-95">
+                      <Icon className="h-7 w-7 text-white" />
+                    </div>
+                    {item.active && (
+                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-white rounded-full border-2 border-[#23407a] flex items-center justify-center">
+                        <div className="w-1.5 h-1.5 bg-[#23407a] rounded-full"></div>
+                      </div>
+                    )}
+                  </div>
+                  <span className="text-xs font-bold text-[#23407a]">
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            }
+
             return (
               <Link
                 key={item.href}
                 to={item.href}
-                className="flex flex-col items-center justify-center p-2"
+                className={cn(
+                  "flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-300 group min-w-0 flex-1",
+                  item.active
+                    ? "bg-[#23407a]/10 text-[#23407a]"
+                    : "text-gray-500 hover:text-[#23407a] hover:bg-[#23407a]/5"
+                )}
               >
-                <div className="w-12 h-12 bg-[#23407a] rounded-full flex items-center justify-center mb-1 shadow-lg">
-                  <Icon className="h-6 w-6 text-white" />
+                <div className="relative mb-1">
+                  <Icon
+                    className={cn(
+                      "h-5 w-5 transition-all duration-300",
+                      item.active
+                        ? "text-[#23407a] scale-110"
+                        : "text-gray-500 group-hover:text-[#23407a] group-hover:scale-110"
+                    )}
+                  />
+                  {item.active && (
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-[#23407a] rounded-full animate-pulse"></div>
+                  )}
                 </div>
-                <span className="text-xs font-medium text-[#23407a]">
+                <span
+                  className={cn(
+                    "text-xs font-medium transition-colors truncate",
+                    item.active
+                      ? "text-[#23407a] font-bold"
+                      : "text-gray-500 group-hover:text-[#23407a]"
+                  )}
+                >
                   {item.label}
                 </span>
               </Link>
             );
-          }
-
-          return (
-            <Link
-              key={item.href}
-              to={item.href}
-              className={cn(
-                "mobile-nav-item flex-1",
-                item.active && "text-[#23407a]"
-              )}
-            >
-              <Icon
-                className={cn(
-                  "h-5 w-5",
-                  item.active ? "text-[#23407a]" : "text-gray-500"
-                )}
-              />
-              <span
-                className={cn(
-                  "text-xs font-medium",
-                  item.active ? "text-[#23407a]" : "text-gray-500"
-                )}
-              >
-                {item.label}
-              </span>
-            </Link>
-          );
-        })}
+          })}
+        </div>
       </div>
     </nav>
   );
