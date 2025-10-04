@@ -7,35 +7,29 @@ const classesService = {
     try {
       const response = await api.get("/classes");
 
-      // Pastikan response adalah array
+      // Backend returns direct array, no enrollment wrapper needed
       const data = Array.isArray(response) ? response : [];
 
-      // Transform response to match frontend expectations
-      // Backend returns enrollment objects with nested class data
-      const transformedClasses = data.map((enrollment) => {
-        // Safe handling untuk enrollment object
-        const classData = enrollment?.class || {};
-
-        return {
-          ...classData,
-          // Add enrollment metadata
-          enrollmentId: enrollment?.id,
-          enrolledAt: enrollment?.joinedAt,
-          // Transform assignments if they exist (set empty array for now)
-          assignments: classData.assignments || [],
-          // Transform enrollments if they exist (we don't have this data yet)
-          enrollments: [],
-          // Add instructor info (we need to get this from backend later)
-          instructor: classData.instructor || { fullName: "Instructor" },
-          // Add student enrollment info for this user
-          currentUserEnrollment: {
-            id: enrollment?.id,
-            joinedAt: enrollment?.joinedAt,
-          },
-        };
-      });
-
-      return transformedClasses;
+      return data.map((classItem) => ({
+        id: classItem.id,
+        name: classItem.name,
+        description: classItem.description,
+        instructorId: classItem.instructorId,
+        classToken: classItem.classToken,
+        createdAt: classItem.createdAt,
+        updatedAt: classItem.updatedAt,
+        // Backend provides instructor data in class detail, set placeholder for list
+        instructor: classItem.instructor || { fullName: "Loading..." },
+        // Backend provides assignments data, use it if available
+        assignments: classItem.assignments || [],
+        // Backend provides enrollments data, use it if available
+        enrollments: classItem.enrollments || [],
+        // Add count helper for UI components
+        _count: {
+          assignments: (classItem.assignments || []).length,
+          enrollments: (classItem.enrollments || []).length,
+        },
+      }));
     } catch (error) {
       console.error("Error fetching classes:", error);
       throw error;
@@ -46,7 +40,19 @@ const classesService = {
   getClassById: async (id) => {
     try {
       const response = await api.get(`/classes/${id}`);
-      return response;
+
+      // Backend provides full instructor and enrollments data
+      return {
+        ...response,
+        instructor: response.instructor || { fullName: "Unknown" },
+        enrollments: response.enrollments || [],
+        assignments: response.assignments || [],
+        // Add count helpers for UI components
+        _count: {
+          assignments: (response.assignments || []).length,
+          enrollments: (response.enrollments || []).length,
+        },
+      };
     } catch (error) {
       throw error;
     }
