@@ -261,7 +261,7 @@ export default submissionsService;
 
 ---
 
-### **Task 5: Dashboard Data Fetching Fix**
+### **Task 5: Dashboard Data Fetching Fix** ✅
 
 **Priority: High | Estimasi: 1 hari**
 

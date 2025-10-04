@@ -51,19 +51,33 @@ export const useStudentDashboard = () => {
       // Calculate statistics from transformed data
       const totalClasses = safeClassesData.length;
 
-      // Fetch class assignments
-      const classAssignments = await Promise.all(
-        safeClassesData.map((cls) =>
-          assignmentsService.getClassAssignments(cls.id)
-        )
-      );
+      // Fetch class assignments untuk mendapatkan active assignments count
+      const classAssignmentsPromises = safeClassesData.map(async (cls) => {
+        try {
+          return await assignmentsService.getClassAssignments(cls.id);
+        } catch (error) {
+          console.warn(
+            `Failed to fetch assignments for class ${cls.id}:`,
+            error
+          );
+          return [];
+        }
+      });
 
-      // Since assignments data is not yet available from backend, set to 0
-      const activeAssignments = 0;
-      const completedAssignments = submissionsData.filter(
+      const classAssignments = await Promise.all(classAssignmentsPromises);
+
+      // Calculate real active assignments
+      const activeAssignments = classAssignments
+        .flat()
+        .filter(
+          (assignment) =>
+            assignment.active && new Date(assignment.deadline) > new Date()
+        ).length;
+
+      const completedAssignments = safeSubmissionsData.filter(
         (s) => s.status === "SUBMITTED" || s.status === "GRADED"
       ).length;
-      const pendingSubmissions = submissionsData.filter(
+      const pendingSubmissions = safeSubmissionsData.filter(
         (s) => s.status === "DRAFT"
       ).length;
 
