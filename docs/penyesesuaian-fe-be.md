@@ -304,7 +304,7 @@ const pendingSubmissions = safeSubmissionsData.filter(
 
 ---
 
-### **Task 6: Plagiarism Service Implementation**
+### **Task 6: Plagiarism Service Implementation** ✅
 
 **Priority: Medium | Estimasi: 1 hari**
 
