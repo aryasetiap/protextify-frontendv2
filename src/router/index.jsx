@@ -80,6 +80,22 @@ export const router = createBrowserRouter([
               </PublicRoute>
             ),
           },
+          {
+            path: "email-verification",
+            element: (
+              <PublicRoute>
+                <EmailVerification />
+              </PublicRoute>
+            ),
+          },
+          {
+            path: "verify/:token",
+            element: (
+              <PublicRoute>
+                <EmailVerification />
+              </PublicRoute>
+            ),
+          },
         ],
       },
     ],

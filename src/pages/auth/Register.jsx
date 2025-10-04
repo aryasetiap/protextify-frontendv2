@@ -61,7 +61,6 @@ export default function Register() {
         state: { email: data.email, justRegistered: true },
       });
     } catch (error) {
-      // Error handled by AuthContext
       console.error("Registration failed:", error);
     }
   };

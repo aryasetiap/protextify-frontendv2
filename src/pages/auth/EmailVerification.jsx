@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  useLocation,
+  useNavigate,
+  useSearchParams,
+  useParams,
+} from "react-router-dom";
 import { Mail, CheckCircle, XCircle, Clock, RefreshCw } from "lucide-react";
 import { authService } from "../../services";
 import { toast } from "react-hot-toast";
@@ -18,6 +23,7 @@ export default function EmailVerification() {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { token: urlToken } = useParams(); // ← Tambahkan untuk route /verify/:token
 
   const [status, setStatus] = useState("pending"); // pending, success, error, loading
   const [countdown, setCountdown] = useState(0);
@@ -25,7 +31,7 @@ export default function EmailVerification() {
 
   const email = location.state?.email || "";
   const justRegistered = location.state?.justRegistered || false;
-  const verificationToken = searchParams.get("token");
+  const verificationToken = searchParams.get("token") || urlToken;
 
   useEffect(() => {
     // If there's a token in URL, verify it automatically

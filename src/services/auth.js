@@ -51,6 +51,11 @@ const authService = {
     }
   },
 
+  // Tambahkan alias untuk konsistensi dengan spek task
+  sendVerificationEmail: async (email) => {
+    return await authService.sendVerification(email);
+  },
+
   // Verify email with token
   verifyEmail: async (token) => {
     try {
