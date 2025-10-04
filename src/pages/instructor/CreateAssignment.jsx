@@ -62,14 +62,16 @@ export default function CreateAssignment() {
   const pricePerStudent = 2500;
   const totalPrice = watchedValues.expectedStudentCount * pricePerStudent;
 
+  // Update onSubmit to handle backend payment flow
   const onSubmit = async (data) => {
     try {
       setLoading(true);
 
-      // Format deadline to ISO string
+      // Format deadline to ISO string untuk backend
       const formattedData = {
         ...data,
         deadline: new Date(data.deadline).toISOString(),
+        expectedStudentCount: parseInt(data.expectedStudentCount), // Ensure integer
       };
 
       const response = await assignmentsService.createAssignment(
@@ -77,6 +79,7 @@ export default function CreateAssignment() {
         formattedData
       );
 
+      // Backend returns payment requirement info
       if (response.paymentRequired) {
         setAssignmentData(response);
         setShowPayment(true);
@@ -84,22 +87,26 @@ export default function CreateAssignment() {
           "Assignment berhasil dibuat! Silakan lakukan pembayaran untuk mengaktifkan."
         );
       } else {
+        // Fallback jika tidak perlu payment (though should always require payment)
         toast.success("Assignment berhasil dibuat dan aktif!");
         navigate(`/instructor/classes/${classId}`);
       }
     } catch (error) {
       console.error("Error creating assignment:", error);
+      // Error handling sudah ditangani oleh api interceptor
     } finally {
       setLoading(false);
     }
   };
 
+  // Update handlePayment to use backend payment data
   const handlePayment = async () => {
     try {
       setPaymentLoading(true);
 
+      // Use payment data dari backend response
       const paymentData = {
-        amount: totalPrice,
+        amount: assignmentData.totalPrice,
         assignmentId: assignmentData.assignment.id,
       };
 
@@ -107,15 +114,19 @@ export default function CreateAssignment() {
         paymentData
       );
 
-      // Redirect to Midtrans payment page
+      // Backend provides payment URL
       if (paymentResponse.paymentUrl) {
         window.open(paymentResponse.paymentUrl, "_blank");
         toast.success(
           "Halaman pembayaran telah dibuka. Selesaikan pembayaran untuk mengaktifkan assignment."
         );
+
+        // Store transaction data for tracking
+        setTransactionData(paymentResponse);
       }
     } catch (error) {
       console.error("Error creating payment:", error);
+      toast.error("Gagal membuat pembayaran. Silakan coba lagi.");
     } finally {
       setPaymentLoading(false);
     }

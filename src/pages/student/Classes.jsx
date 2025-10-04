@@ -151,11 +151,13 @@ export default function StudentClasses() {
 function ClassCard({ classData, isNew = false }) {
   const navigate = useNavigate();
 
-  // Handle potential undefined values safely dengan data struktur baru
-  const studentsCount = 0;
+  // Handle backend data structure - no enrollment wrapper needed
+  const studentsCount = classData.enrollments?.length || 0;
   const assignmentsCount = classData.assignments?.length || 0;
   const activeAssignments =
     classData.assignments?.filter((a) => a?.active).length || 0;
+
+  // Backend provides enrolledAt in class data for students
   const joinedDate = classData.enrolledAt || classData.createdAt;
 
   return (

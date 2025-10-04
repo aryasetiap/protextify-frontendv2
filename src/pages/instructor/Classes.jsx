@@ -377,6 +377,8 @@ export default function InstructorClasses() {
 // Class Card Component
 function ClassCard({ classData }) {
   const navigate = useNavigate();
+
+  // Backend provides direct counts in enrollments and assignments arrays
   const studentsCount = classData.enrollments?.length || 0;
   const assignmentsCount = classData.assignments?.length || 0;
   const activeAssignments =
@@ -444,13 +446,10 @@ function ClassCard({ classData }) {
             <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-2">
               <BookOpen className="h-5 w-5 text-white" />
             </div>
-            <p className="text-xs font-bold text-gray-900">
-              {new Date(classData.createdAt).toLocaleDateString("id-ID", {
-                day: "2-digit",
-                month: "short",
-              })}
+            <p className="text-2xl font-bold text-gray-900">
+              {activeAssignments}
             </p>
-            <p className="text-xs text-gray-600 font-medium">Dibuat</p>
+            <p className="text-xs text-gray-600 font-medium">Aktif</p>
           </div>
         </div>
 

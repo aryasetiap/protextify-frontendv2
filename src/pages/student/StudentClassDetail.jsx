@@ -303,10 +303,16 @@ function AssignmentsTab({ classDetail }) {
     const fetchAssignments = async () => {
       try {
         setLoading(true);
-        const data = await assignmentsService.getClassAssignments(
-          classDetail.id
-        );
-        setAssignments(data);
+        // Use classDetail.assignments if available, otherwise fetch from API
+        if (classDetail.assignments && classDetail.assignments.length > 0) {
+          setAssignments(classDetail.assignments.filter((a) => a.active)); // Students only see active assignments
+          setLoading(false);
+        } else {
+          const data = await assignmentsService.getClassAssignments(
+            classDetail.id
+          );
+          setAssignments(data.filter((a) => a.active)); // Students only see active assignments
+        }
       } catch (err) {
         setError(err);
       } finally {
@@ -315,7 +321,7 @@ function AssignmentsTab({ classDetail }) {
     };
 
     fetchAssignments();
-  }, [classDetail.id]);
+  }, [classDetail.id, classDetail.assignments]);
 
   if (loading) {
     return (
