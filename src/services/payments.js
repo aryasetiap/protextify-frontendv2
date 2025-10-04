@@ -6,8 +6,17 @@ const paymentsService = {
   // Create payment transaction with enhanced features
   createTransaction: async (transactionData) => {
     try {
+      // Support both new object format dan legacy parameters
+      const payload =
+        typeof transactionData === "object" && transactionData.amount
+          ? transactionData
+          : {
+              amount: arguments[0], // legacy: amount parameter
+              assignmentId: arguments[1], // legacy: assignmentId parameter
+            };
+
       const response = await api.post("/payments/create-transaction", {
-        ...transactionData,
+        ...payload,
         // Add client metadata
         clientInfo: {
           userAgent: navigator.userAgent,
@@ -19,6 +28,14 @@ const paymentsService = {
     } catch (error) {
       throw error;
     }
+  },
+
+  // Legacy method signature support
+  createTransactionLegacy: async (amount, assignmentId) => {
+    return await paymentsService.createTransaction({
+      amount,
+      assignmentId,
+    });
   },
 
   // Get transaction history with filters
@@ -42,6 +59,11 @@ const paymentsService = {
       console.error("Error fetching transaction history:", error);
       throw error;
     }
+  },
+
+  // Legacy method name alias
+  getTransactions: async (params = {}) => {
+    return await paymentsService.getTransactionHistory(params);
   },
 
   // Get transaction detail by ID
