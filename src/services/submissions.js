@@ -1,63 +1,37 @@
 // src/services/submissions.js
 import api from "./api";
+import axios from "axios";
+import { API_BASE_URL } from "@/utils/constants";
 
 const submissionsService = {
   // Create submission for assignment (student only)
   createSubmission: async (assignmentId, submissionData) => {
-    try {
-      const response = await api.post(
-        `/assignments/${assignmentId}/submissions`,
-        submissionData
-      );
-      return response;
-    } catch (error) {
-      throw error;
-    }
+    return await api.post(
+      `/assignments/${assignmentId}/submissions`,
+      submissionData
+    );
   },
 
   // Get submission detail by ID
   getSubmissionById: async (submissionId) => {
-    try {
-      const response = await api.get(`/submissions/${submissionId}`);
-      return response;
-    } catch (error) {
-      throw error;
-    }
+    return await api.get(`/submissions/${submissionId}`);
   },
 
   // Update submission content (auto-save)
   updateContent: async (submissionId, content) => {
-    try {
-      const response = await api.patch(`/submissions/${submissionId}/content`, {
-        content,
-      });
-      return response;
-    } catch (error) {
-      throw error;
-    }
+    return await api.patch(`/submissions/${submissionId}/content`, {
+      content,
+    });
   },
 
   // Submit final submission (student only)
   submitAssignment: async (submissionId) => {
-    try {
-      const response = await api.post(`/submissions/${submissionId}/submit`);
-      return response;
-    } catch (error) {
-      throw error;
-    }
+    return await api.post(`/submissions/${submissionId}/submit`);
   },
 
   // Grade submission (instructor only)
   gradeSubmission: async (submissionId, gradeData) => {
-    try {
-      const response = await api.patch(
-        `/submissions/${submissionId}/grade`,
-        gradeData
-      );
-      return response;
-    } catch (error) {
-      throw error;
-    }
+    return await api.patch(`/submissions/${submissionId}/grade`, gradeData);
   },
 
   // Get submission history for student
@@ -74,20 +48,28 @@ const submissionsService = {
   // Enhanced download with format options
   downloadSubmission: async (submissionId, format = "pdf", options = {}) => {
     try {
-      const response = await api.get(`/submissions/${submissionId}/download`, {
-        params: {
-          format,
-          ...options,
-        },
-        responseType: "blob", // Important for file downloads
-      });
+      // GANTI - Gunakan axios langsung untuk download karena api instance sudah return response.data
+      const response = await axios.get(
+        `${API_BASE_URL}/submissions/${submissionId}/download`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          params: {
+            format,
+            ...options,
+          },
+          responseType: "blob", // Important for file downloads
+        }
+      );
 
-      // Create download link
+      // Handle the blob response properly
+      const contentDisposition = response.headers?.["content-disposition"];
       const filename =
-        response.headers["content-disposition"]
-          ?.split("filename=")[1]
-          ?.replace(/"/g, "") || `submission-${submissionId}.${format}`;
+        contentDisposition?.split("filename=")[1]?.replace(/"/g, "") ||
+        `submission-${submissionId}.${format}`;
 
+      // Create download
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
@@ -99,85 +81,31 @@ const submissionsService = {
 
       return { success: true, filename };
     } catch (error) {
+      if (error.response?.status === 404) {
+        throw new Error(
+          "Submission tidak ditemukan atau belum ada konten untuk didownload."
+        );
+      }
       throw error;
     }
   },
 
-  // Download with custom options
-  downloadSubmissionWithOptions: async (submissionId, downloadOptions = {}) => {
-    const {
-      format = "pdf",
-      includeAttachments = true,
-      watermark = null,
-      quality = "high",
-    } = downloadOptions;
-
-    try {
-      const response = await api.post(
-        `/submissions/${submissionId}/download-custom`,
-        {
-          format,
-          includeAttachments,
-          watermark,
-          quality,
-        },
-        {
-          responseType: "blob",
-        }
-      );
-
-      // Handle download response
-      const contentDisposition = response.headers["content-disposition"];
-      const filename = contentDisposition
-        ? contentDisposition.split("filename=")[1].replace(/"/g, "")
-        : `submission-${submissionId}-custom.${format}`;
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", filename);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-
-      return { success: true, filename, size: response.data.size };
-    } catch (error) {
-      throw error;
-    }
+  // Get submissions for assignment (instructor only)
+  getAssignmentSubmissions: async (classId, assignmentId) => {
+    return await api.get(
+      `/classes/${classId}/assignments/${assignmentId}/submissions`
+    );
   },
 
-  // Bulk download submissions
-  downloadMultipleSubmissions: async (submissionIds, format = "zip") => {
-    try {
-      const response = await api.post(
-        "/submissions/download-bulk",
-        {
-          submissionIds,
-          format,
-        },
-        {
-          responseType: "blob",
-        }
-      );
+  // Get submission versions
+  getSubmissionVersions: async (submissionId) => {
+    const response = await api.get(`/submissions/${submissionId}/versions`);
+    return response;
+  },
 
-      const filename = `submissions-bulk-${
-        new Date().toISOString().split("T")[0]
-      }.${format}`;
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", filename);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-
-      return { success: true, filename };
-    } catch (error) {
-      throw error;
-    }
+  // Get specific version
+  getSubmissionVersion: async (submissionId, version) => {
+    return await api.get(`/submissions/${submissionId}/versions/${version}`);
   },
 
   // Get class history (instructor only)

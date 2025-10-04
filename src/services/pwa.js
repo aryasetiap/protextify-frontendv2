@@ -18,7 +18,7 @@ class PWAService {
    */
   async init() {
     if (!this.isSupported) {
-      console.log("Service workers are not supported");
+      console.warn("Service workers are not supported");
       return;
     }
 
@@ -35,7 +35,7 @@ class PWAService {
       // Setup app update detection
       this.setupUpdateDetection();
 
-      console.log("PWA initialized successfully");
+      console.warn("PWA initialized successfully");
     } catch (error) {
       console.error("PWA initialization failed:", error);
     }
@@ -50,7 +50,7 @@ class PWAService {
         scope: "/",
       });
 
-      console.log("Service worker registered:", registration);
+      console.warn("Service worker registered:", registration);
 
       // Update service worker when new version is available
       registration.addEventListener("updatefound", () => {
@@ -94,7 +94,7 @@ class PWAService {
 
     // Listen for app installed
     window.addEventListener("appinstalled", () => {
-      console.log("PWA installed successfully");
+      console.warn("PWA installed successfully");
       this.isInstalled = true;
       this.hideInstallPrompt();
       this.trackInstallEvent();
@@ -146,10 +146,10 @@ class PWAService {
       const choiceResult = await this.deferredPrompt.userChoice;
 
       if (choiceResult.outcome === "accepted") {
-        console.log("User accepted install prompt");
+        console.warn("User accepted install prompt");
         this.trackInstallEvent("accepted");
       } else {
-        console.log("User dismissed install prompt");
+        console.warn("User dismissed install prompt");
         this.trackInstallEvent("dismissed");
       }
 
@@ -191,7 +191,7 @@ class PWAService {
       window.navigator.standalone === true;
 
     if (this.isInstalled) {
-      console.log("App is running in installed mode");
+      console.warn("App is running in installed mode");
       this.hideInstallPrompt();
     }
   }
@@ -292,7 +292,7 @@ class PWAService {
    */
   sendAnalytics(event, data) {
     // Implement your analytics tracking here
-    console.log("PWA Analytics:", event, data);
+    console.warn("PWA Analytics:", event, data);
   }
 
   /**

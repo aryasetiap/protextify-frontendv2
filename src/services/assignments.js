@@ -2,16 +2,6 @@
 import api from "./api";
 
 const assignmentsService = {
-  // Get all assignments (for admin or instructor)
-  getAssignments: async () => {
-    try {
-      const response = await api.get("/assignments");
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  },
-
   // Create assignment in class (instructor only)
   createAssignment: async (classId, assignmentData) => {
     try {
@@ -23,32 +13,25 @@ const assignmentsService = {
     } catch (error) {
       // Handle specific error cases
       if (error.response?.status === 422) {
-        throw {
-          ...error,
-          message: "Data assignment tidak valid. Periksa kembali form Anda.",
-        };
+        const err = new Error(
+          "Data assignment tidak valid. Periksa kembali form Anda."
+        );
+        err.name = error.name;
+        err.response = error.response;
+        throw err;
       } else if (error.response?.status === 403) {
-        throw {
-          ...error,
-          message:
-            "Anda tidak memiliki akses untuk membuat assignment di kelas ini.",
-        };
+        const err = new Error(
+          "Anda tidak memiliki akses untuk membuat assignment di kelas ini."
+        );
+        err.name = error.name;
+        err.response = error.response;
+        throw err;
       } else if (error.response?.status === 404) {
-        throw {
-          ...error,
-          message: "Kelas tidak ditemukan.",
-        };
+        const err = new Error("Kelas tidak ditemukan.");
+        err.name = error.name;
+        err.response = error.response;
+        throw err;
       }
-      throw error;
-    }
-  },
-
-  // Get assignment detail by ID
-  getAssignmentById: async (id) => {
-    try {
-      const response = await api.get(`/assignments/${id}`);
-      return response;
-    } catch (error) {
       throw error;
     }
   },
@@ -61,16 +44,19 @@ const assignmentsService = {
     } catch (error) {
       // Handle specific error cases
       if (error.response?.status === 404) {
-        throw {
-          ...error,
-          message: "Kelas tidak ditemukan atau Anda tidak memiliki akses.",
-        };
+        const err = new Error(
+          "Kelas tidak ditemukan atau Anda tidak memiliki akses."
+        );
+        err.name = error.name;
+        err.response = error.response;
+        throw err;
       } else if (error.response?.status === 403) {
-        throw {
-          ...error,
-          message:
-            "Anda tidak memiliki akses untuk melihat tugas di kelas ini.",
-        };
+        const err = new Error(
+          "Anda tidak memiliki akses untuk melihat tugas di kelas ini."
+        );
+        err.name = error.name;
+        err.response = error.response;
+        throw err;
       }
       throw error;
     }

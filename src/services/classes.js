@@ -38,34 +38,26 @@ const classesService = {
 
   // Get class detail by ID
   getClassById: async (id) => {
-    try {
-      const response = await api.get(`/classes/${id}`);
+    const response = await api.get(`/classes/${id}`);
 
-      // Backend provides full instructor and enrollments data
-      return {
-        ...response,
-        instructor: response.instructor || { fullName: "Unknown" },
-        enrollments: response.enrollments || [],
-        assignments: response.assignments || [],
-        // Add count helpers for UI components
-        _count: {
-          assignments: (response.assignments || []).length,
-          enrollments: (response.enrollments || []).length,
-        },
-      };
-    } catch (error) {
-      throw error;
-    }
+    // Backend provides full instructor and enrollments data
+    return {
+      ...response,
+      instructor: response.instructor || { fullName: "Unknown" },
+      enrollments: response.enrollments || [],
+      assignments: response.assignments || [],
+      // Add count helpers for UI components
+      _count: {
+        assignments: (response.assignments || []).length,
+        enrollments: (response.enrollments || []).length,
+      },
+    };
   },
 
   // Create new class (instructor only)
   createClass: async (classData) => {
-    try {
-      const response = await api.post("/classes", classData);
-      return response;
-    } catch (error) {
-      throw error;
-    }
+    const response = await api.post("/classes", classData);
+    return response;
   },
 
   // Join class using token (student only)
@@ -76,84 +68,39 @@ const classesService = {
     } catch (error) {
       // Add specific error handling
       if (error.response?.status === 404) {
-        throw {
-          ...error,
-          message:
-            "Token kelas tidak ditemukan. Periksa kembali token yang dimasukkan.",
-        };
+        const err404 = new Error(
+          "Token kelas tidak ditemukan. Periksa kembali token yang dimasukkan."
+        );
+        err404.status = 404;
+        err404.original = error;
+        throw err404;
       } else if (error.response?.status === 409) {
-        throw {
-          ...error,
-          message: "Anda sudah bergabung di kelas ini.",
-        };
+        const err409 = new Error("Anda sudah bergabung di kelas ini.");
+        err409.status = 409;
+        err409.original = error;
+        throw err409;
       } else if (error.response?.status === 400) {
-        throw {
-          ...error,
-          message: "Format token tidak valid. Token harus 8 karakter.",
-        };
+        const err400 = new Error(
+          "Format token tidak valid. Token harus 8 karakter."
+        );
+        err400.status = 400;
+        err400.original = error;
+        throw err400;
       }
-      throw error;
-    }
-  },
-
-  // Preview class by token (before joining)
-  previewClass: async (classToken) => {
-    try {
-      const response = await api.get(`/classes/preview/${classToken}`);
-      return response;
-    } catch (error) {
       throw error;
     }
   },
 
   // Get assignments for a class
   getClassAssignments: async (classId) => {
-    try {
-      const response = await api.get(`/classes/${classId}/assignments`);
-      return response;
-    } catch (error) {
-      throw error;
-    }
+    const response = await api.get(`/classes/${classId}/assignments`);
+    return response;
   },
 
   // Get class history (instructor only)
   getClassHistory: async (classId) => {
-    try {
-      const response = await api.get(`/classes/${classId}/history`);
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  // Update class (instructor only)
-  updateClass: async (classId, updateData) => {
-    try {
-      const response = await api.patch(`/classes/${classId}`, updateData);
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  // Delete class (instructor only)
-  deleteClass: async (classId) => {
-    try {
-      const response = await api.delete(`/classes/${classId}`);
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  // Regenerate class token (instructor only)
-  regenerateClassToken: async (classId) => {
-    try {
-      const response = await api.post(`/classes/${classId}/regenerate-token`);
-      return response;
-    } catch (error) {
-      throw error;
-    }
+    const response = await api.get(`/classes/${classId}/history`);
+    return response;
   },
 };
 

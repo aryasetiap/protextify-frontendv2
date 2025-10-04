@@ -3,52 +3,27 @@ import api from "./api";
 const authService = {
   // Login dengan email dan password
   login: async (credentials) => {
-    try {
-      const response = await api.post("/auth/login", credentials);
-      return response;
-    } catch (error) {
-      throw error;
-    }
+    return await api.post("/auth/login", credentials);
   },
 
   // Register user baru
   register: async (userData) => {
-    try {
-      const response = await api.post("/auth/register", userData);
-      return response;
-    } catch (error) {
-      throw error;
-    }
+    return await api.post("/auth/register", userData);
   },
 
   // Get current user profile
   getCurrentUser: async () => {
-    try {
-      const response = await api.get("/users/me");
-      return response;
-    } catch (error) {
-      throw error;
-    }
+    return await api.get("/users/me");
   },
 
   // Update user profile
   updateProfile: async (userData) => {
-    try {
-      const response = await api.patch("/users/me", userData);
-      return response;
-    } catch (error) {
-      throw error;
-    }
+    return await api.patch("/users/me", userData);
   },
 
   // Send email verification
   sendVerification: async (email) => {
-    try {
-      const response = await api.post("/auth/send-verification", { email });
-      return response;
-    } catch (error) {
-      throw error;
-    }
+    return await api.post("/auth/send-verification", { email });
   },
 
   // Tambahkan alias untuk konsistensi dengan spek task
@@ -58,12 +33,7 @@ const authService = {
 
   // Verify email with token
   verifyEmail: async (token) => {
-    try {
-      const response = await api.post("/auth/verify-email", { token });
-      return response;
-    } catch (error) {
-      throw error;
-    }
+    return await api.post("/auth/verify-email", { token });
   },
 
   // Google OAuth login
@@ -88,19 +58,9 @@ const authService = {
     return localStorage.getItem("token");
   },
 
-  // Refresh token (if backend supports it)
-  refreshToken: async () => {
-    try {
-      const response = await api.post("/auth/refresh");
-      if (response.accessToken) {
-        localStorage.setItem("token", response.accessToken);
-      }
-      return response;
-    } catch (error) {
-      // If refresh fails, logout
-      authService.logout();
-      throw error;
-    }
+  // Get instructor-only endpoint (untuk testing role)
+  getInstructorOnly: async () => {
+    return await api.get("/auth/instructor-only");
   },
 };
 

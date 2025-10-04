@@ -25,7 +25,7 @@ api.interceptors.request.use(
 
     // Add logging untuk development
     if (import.meta.env.VITE_ENABLE_ROUTER_LOGGING === "true") {
-      console.log(
+      console.warn(
         `🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`
       );
     }
@@ -42,7 +42,7 @@ api.interceptors.response.use(
   (response) => {
     // Add logging untuk development
     if (import.meta.env.VITE_ENABLE_ROUTER_LOGGING === "true") {
-      console.log(
+      console.warn(
         `✅ API Response: ${response.config.method?.toUpperCase()} ${
           response.config.url
         } - ${response.status}`
@@ -111,13 +111,17 @@ api.interceptors.response.use(
         toast.error(message);
         break;
       case 404:
-        // Contextual 404 messages
+        // Contextual 404 messages based on backend documentation
         if (error.config?.url?.includes("/classes/")) {
           toast.error("Kelas tidak ditemukan atau Anda tidak memiliki akses.");
         } else if (error.config?.url?.includes("/assignments/")) {
           toast.error("Assignment tidak ditemukan.");
         } else if (error.config?.url?.includes("/submissions/")) {
           toast.error("Submission tidak ditemukan.");
+        } else if (error.config?.url?.includes("/auth/verify-email")) {
+          toast.error("Token verifikasi tidak valid atau sudah expired.");
+        } else if (error.config?.url?.includes("/plagiarism")) {
+          toast.error("Data plagiarisme tidak ditemukan.");
         } else {
           toast.error("Data tidak ditemukan.");
         }
@@ -163,5 +167,34 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// GANTI - Path yang benar sesuai dokumentasi
+export const rootEndpoints = {
+  // Welcome message - path tanpa /api prefix
+  getWelcome: async () => {
+    const response = await axios.get(`${API_BASE_URL.replace("/api", "")}/`);
+    return response.data;
+  },
+
+  // Health check - path tanpa /api prefix
+  getHealth: async () => {
+    const response = await axios.get(
+      `${API_BASE_URL.replace("/api", "")}/health`
+    );
+    return response.data;
+  },
+
+  // API info - menggunakan api instance yang sudah ada
+  getApiInfo: async () => {
+    const response = await api.get("/api");
+    return response;
+  },
+
+  // API health - menggunakan api instance yang sudah ada
+  getApiHealth: async () => {
+    const response = await api.get("/api/health");
+    return response;
+  },
+};
 
 export default api;

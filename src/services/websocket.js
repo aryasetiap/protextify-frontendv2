@@ -1,6 +1,6 @@
 // src/services/websocket.js
 import { io } from "socket.io-client";
-import { WS_URL } from "../utils/constants";
+import { WS_URL, API_BASE_URL } from "../utils/constants";
 import { toast } from "react-hot-toast";
 
 class WebSocketService {
@@ -20,7 +20,7 @@ class WebSocketService {
   connect(token) {
     try {
       if (this.socket?.connected) {
-        console.log("WebSocket already connected");
+        console.warn("WebSocket already connected");
         return Promise.resolve();
       }
 
@@ -44,7 +44,7 @@ class WebSocketService {
           this.notifyConnectionChange(true);
 
           if (import.meta.env.VITE_ENABLE_ROUTER_LOGGING === "true") {
-            console.log("✅ WebSocket connected:", this.socket.id);
+            console.warn("✅ WebSocket connected:", this.socket.id);
           }
 
           resolve();
@@ -76,7 +76,7 @@ class WebSocketService {
       this.notifyConnectionChange(false);
 
       if (import.meta.env.VITE_ENABLE_ROUTER_LOGGING === "true") {
-        console.log("❌ WebSocket disconnected:", reason);
+        console.warn("❌ WebSocket disconnected:", reason);
       }
 
       // Show user-friendly message for unexpected disconnections
@@ -92,7 +92,7 @@ class WebSocketService {
       toast.success("Koneksi berhasil dipulihkan!");
 
       if (import.meta.env.VITE_ENABLE_ROUTER_LOGGING === "true") {
-        console.log(
+        console.warn(
           "🔄 WebSocket reconnected after",
           attemptNumber,
           "attempts"
@@ -110,61 +110,35 @@ class WebSocketService {
       }
     });
 
-    // Application events
+    // Application events - sesuai dokumentasi
     this.socket.on("notification", (notification) => {
       if (import.meta.env.VITE_ENABLE_ROUTER_LOGGING === "true") {
-        console.log("🔔 Notification received:", notification);
+        console.warn("🔔 Notification received:", notification);
       }
-
       this.triggerListeners("notification", notification);
       this.showNotification(notification);
     });
 
     this.socket.on("submissionUpdated", (data) => {
       if (import.meta.env.VITE_ENABLE_ROUTER_LOGGING === "true") {
-        console.log("📄 Submission updated:", data);
+        console.warn("📄 Submission updated:", data);
       }
-
       this.triggerListeners("submissionUpdated", data);
     });
 
     this.socket.on("submissionListUpdated", (data) => {
       if (import.meta.env.VITE_ENABLE_ROUTER_LOGGING === "true") {
-        console.log("📋 Submission list updated:", data);
+        console.warn("📋 Submission list updated:", data);
       }
-
       this.triggerListeners("submissionListUpdated", data);
     });
 
-    // Content auto-save response
+    // Auto-save response - sesuai dokumentasi updateContent event
     this.socket.on("updateContentResponse", (data) => {
       if (import.meta.env.VITE_ENABLE_ROUTER_LOGGING === "true") {
-        console.log("📝 Content updated:", data);
+        console.warn("📝 Content update response:", data);
       }
-
       this.triggerListeners("updateContentResponse", data);
-    });
-
-    // Plagiarism events
-    this.socket.on("plagiarismProgress", (data) => {
-      this.triggerListeners("plagiarismProgress", data);
-    });
-
-    this.socket.on("plagiarismComplete", (data) => {
-      this.triggerListeners("plagiarismComplete", data);
-      toast.success("Pengecekan plagiarisme selesai!");
-    });
-
-    this.socket.on("plagiarismFailed", (data) => {
-      this.triggerListeners("plagiarismFailed", data);
-      toast.error("Pengecekan plagiarisme gagal!");
-    });
-
-    // Heartbeat/ping-pong
-    this.socket.on("pong", () => {
-      if (import.meta.env.VITE_ENABLE_ROUTER_LOGGING === "true") {
-        console.log("💓 Heartbeat received");
-      }
     });
   }
 
@@ -203,7 +177,7 @@ class WebSocketService {
 
   // Enhanced notification display
   showNotification(notification) {
-    const { type, message, data } = notification;
+    const { type, message } = notification;
 
     switch (type) {
       case "success":
@@ -241,7 +215,7 @@ class WebSocketService {
       this.socket.emit(event, { [`${roomType}Id`]: roomId });
 
       if (import.meta.env.VITE_ENABLE_ROUTER_LOGGING === "true") {
-        console.log(`🏠 Joined ${roomType} room:`, roomId);
+        console.warn(`🏠 Joined ${roomType} room:`, roomId);
       }
     }
   }
@@ -262,7 +236,7 @@ class WebSocketService {
       this.socket.emit(event, { [`${roomType}Id`]: roomId });
 
       if (import.meta.env.VITE_ENABLE_ROUTER_LOGGING === "true") {
-        console.log(`🚪 Left ${roomType} room:`, roomId);
+        console.warn(`🚪 Left ${roomType} room:`, roomId);
       }
     }
   }
@@ -335,7 +309,7 @@ class WebSocketService {
     this.notifyConnectionChange(false);
 
     if (import.meta.env.VITE_ENABLE_ROUTER_LOGGING === "true") {
-      console.log("🔌 WebSocket disconnected manually");
+      console.warn("🔌 WebSocket disconnected manually");
     }
   }
 
