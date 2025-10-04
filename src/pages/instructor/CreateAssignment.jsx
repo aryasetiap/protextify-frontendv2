@@ -152,9 +152,7 @@ export default function CreateAssignment() {
       </div>
 
       {!showPayment ? (
-        /* Assignment Creation Form */
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Basic Information */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
@@ -181,6 +179,17 @@ export default function CreateAssignment() {
                   onChange={(value) => setValue("instructions", value)}
                   placeholder="Masukkan instruksi detail untuk tugas ini..."
                   error={errors.instructions?.message}
+                  maxWords={2000}
+                  maxCharacters={10000}
+                  allowedFormats={[
+                    "bold",
+                    "italic",
+                    "underline",
+                    "list",
+                    "heading",
+                    "link",
+                  ]}
+                  enablePasteMonitoring={true}
                 />
               </div>
 
@@ -192,6 +201,26 @@ export default function CreateAssignment() {
                     onChange={(value) => setValue("deadline", value)}
                     error={errors.deadline?.message}
                     minDate={new Date()}
+                    required={true}
+                    timezone="Asia/Jakarta"
+                    showTimezone={true}
+                    presets={[
+                      {
+                        label: "1 minggu dari sekarang",
+                        getValue: () =>
+                          new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                      },
+                      {
+                        label: "2 minggu dari sekarang",
+                        getValue: () =>
+                          new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+                      },
+                      {
+                        label: "1 bulan dari sekarang",
+                        getValue: () =>
+                          new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+                      },
+                    ]}
                   />
                 </div>
                 <div>
