@@ -128,7 +128,7 @@ export default function Sidebar() {
                 </div>
               </div>
             )}
-            <button
+            {/* <button
               onClick={() => setIsCollapsed(!isCollapsed)}
               className="p-2 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-300 text-white/80 hover:text-white border border-white/20"
               title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -138,7 +138,7 @@ export default function Sidebar() {
               ) : (
                 <ChevronLeft className="h-4 w-4" />
               )}
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

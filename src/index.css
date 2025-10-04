@@ -106,14 +106,16 @@
     0 8px 10px -6px rgb(0 0 0 / 0.1);
 
   /* Z-Index Scale */
-  --z-dropdown: 1000;
-  --z-sticky: 1020;
-  --z-fixed: 1030;
-  --z-modal-backdrop: 1040;
-  --z-modal: 1050;
-  --z-popover: 1060;
-  --z-tooltip: 1070;
-  --z-toast: 1080;
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 101;
+  --z-fixed: 102;
+  --z-modal-backdrop: 103;
+  --z-modal: 104;
+  --z-popover: 105;
+  --z-tooltip: 106;
+  --z-toast: 107;
+  --z-max: 999;
 }
 
 /* ===== RESET & BASE STYLES ===== */
@@ -758,98 +760,106 @@ textarea,
 }
 
 /* Glass effect improvements */
-.backdrop-blur-lg {
-  backdrop-filter: blur(16px);
+.backdrop-blur-xl {
+  backdrop-filter: blur(24px);
 }
 
-/* Footer specific styles */
-.footer-link-hover {
-  @apply relative;
+/* Dashboard header specific styles */
+.dashboard-header-glass {
+  background: linear-gradient(
+    135deg,
+    rgba(35, 64, 122, 0.9) 0%,
+    rgba(26, 47, 92, 0.95) 100%
+  );
+  backdrop-filter: blur(20px);
 }
 
-.footer-link-hover::before {
-  content: "";
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0;
-  height: 1px;
-  background: currentColor;
-  transition: width 0.3s ease;
+/* Enhanced z-index layers */
+:root {
+  /* Z-Index Scale - Comprehensive */
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 101;
+  --z-fixed: 102;
+  --z-modal-backdrop: 103;
+  --z-modal: 104;
+  --z-popover: 105;
+  --z-tooltip: 106;
+  --z-toast: 107;
+  --z-max: 999;
 }
 
-.footer-link-hover:hover::before {
-  width: 100%;
+/* Dashboard header improvements */
+.dashboard-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
 }
 
-/* Newsletter input focus effects */
-.newsletter-input:focus {
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+/* Dropdown menu enhancements */
+.dropdown-menu {
+  position: fixed;
+  z-index: var(--z-dropdown);
+  max-height: calc(100vh - 5rem);
+  overflow-y: auto;
 }
 
-/* Social hover effects */
-.social-icon {
-  @apply transform transition-all duration-200;
+/* Mobile responsive dropdown positioning */
+@media (max-width: 768px) {
+  .dropdown-menu {
+    position: fixed;
+    top: 4.5rem;
+    left: 1rem;
+    right: 1rem;
+    width: auto;
+  }
 }
 
-.social-icon:hover {
-  @apply scale-110 rotate-3;
+/* Enhanced backdrop */
+.dropdown-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-dropdown) - 1);
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(2px);
 }
 
-/* Footer gradient text */
-.footer-gradient-text {
-  background: linear-gradient(135deg, #60a5fa 0%, #a855f7 50%, #ec4899 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+/* Smooth animations */
+@keyframes dropdown-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-/* Improved grid pattern for footer */
-.bg-grid-white\/\[0\.02\] {
-  background-image: linear-gradient(
-      to right,
-      rgba(255, 255, 255, 0.02) 1px,
-      transparent 1px
-    ),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+.dropdown-enter {
+  animation: dropdown-enter 0.15s ease-out;
 }
 
-/* Minimalist footer styles */
-.footer-minimal {
-  background: linear-gradient(135deg, #23407a 0%, #1a2f5c 50%, #0f1b3a 100%);
+/* Focus trap for accessibility */
+.dropdown-menu:focus-within {
+  outline: none;
 }
 
-/* Simplified grid pattern */
-.bg-grid-white\/\[0\.01\] {
-  background-image: linear-gradient(
-      to right,
-      rgba(255, 255, 255, 0.01) 1px,
-      transparent 1px
-    ),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+/* Scroll improvements */
+.dropdown-menu {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
 }
 
-/* Clean hover effects */
-.footer-link {
-  transition: color 0.2s ease;
+.dropdown-menu::-webkit-scrollbar {
+  width: 4px;
 }
 
-.footer-link:hover {
-  color: white;
+.dropdown-menu::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-/* Simplified social icons */
-.footer-social {
-  transition: all 0.2s ease;
-}
-
-.footer-social:hover {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  transform: translateY(-1px);
-}
-
-/* Newsletter input focus */
-.footer-newsletter-input:focus {
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+.dropdown-menu::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.5);
+  border-radius: 2px;
 }
