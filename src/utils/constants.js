@@ -434,3 +434,46 @@ export const TRANSACTION_TYPES = {
   CREDIT_PURCHASE: "CREDIT_PURCHASE",
   SUBSCRIPTION: "SUBSCRIPTION",
 };
+
+// Line 89-130: ADD specific backend error messages mapping
+export const BACKEND_ERROR_MESSAGES = {
+  // Authentication errors
+  INVALID_CREDENTIALS: "Email atau password tidak valid.",
+  TOKEN_EXPIRED: "Sesi Anda telah berakhir. Silakan login kembali.",
+  EMAIL_NOT_VERIFIED: "Email belum diverifikasi. Silakan cek email Anda.",
+  EMAIL_ALREADY_EXISTS: "Email sudah terdaftar. Gunakan email lain.",
+
+  // Class errors
+  CLASS_TOKEN_INVALID: "Token kelas tidak valid atau sudah kadaluarsa.",
+  CLASS_NOT_FOUND: "Kelas tidak ditemukan.",
+  ALREADY_ENROLLED: "Anda sudah bergabung di kelas ini.",
+
+  // Assignment errors
+  ASSIGNMENT_NOT_ACTIVE: "Assignment belum aktif. Pembayaran diperlukan.",
+  ASSIGNMENT_DEADLINE_PASSED: "Batas waktu pengumpulan sudah lewat.",
+
+  // Submission errors
+  SUBMISSION_ALREADY_SUBMITTED: "Tugas sudah dikumpulkan sebelumnya.",
+  SUBMISSION_NOT_FOUND: "Submission tidak ditemukan.",
+
+  // Payment errors
+  PAYMENT_REQUIRED: "Pembayaran diperlukan untuk mengaktifkan fitur ini.",
+  PAYMENT_FAILED: "Pembayaran gagal. Silakan coba lagi.",
+
+  // Plagiarism errors
+  PLAGIARISM_ALREADY_RUNNING: "Pengecekan plagiarisme sedang berjalan.",
+  INSUFFICIENT_CREDITS: "Kredit tidak mencukupi untuk pengecekan plagiarisme.",
+};
+
+// Backend status code mapping
+export const HTTP_STATUS_MESSAGES = {
+  400: "Data yang dikirim tidak valid",
+  401: "Akses ditolak - silakan login kembali",
+  403: "Anda tidak memiliki izin untuk melakukan tindakan ini",
+  404: "Data yang diminta tidak ditemukan",
+  409: "Konflik data - operasi tidak dapat dilakukan",
+  422: "Data tidak memenuhi validasi yang diperlukan",
+  429: "Terlalu banyak permintaan - silakan tunggu sebentar",
+  500: "Terjadi kesalahan server - silakan coba lagi",
+  503: "Layanan sedang tidak tersedia",
+};

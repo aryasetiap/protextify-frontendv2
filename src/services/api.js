@@ -1,6 +1,10 @@
 import axios from "axios";
 import toast from "react-hot-toast";
-import { API_BASE_URL } from "@/utils/constants";
+import {
+  API_BASE_URL,
+  BACKEND_ERROR_MESSAGES,
+  HTTP_STATUS_MESSAGES,
+} from "@/utils/constants";
 
 // Create axios instance
 const api = axios.create({
@@ -49,10 +53,16 @@ api.interceptors.response.use(
     return response.data;
   },
   (error) => {
-    const message =
-      error.response?.data?.message ||
-      error.message ||
+    // Enhanced message extraction with backend-specific handling
+    const backendMessage =
+      error.response?.data?.message || error.response?.data?.error;
+    const specificMessage =
+      BACKEND_ERROR_MESSAGES[backendMessage] || backendMessage;
+    const defaultMessage =
+      HTTP_STATUS_MESSAGES[error.response?.status] ||
       "Terjadi kesalahan yang tidak diketahui";
+
+    const message = specificMessage || defaultMessage;
 
     // Add logging untuk development
     if (import.meta.env.VITE_ENABLE_ROUTER_LOGGING === "true") {
@@ -60,43 +70,89 @@ api.interceptors.response.use(
         `❌ API Error: ${error.config?.method?.toUpperCase()} ${
           error.config?.url
         } - ${error.response?.status}`,
-        error
+        {
+          backendMessage,
+          specificMessage,
+          defaultMessage,
+          finalMessage: message,
+        }
       );
     }
 
-    // Handle specific error codes
+    // Enhanced error handling with backend alignment
     switch (error.response?.status) {
+      case 400:
+        // Backend validation errors
+        if (error.response.data?.errors) {
+          const errors = Object.values(error.response.data.errors).flat();
+          errors.forEach((err) =>
+            toast.error(BACKEND_ERROR_MESSAGES[err] || err)
+          );
+        } else {
+          toast.error(message);
+        }
+        break;
       case 401:
-        // Unauthorized - redirect to login
+        // Enhanced 401 handling - check if already on auth pages
         localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
         if (
-          window.location.pathname !== "/auth/login" &&
-          window.location.pathname !== "/login"
+          !["/auth/login", "/login", "/auth/register", "/register"].includes(
+            window.location.pathname
+          )
         ) {
           toast.error("Sesi Anda telah berakhir. Silakan login kembali.");
           window.location.href = "/auth/login";
         }
         break;
       case 403:
-        toast.error("Anda tidak memiliki akses untuk melakukan tindakan ini");
+        // Enhanced forbidden message
+        toast.error(message);
         break;
       case 404:
-        toast.error("Data tidak ditemukan");
+        // Contextual 404 messages
+        if (error.config?.url?.includes("/classes/")) {
+          toast.error("Kelas tidak ditemukan atau Anda tidak memiliki akses.");
+        } else if (error.config?.url?.includes("/assignments/")) {
+          toast.error("Assignment tidak ditemukan.");
+        } else if (error.config?.url?.includes("/submissions/")) {
+          toast.error("Submission tidak ditemukan.");
+        } else {
+          toast.error("Data tidak ditemukan.");
+        }
+        break;
+      case 409:
+        // Enhanced conflict handling
+        if (backendMessage?.includes("already enrolled")) {
+          toast.error("Anda sudah bergabung di kelas ini.");
+        } else if (backendMessage?.includes("already submitted")) {
+          toast.error("Tugas sudah dikumpulkan sebelumnya.");
+        } else {
+          toast.error(message);
+        }
         break;
       case 422:
-        // Validation errors
+        // Enhanced validation error handling
         if (error.response.data?.errors) {
           const errors = Object.values(error.response.data.errors).flat();
-          errors.forEach((err) => toast.error(err));
+          errors.forEach((err) =>
+            toast.error(BACKEND_ERROR_MESSAGES[err] || err)
+          );
         } else {
           toast.error(message);
         }
         break;
       case 429:
-        toast.error("Terlalu banyak permintaan. Silakan coba lagi nanti.");
+        toast.error("Terlalu banyak permintaan. Silakan tunggu beberapa saat.");
         break;
       case 500:
-        toast.error("Terjadi kesalahan server. Silakan coba lagi.");
+        toast.error("Terjadi kesalahan server. Tim teknis telah diberitahu.");
+        break;
+      case 503:
+        toast.error(
+          "Layanan sedang dalam pemeliharaan. Silakan coba lagi nanti."
+        );
         break;
       default:
         if (error.response?.status >= 400) {
