@@ -395,6 +395,34 @@ class WebSocketService {
       rooms: this.socket?.rooms || [],
     };
   }
+
+  // Task spec compatibility methods
+  onNotification(callback) {
+    this.on("notification", callback);
+    return () => this.off("notification", callback);
+  }
+
+  onSubmissionUpdated(callback) {
+    this.on("submissionUpdated", callback);
+    return () => this.off("submissionUpdated", callback);
+  }
+
+  onSubmissionListUpdated(callback) {
+    this.on("submissionListUpdated", callback);
+    return () => this.off("submissionListUpdated", callback);
+  }
+
+  // Batch event subscription helper
+  subscribeToEvents(eventHandlers) {
+    const unsubscribers = [];
+
+    Object.entries(eventHandlers).forEach(([event, handler]) => {
+      this.on(event, handler);
+      unsubscribers.push(() => this.off(event, handler));
+    });
+
+    return () => unsubscribers.forEach((unsub) => unsub());
+  }
 }
 
 // Create singleton instance

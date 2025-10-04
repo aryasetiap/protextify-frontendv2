@@ -11,13 +11,8 @@ export const uploadService = {
   uploadFile: () => Promise.resolve({}),
 };
 
-export const websocketService = {
-  connect: () => Promise.resolve(),
-  disconnect: () => {},
-  on: () => {},
-  off: () => {},
-  emit: () => {},
-};
+// ADD: Real WebSocket service import
+export { default as websocketService } from "./websocket";
 
 // Utility functions
 export { useApi } from "../hooks/useApi";
