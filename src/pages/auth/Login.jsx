@@ -302,15 +302,14 @@ export default function Login() {
                       </span>
                     </div>
 
-                    {/* Forgot Password - Coming Soon */}
+                    {/* Forgot Password - Aktifkan link */}
                     <div>
-                      <button
-                        type="button"
-                        className="text-xs text-gray-500 hover:text-gray-700 cursor-not-allowed transition-colors"
-                        disabled
+                      <Link
+                        to="/auth/forgot-password"
+                        className="text-xs text-[#23407a] hover:text-[#1a2f5c] transition-colors underline"
                       >
-                        Lupa password? (Segera hadir)
-                      </button>
+                        Lupa password?
+                      </Link>
                     </div>
                   </div>
                 </form>
