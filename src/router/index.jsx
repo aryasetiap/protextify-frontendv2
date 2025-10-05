@@ -12,7 +12,7 @@ import PublicRoute from "../components/PublicRoute";
 import ErrorBoundary from "../components/ErrorBoundary";
 
 // Public Pages
-import { Home, About, NotFound } from "../pages/public";
+import { Home, About, Pricing, Help, Docs, Privacy, Terms, NotFound } from "../pages/public";
 
 // Auth Pages
 import {
@@ -61,6 +61,11 @@ export const router = createBrowserRouter([
       // Public routes
       { index: true, element: <Home /> },
       { path: "about", element: <About /> },
+      { path: "pricing", element: <Pricing /> },
+      { path: "help", element: <Help /> },
+      { path: "docs", element: <Docs /> },
+      { path: "privacy", element: <Privacy /> },
+      { path: "terms", element: <Terms /> },
       {
         path: "verify-email",
         element: (

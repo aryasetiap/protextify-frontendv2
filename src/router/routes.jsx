@@ -4,6 +4,11 @@ export const ROUTES = {
   // Public routes
   HOME: "/",
   ABOUT: "/about",
+  PRICING: "/pricing",
+  HELP: "/help",
+  DOCS: "/docs",
+  PRIVACY: "/privacy",
+  TERMS: "/terms",
 
   // Auth routes
   AUTH: {
@@ -41,6 +46,11 @@ export const ROUTES = {
 export const getPublicRoutes = () => [
   ROUTES.HOME,
   ROUTES.ABOUT,
+  ROUTES.PRICING,
+  ROUTES.HELP,
+  ROUTES.DOCS,
+  ROUTES.PRIVACY,
+  ROUTES.TERMS,
   ROUTES.AUTH.LOGIN,
   ROUTES.AUTH.REGISTER,
   ROUTES.AUTH.EMAIL_VERIFICATION,

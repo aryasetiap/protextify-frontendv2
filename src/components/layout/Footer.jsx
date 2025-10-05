@@ -24,7 +24,7 @@ export default function Footer() {
     { label: "Bantuan", href: "/help" },
     { label: "Dokumentasi", href: "/docs" },
     { label: "Tutorial", href: "/tutorials" },
-    { label: "Kontak", href: "/contact" },
+    // { label: "Kontak", href: "/contact" },
   ];
 
   const legal = [
