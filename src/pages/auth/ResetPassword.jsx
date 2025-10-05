@@ -10,9 +10,7 @@ import {
   Container,
   Alert,
 } from "../../components";
-
-// TODO: Aktifkan logic reset password setelah endpoint BE tersedia
-// import { authService } from "../../services"; // Uncomment jika endpoint sudah tersedia
+import { authService } from "../../services";
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
@@ -25,15 +23,13 @@ export default function ResetPassword() {
     e.preventDefault();
     setStatus("loading");
     setError("");
-    // TODO: Kirim request ke endpoint /auth/reset-password jika sudah tersedia
-    // try {
-    //   await authService.resetPassword({ token, password });
-    //   setStatus("success");
-    // } catch (err) {
-    //   setError("Gagal reset password");
-    //   setStatus("error");
-    // }
-    setStatus("success"); // Placeholder sukses
+    try {
+      await authService.resetPassword({ token, password });
+      setStatus("success");
+    } catch (err) {
+      setError(err.response?.data?.message || "Gagal reset password");
+      setStatus("error");
+    }
   };
 
   return (

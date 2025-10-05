@@ -9,28 +9,26 @@ import {
   Container,
   Alert,
 } from "../../components";
-
-// TODO: Aktifkan logic request reset password setelah endpoint BE tersedia
-// import { authService } from "../../services"; // Uncomment jika endpoint sudah tersedia
-
+import { authService } from "../../services"; 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState("idle"); // idle, loading, success, error
+  const [status, setStatus] = useState("idle");
   const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus("loading");
     setError("");
-    // TODO: Kirim request ke endpoint /auth/forgot-password jika sudah tersedia
-    // try {
-    //   await authService.forgotPassword(email);
-    //   setStatus("success");
-    // } catch (err) {
-    //   setError("Gagal mengirim permintaan reset password");
-    //   setStatus("error");
-    // }
-    setStatus("success"); // Placeholder sukses
+    try {
+      await authService.forgotPassword(email);
+      setStatus("success");
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          "Gagal mengirim permintaan reset password"
+      );
+      setStatus("error");
+    }
   };
 
   return (

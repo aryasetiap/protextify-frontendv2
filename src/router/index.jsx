@@ -61,6 +61,14 @@ export const router = createBrowserRouter([
       // Public routes
       { index: true, element: <Home /> },
       { path: "about", element: <About /> },
+      {
+        path: "verify-email",
+        element: (
+          <PublicRoute>
+            <EmailVerification />
+          </PublicRoute>
+        ),
+      },
 
       // Auth routes (gunakan RootLayout juga)
       {
@@ -109,6 +117,14 @@ export const router = createBrowserRouter([
               <PublicRoute>
                 {/* TODO: Aktifkan logic setelah endpoint BE tersedia */}
                 <ResetPassword />
+              </PublicRoute>
+            ),
+          },
+          {
+            path: "verify-email",
+            element: (
+              <PublicRoute>
+                <EmailVerification />
               </PublicRoute>
             ),
           },
