@@ -64,7 +64,7 @@ const ActivityTimeline = ({ submissions, className = "" }) => {
           {submissions.length > 0 ? (
             submissions.map((submission, index) => (
               <div
-                key={submission.id}
+                key={submission.id || index} // Tambahkan key unik di sini
                 className="group flex items-start space-x-4 p-3 rounded-xl hover:bg-gray-50 transition-colors"
               >
                 <div
@@ -87,21 +87,30 @@ const ActivityTimeline = ({ submissions, className = "" }) => {
                     </span>
                     <span>•</span>
                     <span>
-                      {new Date(submission.updatedAt).toLocaleDateString(
-                        "id-ID",
-                        {
-                          day: "numeric",
-                          month: "short",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }
-                      )}
+                      {/* Gunakan submittedAt jika ada, fallback ke updatedAt */}
+                      {new Date(
+                        submission.submittedAt || submission.updatedAt
+                      ).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </span>
                   </div>
-                  {submission.grade && (
+                  {/* Nilai */}
+                  {typeof submission.grade === "number" && (
                     <div className="mt-2">
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                         Nilai: {submission.grade}
+                      </span>
+                    </div>
+                  )}
+                  {/* Plagiarism Score */}
+                  {typeof submission.plagiarismScore === "number" && (
+                    <div className="mt-2">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        Plagiarisme: {submission.plagiarismScore}%
                       </span>
                     </div>
                   )}
