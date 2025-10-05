@@ -10,30 +10,43 @@ const classesService = {
       // Pastikan response adalah array
       const data = Array.isArray(response) ? response : [];
 
-      // Transform response to match frontend expectations
-      // Backend returns enrollment objects with nested class data
-      const transformedClasses = data.map((enrollment) => {
-        // Safe handling untuk enrollment object
-        const classData = enrollment?.class || {};
-
-        return {
-          ...classData,
-          // Add enrollment metadata
-          enrollmentId: enrollment?.id,
-          enrolledAt: enrollment?.joinedAt,
-          // Transform assignments if they exist (set empty array for now)
-          assignments: classData.assignments || [],
-          // Transform enrollments if they exist (we don't have this data yet)
-          enrollments: [],
-          // Add instructor info (we need to get this from backend later)
-          instructor: classData.instructor || { fullName: "Instructor" },
-          // Add student enrollment info for this user
-          currentUserEnrollment: {
-            id: enrollment?.id,
-            joinedAt: enrollment?.joinedAt,
-          },
-        };
-      });
+      // Transform response sesuai struktur baru dari BE
+      const transformedClasses = data.map((classObj) => ({
+        id: classObj.id,
+        name: classObj.name,
+        description: classObj.description,
+        instructor: classObj.instructor
+          ? {
+              id: classObj.instructor.id,
+              fullName: classObj.instructor.fullName,
+            }
+          : { id: "", fullName: "Instruktur" },
+        assignments: Array.isArray(classObj.assignments)
+          ? classObj.assignments.map((a) => ({
+              id: a.id,
+              title: a.title,
+              deadline: a.deadline,
+              active: a.active,
+              // Tambahan field lain jika ada
+            }))
+          : [],
+        enrollments: Array.isArray(classObj.enrollments)
+          ? classObj.enrollments.map((e) => ({
+              student: {
+                id: e.student?.id,
+                fullName: e.student?.fullName,
+              },
+            }))
+          : [],
+        createdAt: classObj.createdAt,
+        classToken: classObj.classToken,
+        currentUserEnrollment: classObj.currentUserEnrollment
+          ? {
+              id: classObj.currentUserEnrollment.id,
+              joinedAt: classObj.currentUserEnrollment.joinedAt,
+            }
+          : undefined,
+      }));
 
       return transformedClasses;
     } catch (error) {
