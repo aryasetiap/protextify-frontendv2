@@ -12,7 +12,16 @@ import PublicRoute from "../components/PublicRoute";
 import ErrorBoundary from "../components/ErrorBoundary";
 
 // Public Pages
-import { Home, About, Pricing, Help, Docs, Privacy, Terms, NotFound } from "../pages/public";
+import {
+  Home,
+  About,
+  Pricing,
+  Help,
+  Docs,
+  Privacy,
+  Terms,
+  NotFound,
+} from "../pages/public";
 
 // Auth Pages
 import {
@@ -33,6 +42,7 @@ import {
   StudentSubmissions,
   WriteAssignment,
   StudentClassDetail,
+  ClassAssignments,
 } from "../pages/student";
 
 // Instructor Pages
@@ -174,6 +184,10 @@ export const router = createBrowserRouter([
       {
         path: "classes/:classId",
         element: <StudentClassDetail />,
+      },
+      {
+        path: "classes/:classId/assignments", // ✅ Add this route
+        element: <ClassAssignments />,
       },
       {
         path: "assignments/:assignmentId/write",

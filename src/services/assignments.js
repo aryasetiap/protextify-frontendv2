@@ -71,6 +71,32 @@ const assignmentsService = {
       return [];
     }
   },
+
+  // Get assignments for specific class
+  getClassAssignments: async (classId) => {
+    try {
+      const response = await api.get(`/classes/${classId}/assignments`);
+
+      // Ensure response is array and transform if needed
+      if (!Array.isArray(response)) return [];
+
+      return response.map((assignment) => ({
+        id: assignment.id,
+        title: assignment.title,
+        instructions: assignment.instructions,
+        deadline: assignment.deadline,
+        classId: assignment.classId,
+        active: !!assignment.active,
+        expectedStudentCount: assignment.expectedStudentCount,
+        createdAt: assignment.createdAt,
+        updatedAt: assignment.updatedAt,
+        _count: assignment._count || { submissions: 0 },
+      }));
+    } catch (error) {
+      console.error("Error fetching class assignments:", error);
+      throw error;
+    }
+  },
 };
 
 export default assignmentsService;
