@@ -21,6 +21,7 @@ import {
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
+  const successMessage = location.state?.message;
   const { login, loading, error, clearError } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -31,7 +32,6 @@ export default function Login() {
     register,
     handleSubmit,
     formState: { errors },
-    setValue,
   } = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -43,11 +43,11 @@ export default function Login() {
   const onSubmit = async (data) => {
     try {
       clearError();
-      console.log("🚀 Starting login process...");
+      console.warn("🚀 Starting login process...");
 
       const response = await login(data);
 
-      console.log("✅ Login successful, response:", {
+      console.warn("✅ Login successful, response:", {
         user: response.user,
         userRole: response.user?.role,
         from,
@@ -56,7 +56,7 @@ export default function Login() {
       // ✅ PERBAIKAN: Pastikan menggunakan getDefaultRoute
       const redirectPath = getDefaultRoute(response.user.role);
 
-      console.log("🎯 Redirecting to:", {
+      console.warn("🎯 Redirecting to:", {
         userRole: response.user.role,
         from,
         redirectPath,
@@ -74,16 +74,6 @@ export default function Login() {
 
   const handleGoogleLogin = () => {
     window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
-  };
-
-  const handleDemoCredentials = (role) => {
-    if (role === "student") {
-      setValue("email", "student@example.com");
-      setValue("password", "password123");
-    } else {
-      setValue("email", "instructor@example.com");
-      setValue("password", "password123");
-    }
   };
 
   return (
@@ -184,6 +174,12 @@ export default function Login() {
               </CardHeader>
 
               <CardContent className="space-y-6">
+                {successMessage && (
+                  <Alert variant="success" title="Berhasil!" className="mb-4">
+                    {successMessage}
+                  </Alert>
+                )}
+
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                   {error && (
                     <Alert variant="error" title="Login Gagal" className="mb-4">

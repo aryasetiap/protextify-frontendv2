@@ -20,6 +20,8 @@ import {
   Register,
   EmailVerification,
   GoogleCallback,
+  ForgotPassword,
+  ResetPassword,
 } from "../pages/auth";
 
 // Student Pages
@@ -77,6 +79,36 @@ export const router = createBrowserRouter([
             element: (
               <PublicRoute>
                 <Register />
+              </PublicRoute>
+            ),
+          },
+          {
+            path: "email-verification",
+            element: (
+              <PublicRoute>
+                <EmailVerification />
+              </PublicRoute>
+            ),
+          },
+          {
+            path: "google/callback",
+            element: <GoogleCallback />,
+          },
+          {
+            path: "forgot-password",
+            element: (
+              <PublicRoute>
+                {/* TODO: Aktifkan logic setelah endpoint BE tersedia */}
+                <ForgotPassword />
+              </PublicRoute>
+            ),
+          },
+          {
+            path: "reset-password",
+            element: (
+              <PublicRoute>
+                {/* TODO: Aktifkan logic setelah endpoint BE tersedia */}
+                <ResetPassword />
               </PublicRoute>
             ),
           },

@@ -97,6 +97,22 @@ const authService = {
       throw error;
     }
   },
+
+  // TODO: Aktifkan setelah endpoint BE tersedia
+  forgotPassword: async (email) => {
+    // TODO: Implementasi request ke /auth/forgot-password jika endpoint sudah tersedia
+    // return await api.post("/auth/forgot-password", { email });
+    throw new Error(
+      "Endpoint /auth/forgot-password belum tersedia di backend."
+    );
+  },
+
+  // TODO: Aktifkan setelah endpoint BE tersedia
+  resetPassword: async ({ token, password }) => {
+    // TODO: Implementasi request ke /auth/reset-password jika endpoint sudah tersedia
+    // return await api.post("/auth/reset-password", { token, password });
+    throw new Error("Endpoint /auth/reset-password belum tersedia di backend.");
+  },
 };
 
 export default authService;
