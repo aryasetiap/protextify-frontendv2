@@ -87,34 +87,60 @@ export default function About() {
 
   const team = [
     {
-      name: "Tim Pengembang",
-      role: "Full-Stack Development",
+      name: "Esa Ghanim Fadhallah S.Pi, M.Si",
+      role: "Supervisor",
       description:
-        "Tim berpengalaman dalam mengembangkan solusi edtech yang inovatif dengan fokus pada performa dan skalabilitas.",
-      skills: ["React", "NestJS", "PostgreSQL", "AI Integration"],
+        "Supervisor bertugas memberikan bimbingan dan pengawasan terhadap seluruh operasional perusahaan untuk memastikan kualitas dan standar yang tinggi.",
+      skills: ["Supervision", "Mentoring", "Quality Control"],
+      avatar: "👨‍🏫",
+      photo: "/src/assets/people/esa.png", // Ganti dengan URL foto atau path foto, contoh: "/images/esa.jpg" atau "https://example.com/foto.jpg"
+    },
+    {
+      name: "Lukman Hakim",
+      role: "Chief Executive Officer",
+      description:
+        "Chief Executive Officer berperan dalam mengatur dan mengarahkan operasional perusahaan secara keseluruhan.",
+      skills: ["Leadership", "Team Work"],
       avatar: "👨‍💻",
+      photo: "/src/assets/people/lukman.png", // Ganti dengan URL foto atau path foto, contoh: "/images/esa.jpg" atau "https://example.com/foto.jpg"
     },
     {
-      name: "Tim AI Research",
-      role: "Machine Learning & AI",
+      name: "Kerina Bakarudin",
+      role: "Chief Technology Officer",
       description:
-        "Ahli dalam teknologi deteksi plagiarisme dan natural language processing untuk hasil yang akurat.",
-      skills: ["Winston AI", "NLP", "Machine Learning", "Data Science"],
+        "Chief Technology Officer bertugas mengelola dan mengembangkan teknologi terkini untuk meningkatkan performa dan keamanan platform.",
+      skills: ["Web Development", "Frontend Development"],
       avatar: "🤖",
+      photo: "/src/assets/people/kerin.png", // Ganti dengan URL foto atau path foto, contoh: "/images/esa.jpg" atau "https://example.com/foto.jpg"
     },
     {
-      name: "Tim Product",
-      role: "Product Management",
+      name: "Habib Pandya",
+      role: "Chief Operating Officer",
       description:
-        "Memahami kebutuhan pendidikan dan merancang user experience yang optimal untuk semua kalangan.",
-      skills: [
-        "UX Research",
-        "Product Strategy",
-        "Educational Tech",
-        "Analytics",
-      ],
+        "Chief Operating Officer bertugas mengelola dan mengoperasikan operasional perusahaan secara efisien dan efektif.",
+      skills: ["Team Work", "Educational Tech", "Analytics"],
       avatar: "🎯",
+      photo: "/src/assets/people/habib.png", // Ganti dengan URL foto atau path foto, contoh: "/images/esa.jpg" atau "https://example.com/foto.jpg"
     },
+    {
+      name: "Arya Setia Pratama",
+      role: "Chief Marketing Officer",
+      description:
+        "Chief Marketing Officer bertugas mengelola dan mengembangkan strategi pemasaran perusahaan untuk meningkatkan brand awareness dan pertumbuhan bisnis.",
+      skills: ["Marketing", "Sales", "Branding"],
+      avatar: "🔍",
+      photo: "/src/assets/people/asep.png", // Ganti dengan URL foto atau path foto, contoh: "/images/esa.jpg" atau "https://example.com/foto.jpg"
+    },
+    {
+      name: "Arsyitha Alifia",
+      role: "Chief Financial Officer",
+      description:
+        "Chief Financial Officer bertugas mengelola dan mengembangkan strategi keuangan perusahaan untuk meningkatkan kesehatan keuangan dan pertumbuhan bisnis.",
+      skills: ["Finance", "Accounting", "Tax"],
+      avatar: "💬",
+      photo: "/src/assets/people/arsit.png", // Ganti dengan URL foto atau path foto, contoh: "/images/esa.jpg" atau "https://example.com/foto.jpg"
+    }
+    
   ];
 
   const techStack = {
@@ -345,7 +371,11 @@ export default function About() {
                         ? "bg-blue-500/10 text-blue-600 group-hover:bg-blue-500 group-hover:text-white"
                         : value.color === "purple"
                         ? "bg-purple-500/10 text-purple-600 group-hover:bg-purple-500 group-hover:text-white"
-                        : "bg-green-500/10 text-green-600 group-hover:bg-green-500 group-hover:text-white"
+                        : value.color === "green"
+                        ? "bg-green-500/10 text-green-600 group-hover:bg-green-500 group-hover:text-white"
+                        : value.color === "red"
+                        ? "bg-red-500/10 text-red-600 group-hover:bg-red-500 group-hover:text-white"
+                        : "bg-yellow-500/10 text-yellow-600 group-hover:bg-yellow-500 group-hover:text-white"
                     }`}
                   >
                     {value.icon}
@@ -530,8 +560,10 @@ export default function About() {
             </p>
           </div>
 
-          <Grid cols={1} mdCols={3} gap={8}>
-            {team.map((member, index) => (
+          {/* First Row - 1 Card (Supervisor) */}
+          <div className="flex justify-center mb-8">
+            <div className="grid grid-cols-1 max-w-md">
+              {team.slice(0, 1).map((member, index) => (
               <Card
                 key={index}
                 className="group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
@@ -540,7 +572,15 @@ export default function About() {
 
                 <CardContent className="p-8 text-center relative z-10">
                   <div className="w-24 h-24 bg-gradient-to-br from-[#23407a] to-[#3b5fa4] rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-300 shadow-lg">
-                    <span className="text-3xl">{member.avatar}</span>
+                    {member.photo ? (
+                      <img 
+                        src={member.photo} 
+                        alt={member.name}
+                        className="w-full h-full object-cover rounded-2xl"
+                      />
+                    ) : (
+                      <span className="text-3xl">{member.avatar}</span>
+                    )}
                   </div>
                   <CardTitle className="mb-2 text-xl group-hover:text-[#23407a] transition-colors">
                     {member.name}
@@ -566,7 +606,104 @@ export default function About() {
                 </CardContent>
               </Card>
             ))}
-          </Grid>
+            </div>
+          </div>
+
+          {/* Second Row - 3 Cards (CEO, CTO, COO) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            {team.slice(1, 4).map((member, index) => (
+              <Card
+                key={index + 3}
+                className="group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-[#23407a]/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                <CardContent className="p-8 text-center relative z-10">
+                  <div className="w-24 h-24 bg-gradient-to-br from-[#23407a] to-[#3b5fa4] rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-300 shadow-lg">
+                    {member.photo ? (
+                      <img 
+                        src={member.photo} 
+                        alt={member.name}
+                        className="w-full h-full object-cover rounded-2xl"
+                      />
+                    ) : (
+                      <span className="text-3xl">{member.avatar}</span>
+                    )}
+                  </div>
+                  <CardTitle className="mb-2 text-xl group-hover:text-[#23407a] transition-colors">
+                    {member.name}
+                  </CardTitle>
+                  <p className="text-[#23407a] font-semibold mb-4 text-lg">
+                    {member.role}
+                  </p>
+                  <p className="text-gray-600 mb-6 leading-relaxed">
+                    {member.description}
+                  </p>
+
+                  {/* Skills */}
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {member.skills.map((skill, skillIndex) => (
+                      <span
+                        key={skillIndex}
+                        className="px-3 py-1 bg-[#23407a]/10 text-[#23407a] rounded-full text-xs font-medium hover:bg-[#23407a] hover:text-white transition-colors"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Third Row - 2 Cards (CMO, CFO) - Centered */}
+          <div className="flex justify-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
+              {team.slice(4, 6).map((member, index) => (
+                <Card
+                  key={index + 4}
+                  className="group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#23407a]/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                  <CardContent className="p-8 text-center relative z-10">
+                    <div className="w-24 h-24 bg-gradient-to-br from-[#23407a] to-[#3b5fa4] rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-300 shadow-lg">
+                      {member.photo ? (
+                      <img 
+                        src={member.photo} 
+                        alt={member.name}
+                        className="w-full h-full object-cover rounded-2xl"
+                      />
+                    ) : (
+                      <span className="text-3xl">{member.avatar}</span>
+                    )}
+                    </div>
+                    <CardTitle className="mb-2 text-xl group-hover:text-[#23407a] transition-colors">
+                      {member.name}
+                    </CardTitle>
+                    <p className="text-[#23407a] font-semibold mb-4 text-lg">
+                      {member.role}
+                    </p>
+                    <p className="text-gray-600 mb-6 leading-relaxed">
+                      {member.description}
+                    </p>
+
+                    {/* Skills */}
+                    <div className="flex flex-wrap gap-2 justify-center">
+                      {member.skills.map((skill, skillIndex) => (
+                        <span
+                          key={skillIndex}
+                          className="px-3 py-1 bg-[#23407a]/10 text-[#23407a] rounded-full text-xs font-medium hover:bg-[#23407a] hover:text-white transition-colors"
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
         </Container>
       </section>
 

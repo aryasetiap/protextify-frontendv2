@@ -15,9 +15,9 @@ export default function Footer() {
 
   const quickLinks = [
     { label: "Tentang Kami", href: "/about" },
-    { label: "Fitur", href: "/features" },
+    // { label: "Fitur", href: "/features" },
     { label: "Harga", href: "/pricing" },
-    { label: "Blog", href: "/blog" },
+    // { label: "Blog", href: "/blog" },
   ];
 
   const support = [
