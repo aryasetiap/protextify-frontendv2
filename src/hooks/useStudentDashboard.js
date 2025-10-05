@@ -6,6 +6,7 @@ import { useWebSocket } from "./useWebSocket";
 // Import services dengan safe fallback
 import classesService from "../services/classes";
 import submissionsService from "../services/submissions";
+import { assignmentsService } from "../services"; // pastikan sudah diekspor
 
 export const useStudentDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -28,11 +29,13 @@ export const useStudentDashboard = () => {
       setLoading(true);
       setError(null);
 
-      // Fetch classes and submissions in parallel dengan error handling
-      const [classesData, submissionsData] = await Promise.allSettled([
-        classesService.getClasses(),
-        submissionsService.getHistory?.() || Promise.resolve([]),
-      ]);
+      // Fetch classes, submissions, and recent assignments in parallel
+      const [classesData, submissionsData, recentAssignmentsData] =
+        await Promise.allSettled([
+          classesService.getClasses(),
+          submissionsService.getHistory?.() || Promise.resolve([]),
+          assignmentsService.getRecentAssignments?.(3) || Promise.resolve([]),
+        ]);
 
       // Safe handling untuk classesData dengan struktur baru
       const safeClassesData =
@@ -47,11 +50,22 @@ export const useStudentDashboard = () => {
           ? submissionsData.value
           : [];
 
-      // Calculate statistics from transformed data
-      const totalClasses = safeClassesData.length;
+      // Safe handling untuk recentAssignmentsData
+      const safeRecentAssignments =
+        recentAssignmentsData.status === "fulfilled" &&
+        Array.isArray(recentAssignmentsData.value)
+          ? recentAssignmentsData.value
+          : [];
 
-      // Since assignments data is not yet available from backend, set to 0
-      const activeAssignments = 0;
+      // Statistik activeAssignments dari assignments yang aktif dan belum lewat deadline
+      const activeAssignments = safeClassesData.reduce(
+        (acc, cls) =>
+          acc +
+          (cls.assignments?.filter(
+            (a) => a.active && new Date(a.deadline) > new Date()
+          ).length || 0),
+        0
+      );
       const completedAssignments = safeSubmissionsData.filter(
         (s) => s?.status === "SUBMITTED"
       ).length;
@@ -60,21 +74,24 @@ export const useStudentDashboard = () => {
       ).length;
 
       setStats({
-        totalClasses,
+        totalClasses: safeClassesData.length,
         activeAssignments,
         completedAssignments,
         pendingSubmissions,
       });
 
       setRecentClasses(safeClassesData.slice(0, 3));
-      setRecentAssignments([]); // Empty until assignments endpoint is ready
+      setRecentAssignments(safeRecentAssignments);
 
-      // Create activity timeline
+      // Activity timeline: include status, grade, plagiarismScore, submittedAt
       const timeline = [
         ...safeClassesData.map((cls) => ({
           type: "class_joined",
           title: `Bergabung ke kelas ${cls?.name || "Unknown"}`,
-          time: cls?.enrolledAt || cls?.createdAt || new Date().toISOString(),
+          time:
+            cls?.currentUserEnrollment?.joinedAt ||
+            cls?.createdAt ||
+            new Date().toISOString(),
           icon: "class",
         })),
         ...safeSubmissionsData
@@ -82,10 +99,21 @@ export const useStudentDashboard = () => {
           .map((submission) => ({
             type: "submission",
             title: `${
-              submission.status === "SUBMITTED" ? "Mengumpulkan" : "Mengerjakan"
+              submission.status === "SUBMITTED"
+                ? "Mengumpulkan"
+                : submission.status === "GRADED"
+                ? "Dinilai"
+                : "Mengerjakan"
             } ${submission.assignment?.title || "Unknown Assignment"}`,
-            time: submission.updatedAt || new Date().toISOString(),
+            time:
+              submission.submittedAt ||
+              submission.updatedAt ||
+              submission.createdAt ||
+              new Date().toISOString(),
             icon: "assignment",
+            status: submission.status,
+            grade: submission.grade ?? null,
+            plagiarismScore: submission.plagiarismScore ?? null,
           })),
       ]
         .sort((a, b) => new Date(b.time) - new Date(a.time))
