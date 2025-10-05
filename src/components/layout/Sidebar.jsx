@@ -48,13 +48,13 @@ export default function Sidebar() {
           label: "Analytics",
           icon: TrendingUp,
           path: "/instructor/analytics",
-          disabled: true,
+          disabled: false,
         },
         {
           label: "Pengaturan",
           icon: Settings,
           path: "/instructor/settings",
-          disabled: true,
+          disabled: false,
         },
       ];
     } else {

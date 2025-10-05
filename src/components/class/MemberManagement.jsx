@@ -263,25 +263,34 @@ export default function MemberManagement({ classDetail, onRefresh }) {
                       </td>
                       <td className="p-4 text-center">
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>Lihat Profil</DropdownMenuItem>
-                            <DropdownMenuItem>Lihat Progress</DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="text-red-600"
-                              onClick={() => {
-                                setMemberToRemove(enrollment.student);
-                                setShowRemoveModal(true);
-                              }}
-                            >
-                              <UserMinus className="h-4 w-4 mr-2" />
-                              Hapus dari Kelas
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
+                          {({ isOpen, setIsOpen }) => (
+                            <>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => setIsOpen(!isOpen)}
+                              >
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                              {isOpen && (
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem>Lihat Profil</DropdownMenuItem>
+                                  <DropdownMenuItem>Lihat Progress</DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="text-red-600"
+                                    onClick={() => {
+                                      setMemberToRemove(enrollment.student);
+                                      setShowRemoveModal(true);
+                                      setIsOpen(false);
+                                    }}
+                                  >
+                                    <UserMinus className="h-4 w-4 mr-2" />
+                                    Hapus dari Kelas
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              )}
+                            </>
+                          )}
                         </DropdownMenu>
                       </td>
                     </tr>

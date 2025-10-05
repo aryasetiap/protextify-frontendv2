@@ -225,7 +225,7 @@ export default function InstructorDashboard() {
             Statistik Performa
           </h2>
         </div>
-        <Grid cols={1} mdCols={2} lgCols={4} gap={6}>
+        <Grid cols={1} mdCols={2} lgCols={3} gap={6}>
           <StatCard
             title="Total Kelas"
             value={stats.totalClasses}
@@ -249,14 +249,6 @@ export default function InstructorDashboard() {
             color="yellow"
             gradient="from-yellow-500 to-orange-500"
             trend={stats.activeAssignments > 0 ? "warning" : "positive"}
-          />
-          <StatCard
-            title="Pendapatan Bulan Ini"
-            value={`Rp ${stats.monthlyRevenue.toLocaleString()}`}
-            icon={DollarSign}
-            color="purple"
-            gradient="from-purple-500 to-indigo-600"
-            trend="positive"
           />
         </Grid>
       </div>

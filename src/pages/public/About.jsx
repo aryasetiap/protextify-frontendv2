@@ -24,10 +24,17 @@ import {
   CardTitle,
   CardContent,
   Grid,
-  Stack,
   Badge,
   AnimatedCounter,
 } from "../../components";
+
+// Import team photos
+import esaPhoto from "../../assets/people/esa.png";
+import lukmanPhoto from "../../assets/people/lukman.png";
+import kerinPhoto from "../../assets/people/kerin.png";
+import habibPhoto from "../../assets/people/habib.png";
+import asepPhoto from "../../assets/people/asep.png";
+import arsitPhoto from "../../assets/people/arsit.png";
 
 export default function About() {
   const values = [

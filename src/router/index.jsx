@@ -42,9 +42,12 @@ import {
   CreateClass,
   ClassDetail,
   ClassSettings,
+  InstructorSettings,
   CreateAssignment,
   AssignmentDetail,
   MonitorSubmissions,
+  GradeSubmission,
+  InstructorAnalytics,
   BulkGrade,
   AssignmentAnalytics,
   PlagiarismAnalysis,
@@ -216,6 +219,10 @@ export const router = createBrowserRouter([
         element: <ClassSettings />,
       },
       {
+        path: "settings",
+        element: <InstructorSettings />,
+      },
+      {
         path: "classes/:classId/create-assignment",
         element: <CreateAssignment />,
       },
@@ -226,6 +233,14 @@ export const router = createBrowserRouter([
       {
         path: "assignments/:assignmentId/monitor",
         element: <MonitorSubmissions />,
+      },
+      {
+        path: "analytics",
+        element: <InstructorAnalytics />,
+      },
+      {
+        path: "submissions/:submissionId/grade",
+        element: <GradeSubmission />,
       },
       {
         path: "assignments/:assignmentId/bulk-grade",

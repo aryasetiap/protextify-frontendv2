@@ -33,7 +33,6 @@ const InstructorQuickActions = ({ stats }) => {
       href: "/instructor/analytics",
       variant: "outline",
       description: `${stats.completionRate}% completion rate`,
-      disabled: true,
     },
   ];
 
