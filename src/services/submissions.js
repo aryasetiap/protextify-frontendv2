@@ -64,7 +64,34 @@ const submissionsService = {
   getHistory: async () => {
     try {
       const response = await api.get("/submissions/history");
-      return Array.isArray(response) ? response : [];
+      // Pastikan response array dan lakukan transform agar kompatibel
+      if (!Array.isArray(response)) return [];
+
+      return response.map((item) => ({
+        id: item.id,
+        assignmentId: item.assignmentId,
+        content: item.content,
+        status: item.status,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        submittedAt: item.submittedAt || null, // field baru, fallback null
+        grade: typeof item.grade === "number" ? item.grade : null, // field baru, fallback null
+        plagiarismScore:
+          typeof item.plagiarismScore === "number"
+            ? item.plagiarismScore
+            : null, // field baru, fallback null
+        assignment: item.assignment
+          ? {
+              id: item.assignment.id,
+              title: item.assignment.title,
+              deadline: item.assignment.deadline,
+              class: item.assignment.class
+                ? { name: item.assignment.class.name }
+                : { name: "" }, // pastikan assignment.class.name selalu ada
+            }
+          : null,
+        // Tambahkan field lain jika diperlukan
+      }));
     } catch (error) {
       console.error("Error fetching submissions history:", error);
       return []; // Return empty array on error
