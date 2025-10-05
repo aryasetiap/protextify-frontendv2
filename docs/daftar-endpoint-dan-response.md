@@ -94,6 +94,37 @@
             }
           },
           {
+            "method": "POST",
+            "path": "/auth/forgot-password",
+            "description": "Request reset password link ke email user",
+            "authentication": "Not required",
+            "request_body": {
+              "email": "string"
+            },
+            "success_response": {
+              "status_code": 200,
+              "body": {
+                "message": "Reset password link sent to your email"
+              }
+            }
+          },
+          {
+            "method": "POST",
+            "path": "/auth/reset-password",
+            "description": "Reset password menggunakan token dari email",
+            "authentication": "Not required",
+            "request_body": {
+              "token": "string",
+              "newPassword": "string"
+            },
+            "success_response": {
+              "status_code": 200,
+              "body": {
+                "message": "Password reset successful"
+              }
+            }
+          },
+          {
             "method": "GET",
             "path": "/auth/google",
             "description": "Redirect ke halaman login Google OAuth",
@@ -106,11 +137,52 @@
           {
             "method": "GET",
             "path": "/auth/google/callback",
-            "description": "Callback dari Google setelah login berhasil",
+            "description": "Callback dari Google setelah login berhasil - mendukung redirect dan JSON response",
             "authentication": "Not required",
-            "success_response": {
+            "query_parameters": {
+              "format": "json (optional) - untuk mendapat JSON response instead of redirect"
+            },
+            "success_response_redirect": {
               "status_code": 302,
               "description": "Redirect to frontend with JWT token in URL parameter"
+            },
+            "success_response_json": {
+              "status_code": 200,
+              "body": {
+                "accessToken": "string (JWT token)",
+                "user": {
+                  "id": "string",
+                  "email": "string",
+                  "fullName": "string",
+                  "role": "string",
+                  "institution": "string",
+                  "emailVerified": true,
+                  "createdAt": "ISO date string",
+                  "updatedAt": "ISO date string"
+                }
+              }
+            }
+          },
+          {
+            "method": "GET",
+            "path": "/auth/google/user",
+            "description": "Mendapat data user setelah Google login berhasil",
+            "authentication": "Required (JWT)",
+            "success_response": {
+              "status_code": 200,
+              "body": {
+                "accessToken": "string (JWT token)",
+                "user": {
+                  "id": "string",
+                  "email": "string",
+                  "fullName": "string",
+                  "role": "string",
+                  "institution": "string",
+                  "emailVerified": true,
+                  "createdAt": "ISO date string",
+                  "updatedAt": "ISO date string"
+                }
+              }
             }
           },
           {
@@ -980,31 +1052,9 @@
       "payments": "Sistem pembayaran terintegrasi dengan Midtrans",
       "storage": "File storage menggunakan Cloudflare R2 dengan pre-signed URLs",
       "realtime": "WebSocket untuk notifikasi real-time dan auto-save",
-      "swagger": "Dokumentasi Swagger tersedia di /api/docs"
+      "swagger": "Dokumentasi Swagger tersedia di /api/docs",
+      "auth_improvements": "Auth endpoints telah disesuaikan dengan kebutuhan Frontend - format tanggal ISO, field accessToken konsisten, forgot/reset password tersedia"
     }
   }
 }
 ```
-
-File ini telah mendokumentasikan semua 47 endpoint yang ditemukan dalam codebase Anda, termasuk:
-
-1. **Authentication endpoints** (7 endpoints)
-2. **User management** (2 endpoints)
-3. **Class management** (4 endpoints)
-4. **Assignment management** (2 endpoints)
-5. **Submission management** (10 endpoints)
-6. **Plagiarism checking** (3 endpoints)
-7. **Payment processing** (3 endpoints)
-8. **File storage** (3 endpoints)
-9. **Root/health endpoints** (4 endpoints)
-
-Setiap endpoint dilengkapi dengan:
-
-- Method dan path
-- Deskripsi fungsi
-- Requirements authentication
-- Structure request body/parameters
-- Success response dengan status code dan struktur data
-- WebSocket events untuk real-time features
-
-Dokumentasi ini akan sangat membantu tim Frontend dalam implementasi integrasi API.
