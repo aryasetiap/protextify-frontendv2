@@ -76,20 +76,21 @@ const assignmentsService = {
   getClassAssignments: async (classId) => {
     try {
       const response = await api.get(`/classes/${classId}/assignments`);
-
-      // Ensure response is array and transform if needed
+      // Pastikan response array dan mapping sesuai kebutuhan FE
       if (!Array.isArray(response)) return [];
-
       return response.map((assignment) => ({
         id: assignment.id,
         title: assignment.title,
         instructions: assignment.instructions,
         deadline: assignment.deadline,
         classId: assignment.classId,
-        active: !!assignment.active,
         expectedStudentCount: assignment.expectedStudentCount,
+        active: !!assignment.active,
         createdAt: assignment.createdAt,
         updatedAt: assignment.updatedAt,
+        submissions: Array.isArray(assignment.submissions)
+          ? assignment.submissions
+          : [],
         _count: assignment._count || { submissions: 0 },
       }));
     } catch (error) {

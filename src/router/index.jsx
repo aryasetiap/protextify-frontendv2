@@ -39,10 +39,10 @@ import {
   StudentClasses,
   JoinClass,
   StudentAssignments,
+  ClassAssignments, // ✅ Add this import
   StudentSubmissions,
   WriteAssignment,
   StudentClassDetail,
-  ClassAssignments,
 } from "../pages/student";
 
 // Instructor Pages

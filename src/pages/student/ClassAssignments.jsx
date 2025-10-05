@@ -83,7 +83,17 @@ export default function ClassAssignments() {
   return (
     <Container className="py-6">
       {/* Breadcrumb */}
-      <Breadcrumb />
+      <Breadcrumb
+        items={[
+          { label: "Dashboard", href: "/dashboard/overview" },
+          { label: "Kelas", href: "/dashboard/classes" },
+          {
+            label: classDetail?.name || "Detail Kelas",
+            href: `/dashboard/classes/${classId}`,
+          },
+          { label: "Daftar Tugas", current: true },
+        ]}
+      />
 
       {/* Header */}
       <div className="flex items-center mb-6">
