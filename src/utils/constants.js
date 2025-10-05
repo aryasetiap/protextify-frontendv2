@@ -286,6 +286,7 @@ export const API_ENDPOINTS = {
   TRANSACTION_HISTORY: "/payments/transactions",
   TRANSACTION_DETAIL: (id) => `/payments/transactions/${id}`,
   PAYMENT_STATUS: (orderId) => `/payments/status/${orderId}`,
+  ASSIGNMENTS_RECENT: "/assignments/recent", // Tambahkan endpoint baru untuk tugas terbaru
 };
 
 // Loading states
