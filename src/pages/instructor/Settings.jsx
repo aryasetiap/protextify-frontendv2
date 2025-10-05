@@ -116,7 +116,7 @@ export default function InstructorSettings() {
                       </Button>
                     </div>
                   </div>
-                  <div>
+                  {/* <div>
                     <label className="text-sm font-medium text-gray-700">Atau URL Gambar</label>
                     <div className="mt-1 flex items-center gap-2 w-full max-w-md overflow-hidden">
                       <Input
@@ -128,7 +128,7 @@ export default function InstructorSettings() {
                       />
                       <Button variant="outline" size="sm" onClick={handleAvatarUrl} className="whitespace-nowrap">Terapkan</Button>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </CardContent>
