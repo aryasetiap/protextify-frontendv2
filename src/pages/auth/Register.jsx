@@ -37,7 +37,6 @@ export default function Register() {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
   } = useForm({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -49,7 +48,7 @@ export default function Register() {
     },
   });
 
-  const watchedRole = watch("role");
+  // const watchedRole = watch("role");
 
   const onSubmit = async (data) => {
     try {
@@ -193,13 +192,20 @@ export default function Register() {
                   <div className="space-y-4">
                     {/* Role Selection - Enhanced Design */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                      <label
+                        htmlFor="role-student"
+                        className="block text-sm font-medium text-gray-700 mb-3"
+                      >
                         Saya adalah... <span className="text-red-500">*</span>
                       </label>
                       <div className="grid grid-cols-2 gap-3">
-                        <label className="relative group">
+                        <label
+                          className="relative group"
+                          htmlFor="role-student"
+                        >
                           <input
                             type="radio"
+                            id="role-student"
                             value={USER_ROLES.STUDENT}
                             {...register("role")}
                             className="sr-only peer"
@@ -218,9 +224,13 @@ export default function Register() {
                           </div>
                         </label>
 
-                        <label className="relative group">
+                        <label
+                          className="relative group"
+                          htmlFor="role-instructor"
+                        >
                           <input
                             type="radio"
+                            id="role-instructor"
                             value={USER_ROLES.INSTRUCTOR}
                             {...register("role")}
                             className="sr-only peer"

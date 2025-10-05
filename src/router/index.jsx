@@ -20,6 +20,8 @@ import {
   Register,
   EmailVerification,
   GoogleCallback,
+  ForgotPassword,
+  ResetPassword,
 } from "../pages/auth";
 
 // Student Pages
@@ -59,6 +61,14 @@ export const router = createBrowserRouter([
       // Public routes
       { index: true, element: <Home /> },
       { path: "about", element: <About /> },
+      {
+        path: "verify-email",
+        element: (
+          <PublicRoute>
+            <EmailVerification />
+          </PublicRoute>
+        ),
+      },
 
       // Auth routes (gunakan RootLayout juga)
       {
@@ -77,6 +87,44 @@ export const router = createBrowserRouter([
             element: (
               <PublicRoute>
                 <Register />
+              </PublicRoute>
+            ),
+          },
+          {
+            path: "email-verification",
+            element: (
+              <PublicRoute>
+                <EmailVerification />
+              </PublicRoute>
+            ),
+          },
+          {
+            path: "google/callback",
+            element: <GoogleCallback />,
+          },
+          {
+            path: "forgot-password",
+            element: (
+              <PublicRoute>
+                {/* TODO: Aktifkan logic setelah endpoint BE tersedia */}
+                <ForgotPassword />
+              </PublicRoute>
+            ),
+          },
+          {
+            path: "reset-password",
+            element: (
+              <PublicRoute>
+                {/* TODO: Aktifkan logic setelah endpoint BE tersedia */}
+                <ResetPassword />
+              </PublicRoute>
+            ),
+          },
+          {
+            path: "verify-email",
+            element: (
+              <PublicRoute>
+                <EmailVerification />
               </PublicRoute>
             ),
           },

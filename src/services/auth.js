@@ -97,6 +97,14 @@ const authService = {
       throw error;
     }
   },
+
+  forgotPassword: async (email) => {
+    return await api.post("/auth/forgot-password", { email });
+  },
+
+  resetPassword: async ({ token, password }) => {
+    return await api.post("/auth/reset-password", { token, password });
+  },
 };
 
 export default authService;

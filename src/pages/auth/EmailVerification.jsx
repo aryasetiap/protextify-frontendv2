@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Mail, CheckCircle, XCircle, Clock, RefreshCw } from "lucide-react";
 import { authService } from "../../services";
@@ -22,17 +22,45 @@ export default function EmailVerification() {
   const [status, setStatus] = useState("pending"); // pending, success, error, loading
   const [countdown, setCountdown] = useState(0);
   const [isResending, setIsResending] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(""); // Tambahkan state errorMessage
 
   const email = location.state?.email || "";
   const justRegistered = location.state?.justRegistered || false;
   const verificationToken = searchParams.get("token");
+
+  // Pindahkan deklarasi verifyEmail ke atas sebelum useEffect
+  const verifyEmail = useCallback(
+    async (token) => {
+      setStatus("loading");
+      setErrorMessage(""); // Reset error message
+      try {
+        await authService.verifyEmail(token);
+        setStatus("success");
+        toast.success("Email berhasil diverifikasi!");
+
+        setTimeout(() => {
+          navigate("/auth/login", {
+            state: { message: "Email berhasil diverifikasi. Silakan login." },
+          });
+        }, 3000);
+      } catch (error) {
+        setStatus("error");
+        const msg =
+          error?.response?.data?.message ||
+          "Verifikasi email gagal. Token mungkin tidak valid atau sudah kadaluarsa.";
+        setErrorMessage(msg);
+        toast.error(msg);
+      }
+    },
+    [navigate]
+  );
 
   useEffect(() => {
     // If there's a token in URL, verify it automatically
     if (verificationToken) {
       verifyEmail(verificationToken);
     }
-  }, [verificationToken]);
+  }, [verificationToken, verifyEmail]);
 
   useEffect(() => {
     // Countdown timer for resend button
@@ -42,26 +70,19 @@ export default function EmailVerification() {
     }
   }, [countdown]);
 
-  const verifyEmail = async (token) => {
-    setStatus("loading");
-    try {
-      await authService.verifyEmail(token);
-      setStatus("success");
-      toast.success("Email berhasil diverifikasi!");
-
-      // Redirect to login after 3 seconds
-      setTimeout(() => {
-        navigate("/login", {
-          state: { message: "Email berhasil diverifikasi. Silakan login." },
-        });
-      }, 3000);
-    } catch (error) {
-      setStatus("error");
-      toast.error(
-        "Verifikasi email gagal. Token mungkin tidak valid atau sudah kadaluarsa."
+  // Gunakan localStorage untuk persist cooldown agar tidak bisa diakali dengan refresh
+  useEffect(() => {
+    // Saat mount, cek apakah ada cooldown tersimpan
+    const cooldownKey = `resendCooldown:${email}`;
+    const lastResend = localStorage.getItem(cooldownKey);
+    if (lastResend) {
+      const secondsLeft = Math.max(
+        0,
+        60 - Math.floor((Date.now() - Number(lastResend)) / 1000)
       );
+      if (secondsLeft > 0) setCountdown(secondsLeft);
     }
-  };
+  }, [email]);
 
   const resendVerification = async () => {
     if (!email || countdown > 0) return;
@@ -71,8 +92,14 @@ export default function EmailVerification() {
       await authService.sendVerification(email);
       toast.success("Email verifikasi telah dikirim ulang!");
       setCountdown(60); // 60 seconds cooldown
+
+      // Simpan waktu resend ke localStorage
+      localStorage.setItem(`resendCooldown:${email}`, Date.now().toString());
     } catch (error) {
-      toast.error("Gagal mengirim ulang email verifikasi.");
+      toast.error(
+        error?.response?.data?.message ||
+          "Gagal mengirim ulang email verifikasi. Silakan coba beberapa saat lagi."
+      );
     } finally {
       setIsResending(false);
     }
@@ -123,32 +150,36 @@ export default function EmailVerification() {
   const { title, description } = getStatusMessage();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Container className="py-12">
-        <div className="max-w-md mx-auto">
-          <Card>
+    <div className="min-h-screen bg-gradient-to-br from-[#23407a] via-[#1a2f5c] to-[#0f1b3a] relative overflow-hidden">
+      {/* Background Elements - Konsisten dengan Login/Register/Home/About */}
+      <div className="absolute inset-0">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:50px_50px]"></div>
+      </div>
+
+      <Container className="relative z-10 min-h-screen flex items-center justify-center py-32">
+        <div className="w-full max-w-md mx-auto">
+          <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-lg">
             <CardHeader className="text-center pb-6">
               <div className="mb-6">
                 <img
-                  className="mx-auto h-16 w-auto"
-                  src="/src/assets/logo-protextify.png"
+                  className="mx-auto h-12 w-auto"
+                  src="/src/assets/logo-protextify-warna.png"
                   alt="Protextify"
                 />
               </div>
+              <CardTitle className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
+                {title}
+              </CardTitle>
+              <p className="text-gray-600">{description}</p>
             </CardHeader>
 
             <CardContent className="text-center space-y-6">
               <div className="flex justify-center">{getStatusIcon()}</div>
 
-              <div>
-                <CardTitle className="text-xl font-semibold text-gray-900 mb-2">
-                  {title}
-                </CardTitle>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  {description}
-                </p>
-              </div>
-
+              {/* Notifikasi dan tombol */}
               {status === "pending" && email && (
                 <div className="space-y-4">
                   <Alert variant="info" title="Tidak menerima email?">
@@ -158,7 +189,6 @@ export default function EmailVerification() {
                       <li>• Tunggu beberapa menit</li>
                     </ul>
                   </Alert>
-
                   <Button
                     onClick={resendVerification}
                     variant="outline"
@@ -181,10 +211,22 @@ export default function EmailVerification() {
                 </div>
               )}
 
+              {status === "error" && (
+                <Alert
+                  variant="error"
+                  title="Verifikasi Gagal"
+                  className="mb-4"
+                >
+                  {errorMessage ||
+                    "Token verifikasi tidak valid atau sudah kadaluarsa. Silakan minta link verifikasi baru."}
+                </Alert>
+              )}
+
               {status === "error" && email && (
                 <Button
                   onClick={resendVerification}
                   className="w-full"
+                  variant="outline"
                   disabled={countdown > 0 || isResending}
                   loading={isResending}
                 >
@@ -199,8 +241,10 @@ export default function EmailVerification() {
                   <Alert variant="success" title="Berhasil!">
                     Akun Anda telah aktif dan siap digunakan.
                   </Alert>
-
-                  <Button onClick={() => navigate("/login")} className="w-full">
+                  <Button
+                    onClick={() => navigate("/auth/login")}
+                    className="w-full bg-[#23407a] hover:bg-[#1a2f5c] text-white font-semibold"
+                  >
                     Lanjut ke Login
                   </Button>
                 </div>
@@ -209,7 +253,7 @@ export default function EmailVerification() {
               <div className="pt-4 border-t">
                 <Button
                   variant="ghost"
-                  onClick={() => navigate("/login")}
+                  onClick={() => navigate("/auth/login")}
                   className="w-full"
                 >
                   Kembali ke Login
