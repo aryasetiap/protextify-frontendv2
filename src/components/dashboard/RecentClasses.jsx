@@ -30,53 +30,64 @@ const RecentClasses = ({ classes, totalClasses }) => {
       <CardContent>
         <div className="space-y-3">
           {classes.length > 0 ? (
-            classes.map((cls) => (
-              <Link
-                key={cls.id}
-                to={`/dashboard/classes/${cls.id}`}
-                className="group block"
-              >
-                <div className="relative overflow-hidden p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-200 hover:border-[#23407a]/30 hover:shadow-md transition-all duration-300">
-                  {/* Hover gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#23407a]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            classes.map((cls) => {
+              const assignmentsCount = Array.isArray(cls.assignments)
+                ? cls.assignments.length
+                : 0;
+              const instructorName = cls.instructor?.fullName || "Instruktur";
+              const joinedDate =
+                cls.currentUserEnrollment?.joinedAt || cls.createdAt;
 
-                  <div className="relative z-10 flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 truncate group-hover:text-[#23407a] transition-colors">
-                        {cls.name}
-                      </h3>
-                      <div className="flex items-center text-sm text-gray-600 mt-1">
-                        <Users className="h-3 w-3 mr-1" />
-                        <span className="truncate">
-                          {cls.instructor?.fullName || "Loading..."}
-                        </span>
+              return (
+                <Link
+                  key={cls.id}
+                  to={`/dashboard/classes/${cls.id}`}
+                  className="group block"
+                >
+                  <div className="relative overflow-hidden p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-200 hover:border-[#23407a]/30 hover:shadow-md transition-all duration-300">
+                    {/* Hover gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#23407a]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                    <div className="relative z-10 flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-900 truncate group-hover:text-[#23407a] transition-colors">
+                          {cls.name}
+                        </h3>
+                        <div className="flex items-center text-sm text-gray-600 mt-1">
+                          <Users className="h-3 w-3 mr-1" />
+                          <span className="truncate">{instructorName}</span>
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Bergabung:{" "}
+                          {new Date(joinedDate).toLocaleDateString("id-ID")}
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center space-x-3 ml-4">
-                      <div className="flex items-center text-sm text-gray-500">
-                        <FileText className="h-3 w-3 mr-1" />
-                        <span>{cls.assignments?.length || 0}</span>
-                      </div>
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity text-[#23407a]">
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 5l7 7-7 7"
-                          />
-                        </svg>
+                      <div className="flex items-center space-x-3 ml-4">
+                        <div className="flex items-center text-sm text-gray-500">
+                          <FileText className="h-3 w-3 mr-1" />
+                          <span>{assignmentsCount}</span>
+                        </div>
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity text-[#23407a]">
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
+                          </svg>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </Link>
-            ))
+                </Link>
+              );
+            })
           ) : (
             <div className="text-center py-8">
               <div className="w-16 h-16 bg-gradient-to-br from-[#23407a]/10 to-[#3b5fa4]/10 rounded-2xl flex items-center justify-center mx-auto mb-4">

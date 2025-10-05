@@ -23,9 +23,13 @@ const QuickActions = ({ stats }) => {
     {
       label: "Tugas Aktif",
       icon: FileText,
-      href: "/dashboard/assignments",
+      href:
+        stats.activeAssignments > 0
+          ? "/dashboard/assignments"
+          : "/dashboard/assignments", // tetap ke assignments, bisa tambahkan disabled jika 0
       variant: "outline",
       description: `${stats.activeAssignments} tugas aktif`,
+      disabled: stats.activeAssignments === 0, // opsional: disable jika tidak ada tugas aktif
     },
     {
       label: "Riwayat Pengumpulan",
@@ -49,7 +53,15 @@ const QuickActions = ({ stats }) => {
       <CardContent>
         <div className="space-y-3">
           {actions.map((action, index) => (
-            <Link key={index} to={action.href} className="group block">
+            <Link
+              key={index}
+              to={action.disabled ? "#" : action.href}
+              className={`group block ${
+                action.disabled ? "pointer-events-none opacity-50" : ""
+              }`}
+              tabIndex={action.disabled ? -1 : 0}
+              aria-disabled={action.disabled}
+            >
               <div
                 className={`
                 relative overflow-hidden p-4 rounded-xl border transition-all duration-300 

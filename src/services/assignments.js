@@ -47,6 +47,30 @@ const assignmentsService = {
       throw error;
     }
   },
+
+  // Get recent assignments for student dashboard
+  // Response structure: [{ id, title, deadline, class: { name }, active }]
+  getRecentAssignments: async (limit = 3) => {
+    try {
+      const response = await api.get("/assignments/recent", {
+        params: { limit },
+      });
+
+      // Pastikan response array dan transform sesuai ekspektasi FE
+      if (!Array.isArray(response)) return [];
+
+      return response.map((item) => ({
+        id: item.id,
+        title: item.title,
+        deadline: item.deadline,
+        class: item.class ? { name: item.class.name } : { name: "" },
+        active: !!item.active,
+      }));
+    } catch (error) {
+      console.error("Error fetching recent assignments:", error);
+      return [];
+    }
+  },
 };
 
 export default assignmentsService;

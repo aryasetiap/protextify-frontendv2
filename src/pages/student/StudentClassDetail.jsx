@@ -205,7 +205,9 @@ export default function StudentClassDetail() {
 
 // Overview Tab Component
 function OverviewTab({ classDetail }) {
-  const recentAssignments = classDetail?.assignments?.slice(0, 3) || [];
+  const recentAssignments = Array.isArray(classDetail?.assignments)
+    ? classDetail.assignments.slice(0, 3)
+    : [];
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -295,7 +297,9 @@ function OverviewTab({ classDetail }) {
 
 // Assignments Tab Component
 function AssignmentsTab({ classDetail }) {
-  const assignments = classDetail?.assignments || [];
+  const assignments = Array.isArray(classDetail?.assignments)
+    ? classDetail.assignments
+    : [];
 
   return (
     <div className="space-y-4">
@@ -314,7 +318,7 @@ function AssignmentsTab({ classDetail }) {
                       {assignment.title}
                     </h4>
                     <p className="text-sm text-gray-600 mb-3">
-                      {assignment.instructions?.substring(0, 100)}...
+                      {assignment.instructions?.substring(0, 100) || ""}
                     </p>
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
                       <span>Deadline: {formatDate(assignment.deadline)}</span>
@@ -363,7 +367,9 @@ function AssignmentsTab({ classDetail }) {
 
 // Classmates Tab Component
 function ClassmatesTab({ classDetail }) {
-  const classmates = classDetail?.enrollments || [];
+  const classmates = Array.isArray(classDetail?.enrollments)
+    ? classDetail.enrollments
+    : [];
 
   return (
     <div className="space-y-4">
@@ -380,17 +386,19 @@ function ClassmatesTab({ classDetail }) {
             <div className="space-y-0">
               {classmates.map((enrollment, index) => (
                 <div
-                  key={enrollment.student.id}
+                  key={enrollment.student.id || index}
                   className={`flex items-center p-4 ${
                     index !== classmates.length - 1 ? "border-b" : ""
                   }`}
                 >
                   <div className="w-10 h-10 bg-[#23407a] rounded-full flex items-center justify-center text-white font-medium mr-3">
-                    {enrollment.student.fullName.charAt(0).toUpperCase()}
+                    {enrollment.student.fullName
+                      ? enrollment.student.fullName.charAt(0).toUpperCase()
+                      : "?"}
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">
-                      {enrollment.student.fullName}
+                      {enrollment.student.fullName || "Tidak diketahui"}
                     </p>
                     <p className="text-sm text-gray-600">
                       {enrollment.student.institution ||
@@ -398,7 +406,8 @@ function ClassmatesTab({ classDetail }) {
                     </p>
                   </div>
                   <div className="text-sm text-gray-500">
-                    Bergabung: {formatDate(enrollment.createdAt)}
+                    Bergabung:{" "}
+                    {formatDate(enrollment.createdAt || classDetail.createdAt)}
                   </div>
                 </div>
               ))}

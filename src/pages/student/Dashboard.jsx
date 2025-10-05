@@ -64,12 +64,27 @@ export default function StudentDashboard() {
     );
   }
 
-  // Safe fallback untuk stats
+  // Safe fallback untuk stats, assignments, dan field baru
   const safeStats = {
-    totalClasses: stats?.totalClasses || 0,
-    activeAssignments: stats?.activeAssignments || 0,
-    completedAssignments: stats?.completedAssignments || 0,
-    pendingSubmissions: stats?.pendingSubmissions || 0,
+    totalClasses:
+      typeof stats?.totalClasses === "number" ? stats.totalClasses : 0,
+    activeAssignments:
+      typeof stats?.activeAssignments === "number"
+        ? stats.activeAssignments
+        : 0,
+    completedAssignments:
+      typeof stats?.completedAssignments === "number"
+        ? stats.completedAssignments
+        : 0,
+    pendingSubmissions:
+      typeof stats?.pendingSubmissions === "number"
+        ? stats.pendingSubmissions
+        : 0,
+    // Fallback untuk field baru jika nanti ada (misal: overdueAssignments)
+    overdueAssignments:
+      typeof stats?.overdueAssignments === "number"
+        ? stats.overdueAssignments
+        : 0,
   };
 
   // Safe fallback untuk arrays
@@ -172,6 +187,16 @@ export default function StudentDashboard() {
             color="purple"
             gradient="from-purple-500 to-indigo-600"
           />
+          {/* Tambahkan StatCard baru jika ada field tambahan */}
+          {safeStats.overdueAssignments > 0 && (
+            <StatCard
+              title="Tugas Terlambat"
+              value={safeStats.overdueAssignments}
+              icon={AlertCircle}
+              color="red"
+              gradient="from-red-500 to-orange-500"
+            />
+          )}
         </Grid>
       </div>
 

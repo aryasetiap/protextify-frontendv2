@@ -151,12 +151,27 @@ export default function StudentClasses() {
 function ClassCard({ classData, isNew = false }) {
   const navigate = useNavigate();
 
-  // Handle potential undefined values safely dengan data struktur baru
-  const studentsCount = 0;
-  const assignmentsCount = classData.assignments?.length || 0;
-  const activeAssignments =
-    classData.assignments?.filter((a) => a?.active).length || 0;
-  const joinedDate = classData.enrolledAt || classData.createdAt;
+  // Ambil jumlah siswa dari enrollments array
+  const studentsCount = Array.isArray(classData.enrollments)
+    ? classData.enrollments.length
+    : 0;
+
+  // Jumlah assignments dari struktur baru
+  const assignmentsCount = Array.isArray(classData.assignments)
+    ? classData.assignments.length
+    : 0;
+
+  // Jumlah tugas aktif
+  const activeAssignments = Array.isArray(classData.assignments)
+    ? classData.assignments.filter((a) => a?.active).length
+    : 0;
+
+  // Nama instruktur dari field baru
+  const instructorName = classData.instructor?.fullName || "Instruktur";
+
+  // Tanggal bergabung dari currentUserEnrollment.joinedAt, fallback ke createdAt
+  const joinedDate =
+    classData.currentUserEnrollment?.joinedAt || classData.createdAt;
 
   return (
     <Card
@@ -193,22 +208,22 @@ function ClassCard({ classData, isNew = false }) {
       </CardHeader>
 
       <CardContent className="relative z-10">
-        {/* Instructor Info with enhanced styling */}
+        {/* Instructor Info */}
         <div className="mb-6 p-4 bg-gradient-to-r from-gray-50 to-blue-50/30 rounded-xl border border-gray-100">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-[#23407a] rounded-full flex items-center justify-center text-white font-semibold text-sm">
-              {classData.instructor?.fullName?.charAt(0) || "I"}
+              {instructorName.charAt(0)}
             </div>
             <div>
               <p className="text-sm font-medium text-gray-900">
-                {classData.instructor?.fullName || "Loading..."}
+                {instructorName}
               </p>
               <p className="text-xs text-gray-500">Instruktur</p>
             </div>
           </div>
         </div>
 
-        {/* Enhanced Stats Grid */}
+        {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl border border-blue-200/50">
             <div className="flex items-center justify-center mb-2">
@@ -232,19 +247,7 @@ function ClassCard({ classData, isNew = false }) {
           </div>
         </div>
 
-        {/* Active Assignments Indicator */}
-        {activeAssignments > 0 && (
-          <div className="mb-6 p-3 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-xl border border-orange-200/50">
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-              <span className="text-sm font-semibold text-orange-800">
-                {activeAssignments} tugas aktif menunggu dikerjakan
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Join Date with enhanced styling */}
+        {/* Join Date */}
         <div className="mb-6 flex items-center text-sm text-gray-500">
           <Calendar className="h-4 w-4 mr-2 text-[#23407a]" />
           <span>Bergabung sejak {formatDate(joinedDate)}</span>
