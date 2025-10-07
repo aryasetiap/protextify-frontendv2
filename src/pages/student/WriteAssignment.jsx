@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Save, Send, AlertCircle, RefreshCw } from "lucide-react";
 import toast from "react-hot-toast";
@@ -109,7 +109,10 @@ export default function WriteAssignment() {
     }
 
     return () => {
-      leaveSubmission(submissionId);
+      // Pastikan leaveSubmission tidak error
+      if (typeof leaveSubmission === "function") {
+        leaveSubmission(submissionId);
+      }
     };
   }, [
     submission,
