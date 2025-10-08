@@ -4,8 +4,8 @@ import { toast } from "react-hot-toast";
 
 export const useTextAnalytics = (initialContent = "", limits = {}) => {
   const {
-    maxWords = 5000,
-    maxCharacters = 25000,
+    maxWords = 1000,
+    maxCharacters = 7000,
     minWords = 0,
     warnAtWordPercentage = 90,
     warnAtCharacterPercentage = 90,

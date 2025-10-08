@@ -19,7 +19,7 @@ import TextStatistics from "../../components/editor/TextStatistics";
 import DraftActions from "../../components/editor/DraftActions";
 import CitationManager from "../../components/editor/CitationManager";
 import CopyPasteMonitor from "../../components/editor/CopyPasteMonitor";
-import FileAttachment from "../../components/submission/FileAttachment";
+// import FileAttachment from "../../components/submission/FileAttachment";
 import SubmissionActions from "../../components/submission/SubmissionActions";
 
 import { useTextAnalytics } from "../../hooks/useTextAnalytics";
@@ -281,8 +281,8 @@ export default function WriteAssignment() {
   const { stats, limitChecks, validation, updateContent } = useTextAnalytics(
     content,
     {
-      maxWords: 5000,
-      maxCharacters: 25000,
+      maxWords: 1000,
+      maxCharacters: 7000,
       minWords: 100,
       // submissionId: localSubmissionId, // opsional, bisa null
     }
@@ -323,19 +323,18 @@ export default function WriteAssignment() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-white border-b border-gray-200 shadow-sm">
         <Container className="py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center">
-                <Link
-                  to={`/dashboard/classes/${assignment.classId}`}
-                  className="flex items-center text-gray-600 hover:text-gray-900"
-                >
-                  <ArrowLeft className="h-5 w-5 mr-2" />
-                  Kembali ke Kelas
-                </Link>
-              </div>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            {/* Left: Breadcrumb & Title */}
+            <div className="flex items-center gap-4 flex-wrap">
+              <Link
+                to={`/dashboard/classes/${assignment.classId}`}
+                className="flex items-center text-gray-600 hover:text-gray-900"
+              >
+                <ArrowLeft className="h-5 w-5 mr-2" />
+                Kembali ke Kelas
+              </Link>
               <Breadcrumb
                 items={[
                   { label: "Dashboard", href: "/dashboard" },
@@ -347,7 +346,8 @@ export default function WriteAssignment() {
                 ]}
               />
             </div>
-            <div className="flex items-center space-x-4">
+            {/* Right: Status */}
+            <div className="flex items-center gap-3">
               <div
                 className={`px-3 py-1 rounded-lg text-sm font-medium ${
                   statusInfo.color === "yellow"
@@ -359,58 +359,74 @@ export default function WriteAssignment() {
               >
                 {statusInfo.label}
               </div>
+              {/* Status penyimpanan (autosave/draft) */}
+              {saving && (
+                <span className="text-blue-600 text-xs ml-2 animate-pulse">
+                  Menyimpan...
+                </span>
+              )}
+              {!saving && submission.status === "DRAFT" && (
+                <span className="text-gray-500 text-xs ml-2">
+                  Draft belum dikirim
+                </span>
+              )}
+              {submission.status === "SUBMITTED" && (
+                <span className="text-green-600 text-xs ml-2">
+                  Sudah dikumpulkan
+                </span>
+              )}
             </div>
           </div>
         </Container>
       </div>
 
       {/* Main Content */}
-      <Container className="py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Main Editor */}
-          <div className="lg:col-span-3 space-y-6">
+      <Container className="py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Main Editor Area */}
+          <div className="flex-1 min-w-0 space-y-8">
             {/* Assignment Info */}
-            <Card>
+            <Card className="mb-2">
               <CardHeader>
-                <CardTitle>{assignment.title}</CardTitle>
+                <CardTitle className="text-xl font-bold text-gray-900">
+                  {assignment.title}
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="prose max-w-none">
+                <div className="prose max-w-none text-gray-700">
                   <div
                     dangerouslySetInnerHTML={{
                       __html: assignment.instructions,
                     }}
                   />
                 </div>
-                <div className="mt-4 flex items-center space-x-4 text-sm text-gray-600">
+                <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-600">
                   <span>
                     Deadline:{" "}
                     {new Date(assignment.deadline).toLocaleString("id-ID")}
                   </span>
-                  <span>•</span>
                   <span>Minimal: 100 kata</span>
-                  <span>•</span>
-                  <span>Maksimal: 5000 kata</span>
+                  <span>Maksimal: 1000 kata</span>
                 </div>
               </CardContent>
             </Card>
 
             {/* Editor */}
-            <Card>
+            <Card className="mb-2">
               <CardContent className="p-0">
                 <RichTextEditor
                   ref={editorRef}
                   value={content}
                   onChange={handleContentChange}
                   disabled={submission.status !== "DRAFT"}
-                  maxWords={5000}
+                  maxWords={1000}
                   placeholder="Mulai tulis jawaban Anda di sini..."
                 />
               </CardContent>
             </Card>
 
             {/* Citations */}
-            <Card>
+            <Card className="mb-2">
               <CardHeader>
                 <CardTitle>Daftar Pustaka & Sitasi</CardTitle>
               </CardHeader>
@@ -425,38 +441,42 @@ export default function WriteAssignment() {
               </CardContent>
             </Card>
 
-            {/* File Attachments Section */}
-            <Card className="p-6">
-              <FileAttachment
-                submission={submission}
-                onFileUploaded={(files) => {
-                  // Handle file upload
-                  console.log("Files uploaded:", files);
-                }}
-                onFileDeleted={(fileId) => {
-                  // Handle file deletion
-                  console.log("File deleted:", fileId);
-                }}
-                readOnly={submission?.status === "SUBMITTED"}
-              />
-            </Card>
+            {/* File Attachments */}
+            {/* <Card className="mb-2">
+              <CardContent>
+                <FileAttachment
+                  submission={submission}
+                  onFileUploaded={(files) => {
+                    // Handle file upload
+                    console.log("Files uploaded:", files);
+                  }}
+                  onFileDeleted={(fileId) => {
+                    // Handle file deletion
+                    console.log("File deleted:", fileId);
+                  }}
+                  readOnly={submission?.status === "SUBMITTED"}
+                />
+              </CardContent>
+            </Card> */}
 
             {/* Submission Actions */}
             {submission && (
-              <Card className="p-4">
-                <SubmissionActions
-                  submission={submission}
-                  type="single"
-                  onActionComplete={() => {
-                    // Refresh data if needed
-                  }}
-                />
+              <Card className="mb-2">
+                <CardContent>
+                  <SubmissionActions
+                    submission={submission}
+                    type="single"
+                    onActionComplete={() => {
+                      // Refresh data if needed
+                    }}
+                  />
+                </CardContent>
               </Card>
             )}
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="w-full lg:w-[340px] flex-shrink-0 space-y-6">
             {/* Text Statistics */}
             <TextStatistics
               stats={stats}
@@ -508,23 +528,27 @@ export default function WriteAssignment() {
       </Container>
 
       {/* Fixed Bottom Actions */}
-      <DraftActions
-        submission={submission}
-        canEdit={submission.status === "DRAFT"}
-        canSubmit={submission.status === "DRAFT" && content.trim()}
-        saving={saving}
-        submitting={submitting}
-        onSave={handleSave}
-        onSubmit={handleSubmit}
-        onRefresh={() => {
-          if (localSubmissionId) {
-            submissionsService
-              .getSubmissionById(localSubmissionId)
-              .then(setSubmission);
-          }
-        }}
-        validation={validation}
-      />
+      <div className="sticky bottom-0 z-30 bg-white border-t border-gray-200 shadow-lg">
+        <Container className="py-4">
+          <DraftActions
+            submission={submission}
+            canEdit={submission.status === "DRAFT"}
+            canSubmit={submission.status === "DRAFT" && content.trim()}
+            saving={saving}
+            submitting={submitting}
+            onSave={handleSave}
+            onSubmit={handleSubmit}
+            onRefresh={() => {
+              if (localSubmissionId) {
+                submissionsService
+                  .getSubmissionById(localSubmissionId)
+                  .then(setSubmission);
+              }
+            }}
+            validation={validation}
+          />
+        </Container>
+      </div>
     </div>
   );
 }

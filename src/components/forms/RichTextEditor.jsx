@@ -145,8 +145,8 @@ const RichTextEditor = forwardRef(
       onChange,
       onAutoSave,
       placeholder = "Mulai tulis jawaban Anda...",
-      maxWords = 5000,
-      maxCharacters = 25000,
+      maxWords = 1000,
+      maxCharacters = 7000,
       disabled = false,
       autoSaveInterval = 3000,
       error,
@@ -468,7 +468,7 @@ const RichTextEditor = forwardRef(
         </div>
 
         {/* Progress Bars */}
-        <div className="mt-3 space-y-2">
+        {/* <div className="mt-3 space-y-2">
           <div>
             <div className="flex justify-between text-xs text-gray-500 mb-1">
               <span>Kata</span>
@@ -518,7 +518,7 @@ const RichTextEditor = forwardRef(
               />
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Error Message */}
         {error && (

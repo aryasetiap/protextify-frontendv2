@@ -56,7 +56,7 @@ export default function InvoiceViewer({
   };
 
   // Harga per siswa dan admin fee dari config/hardcode sesuai BE
-  const PRICE_PER_STUDENT = 2500;
+  const PRICE_PER_STUDENT = 2700;
   const ADMIN_FEE = 5000;
 
   return (
