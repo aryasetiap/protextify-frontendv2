@@ -1,14 +1,3 @@
-/**
- * Mapping utama:
- * - assignmentsService.getAssignmentDetail(classId, assignmentId) -> assignment
- * - submissionsService.getHistory() -> array submission (cek draft)
- * - submissionsService.createSubmission(assignmentId, { content }) -> submission draft
- * - submissionsService.getSubmissionById(submissionId) -> detail submission
- * - submissionsService.updateSubmissionContent(submissionId, content) -> update draft
- * - submissionsService.submitSubmission(submissionId) -> submit final
- * - Tidak render data/fitur yang tidak dikirim BE.
- */
-
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Save, Send, AlertCircle, RefreshCw } from "lucide-react";
@@ -39,7 +28,11 @@ import { assignmentsService, submissionsService } from "../../services";
 // TODO: WebSocket logic dihapus, gunakan polling HTTP
 
 export default function WriteAssignment() {
-  const { classId, assignmentId } = useParams();
+  // Dukung dua pola route:
+  // 1) /dashboard/classes/:classId/assignments/:assignmentId/write
+  // 2) /dashboard/assignments/:id/write
+  const { classId, assignmentId, id } = useParams();
+  const effectiveAssignmentId = assignmentId || id; // fallback ke :id jika :assignmentId tidak ada
   const navigate = useNavigate();
   const editorRef = useRef(null);
 
@@ -58,64 +51,115 @@ export default function WriteAssignment() {
   useEffect(() => {
     const loadAssignmentData = async () => {
       setLoadingAssignment(true);
+      console.log(
+        "[WriteAssignment] Mulai load assignment:",
+        effectiveAssignmentId
+      );
       try {
-        const assignmentData = await assignmentsService.getAssignmentDetail(
-          classId,
-          assignmentId
-        );
+        let assignmentData;
+        if (classId) {
+          assignmentData = await assignmentsService.getAssignmentDetail(
+            classId,
+            effectiveAssignmentId
+          );
+        } else {
+          // fallback jika hanya punya :id
+          assignmentData = await assignmentsService.getAssignmentById(
+            effectiveAssignmentId
+          );
+        }
+        console.log("[WriteAssignment] Assignment response:", assignmentData);
         setAssignment(assignmentData);
       } catch (error) {
+        console.error("[WriteAssignment] ERROR assignment:", error);
         toast.error("Gagal memuat data tugas");
         setAssignment(null);
       } finally {
         setLoadingAssignment(false);
+        console.log(
+          "[WriteAssignment] Selesai load assignment:",
+          effectiveAssignmentId
+        );
       }
     };
-    if (classId && assignmentId) loadAssignmentData();
-  }, [classId, assignmentId]);
+    if (effectiveAssignmentId) loadAssignmentData();
+  }, [classId, effectiveAssignmentId]);
 
   // Create draft submission jika belum ada
   useEffect(() => {
     const createOrFetchSubmission = async () => {
-      if (!assignmentId || !assignment) return;
+      if (!effectiveAssignmentId || !assignment) return;
       setLoadingSubmission(true);
+      console.log(
+        "[WriteAssignment] Mulai cek/membuat submission draft:",
+        effectiveAssignmentId
+      );
       try {
         const history = await submissionsService.getHistory();
-        const existing = history.find((s) => s.assignmentId === assignmentId);
+        console.log("[WriteAssignment] Submission history:", history);
+        const existing = history.find(
+          (s) => s.assignmentId === effectiveAssignmentId
+        );
         if (existing) {
+          console.log(
+            "[WriteAssignment] Submission draft sudah ada:",
+            existing.id
+          );
           setLocalSubmissionId(existing.id);
         } else {
           const newSubmission = await submissionsService.createSubmission(
-            assignmentId,
+            effectiveAssignmentId,
             {}
+          );
+          console.log(
+            "[WriteAssignment] Submission draft baru dibuat:",
+            newSubmission
           );
           setLocalSubmissionId(newSubmission.id);
         }
       } catch (error) {
+        console.error("[WriteAssignment] ERROR submission draft:", error);
         toast.error("Gagal membuat/memuat submission");
       } finally {
         setLoadingSubmission(false);
+        console.log(
+          "[WriteAssignment] Selesai cek/membuat submission draft:",
+          effectiveAssignmentId
+        );
       }
     };
-    if (assignment && assignmentId) createOrFetchSubmission();
-  }, [assignment, assignmentId]);
+    if (assignment && effectiveAssignmentId) createOrFetchSubmission();
+  }, [assignment, effectiveAssignmentId]);
 
   // Fetch submission detail setiap kali localSubmissionId berubah
   useEffect(() => {
     const fetchSubmission = async () => {
       if (!localSubmissionId) return;
       setLoadingSubmission(true);
+      console.log(
+        "[WriteAssignment] Mulai fetch submission detail:",
+        localSubmissionId
+      );
       try {
         const data = await submissionsService.getSubmissionById(
           localSubmissionId
         );
+        console.log("[WriteAssignment] Submission detail response:", data);
         setSubmission(data);
         setContent(data.content || "");
       } catch (error) {
+        console.error(
+          "[WriteAssignment] ERROR fetch submission detail:",
+          error
+        );
         toast.error("Gagal memuat detail submission");
         setSubmission(null);
       } finally {
         setLoadingSubmission(false);
+        console.log(
+          "[WriteAssignment] Selesai fetch submission detail:",
+          localSubmissionId
+        );
       }
     };
     if (localSubmissionId) fetchSubmission();
@@ -233,7 +277,18 @@ export default function WriteAssignment() {
     );
   };
 
-  // Loading state
+  // Selalu panggil hook di atas
+  const { stats, limitChecks, validation, updateContent } = useTextAnalytics(
+    content,
+    {
+      maxWords: 5000,
+      maxCharacters: 25000,
+      minWords: 100,
+      // submissionId: localSubmissionId, // opsional, bisa null
+    }
+  );
+
+  // Baru lakukan pengecekan data setelah hook
   if (loadingAssignment || loadingSubmission) {
     return (
       <Container className="py-6">
@@ -258,16 +313,6 @@ export default function WriteAssignment() {
     );
   }
 
-  // Text analytics
-  const { stats, limitChecks, validation, updateContent } = useTextAnalytics(
-    content,
-    {
-      maxWords: 5000,
-      maxCharacters: 25000,
-      minWords: 100,
-    }
-  );
-
   // Status info
   const statusInfo = {
     DRAFT: { label: "Draft", color: "yellow" },
@@ -286,7 +331,6 @@ export default function WriteAssignment() {
                 <Link
                   to={`/dashboard/classes/${assignment.classId}`}
                   className="flex items-center text-gray-600 hover:text-gray-900"
-                  aria-label="Kembali ke Kelas"
                 >
                   <ArrowLeft className="h-5 w-5 mr-2" />
                   Kembali ke Kelas
@@ -385,9 +429,47 @@ export default function WriteAssignment() {
             <Card className="p-6">
               <FileAttachment
                 submission={submission}
-                enabled={submission.status === "DRAFT"}
+                onFileUploaded={(files) => {
+                  // Handle file upload
+                  console.log("Files uploaded:", files);
+                }}
+                onFileDeleted={(fileId) => {
+                  // Handle file deletion
+                  console.log("File deleted:", fileId);
+                }}
+                readOnly={submission?.status === "SUBMITTED"}
               />
             </Card>
+
+            {/* Submission Actions */}
+            {submission && (
+              <Card className="p-4">
+                <SubmissionActions
+                  submission={submission}
+                  type="single"
+                  onActionComplete={() => {
+                    // Refresh data if needed
+                  }}
+                />
+              </Card>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Text Statistics */}
+            <TextStatistics
+              stats={stats}
+              limitChecks={limitChecks}
+              validation={validation}
+            />
+
+            {/* Copy-Paste Monitor */}
+            <CopyPasteMonitor
+              editorRef={editorRef}
+              onSuspiciousActivity={handleSuspiciousActivity}
+              enabled={submission.status === "DRAFT"}
+            />
 
             {/* Additional Info */}
             <Card>
@@ -421,36 +503,6 @@ export default function WriteAssignment() {
                 )}
               </CardContent>
             </Card>
-
-            {/* Submission Actions */}
-            {submission && (
-              <Card className="p-4">
-                <SubmissionActions
-                  submission={submission}
-                  type="single"
-                  onActionComplete={() => {
-                    // Refresh data if needed
-                  }}
-                />
-              </Card>
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Text Statistics */}
-            <TextStatistics
-              stats={stats}
-              limitChecks={limitChecks}
-              validation={validation}
-            />
-
-            {/* Copy-Paste Monitor */}
-            <CopyPasteMonitor
-              editorRef={editorRef}
-              onSuspiciousActivity={handleSuspiciousActivity}
-              enabled={submission.status === "DRAFT"}
-            />
           </div>
         </div>
       </Container>

@@ -30,13 +30,18 @@ const CopyPasteMonitor = ({
   // Attach monitor to editor
   useEffect(() => {
     if (editorRef?.current && isMonitoring) {
-      // For TipTap editor, use ProseMirror selector
-      const editorElement =
-        editorRef.current.querySelector(".ProseMirror") ||
-        editorRef.current.querySelector('[contenteditable="true"]');
+      // Untuk TipTap: dapatkan DOM editor dari .view.dom
+      let editorDom = null;
+      if (editorRef.current.view && editorRef.current.view.dom) {
+        editorDom = editorRef.current.view.dom;
+      } else if (typeof editorRef.current.getEditor === "function") {
+        // Jika RichTextEditor expose getEditor()
+        const tiptapEditor = editorRef.current.getEditor();
+        editorDom = tiptapEditor?.view?.dom;
+      }
 
-      if (editorElement) {
-        return attachToEditor(editorElement);
+      if (editorDom) {
+        return attachToEditor(editorDom);
       }
     }
   }, [editorRef, isMonitoring, attachToEditor]);

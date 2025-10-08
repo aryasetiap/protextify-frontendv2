@@ -41,9 +41,18 @@ const Alert = forwardRef(
         icon: Info,
         iconColor: "text-blue-500",
       },
+      destructive: {
+        container: "bg-red-50 border-red-200 text-red-800",
+        icon: XCircle,
+        iconColor: "text-red-500",
+      },
     };
 
-    const { container, icon: Icon, iconColor } = variants[variant];
+    const {
+      container,
+      icon: Icon,
+      iconColor,
+    } = variants[variant] || variants.default;
 
     return (
       <div
