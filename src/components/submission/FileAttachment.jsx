@@ -118,9 +118,17 @@ export default function FileAttachment({
         <Card className="p-4">
           <FileUpload
             uploadType="submission"
-            acceptedTypes={[".pdf", ".doc", ".docx", ".txt", ".jpg", ".png"]}
-            maxSize={10 * 1024 * 1024} // 10MB
+            acceptedTypes={[".pdf", ".doc", ".docx", ".jpg", ".png", ".zip"]}
+            maxSize={20 * 1024 * 1024} // 20MB (ZIP)
             multiple={true}
+            fileSizeLimits={{
+              pdf: 10 * 1024 * 1024,
+              doc: 10 * 1024 * 1024,
+              docx: 10 * 1024 * 1024,
+              jpg: 5 * 1024 * 1024,
+              png: 5 * 1024 * 1024,
+              zip: 20 * 1024 * 1024,
+            }}
             onUploadComplete={handleFileUpload}
             onUploadError={(error) => {
               console.error("Upload error:", error);

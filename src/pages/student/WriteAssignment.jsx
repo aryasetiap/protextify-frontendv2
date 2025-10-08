@@ -73,7 +73,7 @@ export default function WriteAssignment() {
     }
   );
 
-  const { joinSubmission, leaveSubmission } = useWebSocket();
+  const { on, off, joinSubmission, leaveSubmission } = useWebSocket();
 
   // Load assignment data
   useEffect(() => {
@@ -88,6 +88,7 @@ export default function WriteAssignment() {
       } catch (error) {
         console.error("Error loading assignment:", error);
         toast.error("Gagal memuat data tugas");
+        setAssignment(null); // Hindari loading tak berujung
       }
     };
 
@@ -101,11 +102,8 @@ export default function WriteAssignment() {
     if (submission) {
       setContent(submission.content || "");
       updateContent(submission.content || "");
-
-      // Join WebSocket room
       joinSubmission(submissionId);
-
-      setIsInitializing(false);
+      setIsInitializing(false); // Pastikan ini dipanggil!
     }
 
     return () => {
@@ -143,9 +141,21 @@ export default function WriteAssignment() {
 
   // Handle submit
   const handleSubmit = async () => {
-    if (!validation.isValid) {
-      toast.error("Pastikan semua validasi terpenuhi sebelum mengumpulkan");
+    // FE: Tampilkan warning/error, tapi tetap bisa submit jika BE mengizinkan
+    if (!canSubmit()) {
+      toast.error(
+        "Submission tidak bisa dikumpulkan. Pastikan status draft dan konten sudah diisi."
+      );
       return;
+    }
+
+    // FE: Tampilkan warning jika ada error/warning validasi, tapi tetap lanjut submit
+    if (!validation.isValid) {
+      toast.warning(
+        "Konten melebihi batas FE (kata/karakter). Submit tetap dilanjutkan, validasi akhir di backend.",
+        { duration: 6000 }
+      );
+      // Lanjutkan submit, biarkan BE yang menolak jika memang tidak valid
     }
 
     try {
@@ -186,6 +196,35 @@ export default function WriteAssignment() {
       { duration: 5000 }
     );
   };
+
+  useEffect(() => {
+    // Handler untuk update submission status secara realtime
+    const handleSubmissionUpdated = (data) => {
+      if (data.submissionId === submissionId) {
+        // Update local submission state
+        loadSubmission();
+        toast.success(`Status tugas diperbarui: ${data.status}`);
+        if (typeof data.grade === "number") {
+          toast.info(`Tugas sudah dinilai: ${data.grade}`);
+        }
+        if (typeof data.plagiarismScore === "number") {
+          toast.info(`Skor plagiarisme: ${data.plagiarismScore}`);
+        }
+      }
+    };
+
+    const handleNotification = (notif) => {
+      toast[notif.type || "info"](notif.message || "Notifikasi baru");
+    };
+
+    on("submissionUpdated", handleSubmissionUpdated);
+    on("notification", handleNotification);
+
+    return () => {
+      off("submissionUpdated", handleSubmissionUpdated);
+      off("notification", handleNotification);
+    };
+  }, [on, off, submissionId, loadSubmission]);
 
   if (draftLoading || isInitializing) {
     return (

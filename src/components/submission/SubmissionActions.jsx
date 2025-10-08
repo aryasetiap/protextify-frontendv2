@@ -22,6 +22,7 @@ export default function SubmissionActions({
       setDownloading(true);
 
       if (type === "single" && submission) {
+        // Hanya gunakan endpoint resmi BE
         await submissionsService.downloadSubmission(submission.id, format);
         toast.success(`File ${format.toUpperCase()} berhasil didownload`);
       } else if (type === "bulk" && submissions) {

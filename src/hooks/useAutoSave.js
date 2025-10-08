@@ -3,6 +3,15 @@ import { useWebSocket } from "./useWebSocket";
 import { submissionsService } from "../services";
 import toast from "react-hot-toast";
 
+// Tambahkan util debounce jika belum ada
+function debounce(fn, delay) {
+  let timer;
+  return function (...args) {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
 export const useAutoSave = (submissionId, options = {}) => {
   const {
     interval = 3000,
@@ -23,7 +32,6 @@ export const useAutoSave = (submissionId, options = {}) => {
       if (!isSocketConnected() || !submissionId || !content.trim()) {
         return false;
       }
-
       try {
         updateContent(submissionId, content);
         lastSavedContentRef.current = content;
@@ -42,7 +50,6 @@ export const useAutoSave = (submissionId, options = {}) => {
       if (!submissionId || !content.trim() || isSavingRef.current) {
         return false;
       }
-
       try {
         isSavingRef.current = true;
         await submissionsService.updateSubmissionContent(submissionId, content);
@@ -59,50 +66,34 @@ export const useAutoSave = (submissionId, options = {}) => {
     [submissionId, onError]
   );
 
+  // Debounced auto-save function
+  const debouncedAutoSave = useRef(
+    debounce(async (content) => {
+      try {
+        let success = false;
+        if (useWS && isSocketConnected()) {
+          success = saveViaWebSocket(content);
+        }
+        if (!success) {
+          await saveViaAPI(content);
+        }
+        if (onSuccess) onSuccess();
+      } catch (error) {
+        toast.error("Gagal menyimpan otomatis. Coba lagi.");
+        console.error("Auto-save failed:", error);
+      }
+    }, interval)
+  ).current;
+
   // Main auto-save function
   const autoSave = useCallback(
     async (content) => {
       if (!enabled || !content || content === lastSavedContentRef.current) {
         return;
       }
-
-      // Clear existing timeout
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-
-      // Set new timeout for auto-save
-      saveTimeoutRef.current = setTimeout(async () => {
-        try {
-          let success = false;
-
-          // Try WebSocket first if enabled and connected
-          if (useWS && isSocketConnected()) {
-            success = saveViaWebSocket(content);
-          }
-
-          // Fallback to API if WebSocket failed or not available
-          if (!success) {
-            await saveViaAPI(content);
-          }
-
-          if (onSuccess) onSuccess();
-        } catch (error) {
-          // Show error toast for API failures
-          toast.error("Gagal menyimpan otomatis. Coba lagi.");
-          console.error("Auto-save failed:", error);
-        }
-      }, interval);
+      debouncedAutoSave(content);
     },
-    [
-      enabled,
-      interval,
-      useWS,
-      isSocketConnected,
-      saveViaWebSocket,
-      saveViaAPI,
-      onSuccess,
-    ]
+    [enabled, debouncedAutoSave, lastSavedContentRef]
   );
 
   // Manual save function

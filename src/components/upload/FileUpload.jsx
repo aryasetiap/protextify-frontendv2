@@ -16,9 +16,17 @@ import toast from "react-hot-toast";
 
 export default function FileUpload({
   uploadType = "submission",
-  acceptedTypes = [".pdf", ".doc", ".docx"],
-  maxSize = 10 * 1024 * 1024, // 10MB
+  acceptedTypes = [".pdf", ".doc", ".docx", ".jpg", ".png", ".zip"],
+  maxSize = 20 * 1024 * 1024, // 20MB default
   multiple = false,
+  fileSizeLimits = {
+    pdf: 10 * 1024 * 1024,
+    doc: 10 * 1024 * 1024,
+    docx: 10 * 1024 * 1024,
+    jpg: 5 * 1024 * 1024,
+    png: 5 * 1024 * 1024,
+    zip: 20 * 1024 * 1024,
+  },
   onUploadComplete,
   onUploadError,
   className = "",
@@ -32,8 +40,13 @@ export default function FileUpload({
   const validateAndAddFiles = useCallback(
     (fileList) => {
       const newFiles = Array.from(fileList).map((file) => {
+        const ext = file.name.split(".").pop()?.toLowerCase();
+        let limit = maxSize;
+        if (fileSizeLimits[ext]) {
+          limit = fileSizeLimits[ext];
+        }
         const validation = uploadService.validateFileAdvanced(file, {
-          maxSize,
+          maxSize: limit,
           allowedExtensions: acceptedTypes.map((type) => type.replace(".", "")),
           checkMimeType: true,
         });
@@ -62,7 +75,7 @@ export default function FileUpload({
         }
       });
     },
-    [maxSize, acceptedTypes, multiple]
+    [maxSize, acceptedTypes, multiple, fileSizeLimits]
   );
 
   const handleFileSelect = (e) => {

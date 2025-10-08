@@ -1,6 +1,7 @@
 // src/hooks/useWebSocket.js
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import websocketService from "../services/websocket";
 
 export const useWebSocket = () => {
   const { isAuthenticated, token } = useAuth();
@@ -38,37 +39,7 @@ export const useWebSocket = () => {
     }));
   }, [isAuthenticated, isOnline]);
 
-  // Mock implementation untuk sementara jika websocketService belum tersedia
-  const mockWebSocketService = {
-    connect: async () => Promise.resolve(),
-    disconnect: () => {},
-    isSocketConnected: () => false,
-    on: (event, callback) => {
-      console.log(`WebSocket mock: Registered listener for ${event}`);
-    },
-    off: (event, callback) => {
-      console.log(`WebSocket mock: Removed listener for ${event}`);
-    },
-    emit: (event, data) => {
-      console.log(`WebSocket mock: Emitted ${event}`, data);
-    },
-    joinRoom: (type, id) => {
-      console.log(`WebSocket mock: Joined room ${type}:${id}`);
-    },
-    leaveRoom: (type, id) => {
-      console.log(`WebSocket mock: Left room ${type}:${id}`);
-    },
-    updateContent: (submissionId, content, options) => {
-      console.log(`WebSocket mock: Updated content for ${submissionId}`);
-    },
-    onConnectionChange: (callback) => () => {},
-    waitForConnection: () => Promise.resolve(),
-    getConnectionStats: () => ({}),
-  };
-
   // Gunakan mock untuk sementara
-  const websocketService = mockWebSocketService;
-
   const connect = useCallback(async () => {
     if (!isAuthenticated || !token) {
       console.warn("Cannot connect: Not authenticated");
@@ -176,6 +147,30 @@ export const useWebSocket = () => {
           typeof websocketService.leaveRoom === "function"
         ) {
           websocketService.leaveRoom("monitoring", assignmentId);
+        }
+      },
+      [websocketService]
+    ),
+
+    joinSubmission: useCallback(
+      (submissionId) => {
+        if (
+          websocketService &&
+          typeof websocketService.joinRoom === "function"
+        ) {
+          websocketService.joinRoom("submission", submissionId);
+        }
+      },
+      [websocketService]
+    ),
+
+    leaveSubmission: useCallback(
+      (submissionId) => {
+        if (
+          websocketService &&
+          typeof websocketService.leaveRoom === "function"
+        ) {
+          websocketService.leaveRoom("submission", submissionId);
         }
       },
       [websocketService]

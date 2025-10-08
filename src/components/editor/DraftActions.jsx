@@ -102,12 +102,7 @@ const DraftActions = ({
           {canEdit && (
             <Button
               onClick={handleSubmitClick}
-              disabled={
-                !canSubmit ||
-                saving ||
-                submitting ||
-                validation.errors.length > 0
-              }
+              disabled={!canSubmit || saving || submitting}
               loading={submitting}
             >
               <Send className="h-4 w-4 mr-2" />
