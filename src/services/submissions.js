@@ -1,211 +1,288 @@
 // src/services/submissions.js
 import api from "./api";
 
+/**
+ * Membuat submission baru untuk assignment (student only)
+ * @param {string} assignmentId
+ * @param {object} submissionData { content }
+ * @returns {object} submission sesuai BE
+ */
+const createSubmission = async (assignmentId, submissionData) => {
+  try {
+    const response = await api.post(
+      `/assignments/${assignmentId}/submissions`,
+      submissionData
+    );
+    return {
+      id: response.id,
+      assignmentId: response.assignmentId,
+      studentId: response.studentId,
+      content: response.content,
+      status: response.status,
+      createdAt: response.createdAt,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Mendapat detail submission by ID
+ * @param {string} submissionId
+ * @returns {object} detail submission sesuai BE
+ */
+const getSubmissionById = async (submissionId) => {
+  try {
+    const response = await api.get(`/submissions/${submissionId}`);
+    return {
+      id: response.id,
+      assignmentId: response.assignmentId,
+      studentId: response.studentId,
+      content: response.content,
+      status: response.status,
+      grade: typeof response.grade === "number" ? response.grade : null,
+      createdAt: response.createdAt,
+      updatedAt: response.updatedAt,
+      submittedAt: response.submittedAt || null,
+      assignment: response.assignment
+        ? {
+            id: response.assignment.id,
+            title: response.assignment.title,
+            deadline: response.assignment.deadline,
+            class: response.assignment.class
+              ? { name: response.assignment.class.name }
+              : undefined,
+          }
+        : undefined,
+      plagiarismChecks: response.plagiarismChecks || null,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Update submission content (auto-save)
+ * @param {string} submissionId
+ * @param {string} content
+ * @returns {object} updated submission sesuai BE
+ */
+const updateSubmissionContent = async (submissionId, content) => {
+  try {
+    const response = await api.patch(`/submissions/${submissionId}/content`, {
+      content,
+    });
+    return {
+      id: response.id,
+      content: response.content,
+      status: response.status,
+      updatedAt: response.updatedAt,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Submit final submission (student only)
+ * @param {string} submissionId
+ * @returns {object} { id, status, submittedAt }
+ */
+const submitSubmission = async (submissionId) => {
+  try {
+    const response = await api.post(`/submissions/${submissionId}/submit`);
+    return {
+      id: response.id,
+      status: response.status,
+      submittedAt: response.submittedAt,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Grade submission (instructor only)
+ * @param {string} submissionId
+ * @param {object} gradeData { grade }
+ * @returns {object} { id, grade, status, updatedAt }
+ */
+const gradeSubmission = async (submissionId, gradeData) => {
+  try {
+    const response = await api.patch(
+      `/submissions/${submissionId}/grade`,
+      gradeData
+    );
+    return {
+      id: response.id,
+      grade: response.grade,
+      status: response.status,
+      updatedAt: response.updatedAt,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Mendapat riwayat submission untuk student
+ * @returns {Array} array submission sesuai BE
+ */
+const getHistory = async () => {
+  try {
+    const response = await api.get("/submissions/history");
+    if (!Array.isArray(response)) return [];
+
+    return response.map((item) => ({
+      id: item.id,
+      assignmentId: item.assignmentId,
+      content: item.content,
+      status: item.status,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
+      submittedAt: item.submittedAt || null,
+      grade: typeof item.grade === "number" ? item.grade : null,
+      plagiarismScore:
+        item.plagiarismChecks?.score ??
+        (typeof item.plagiarismScore === "number"
+          ? item.plagiarismScore
+          : null),
+      assignment: item.assignment
+        ? {
+            id: item.assignment.id,
+            title: item.assignment.title,
+            deadline: item.assignment.deadline,
+            class: item.assignment.class
+              ? { name: item.assignment.class.name }
+              : undefined,
+          }
+        : undefined,
+      plagiarismChecks: item.plagiarismChecks || null,
+    }));
+  } catch (error) {
+    console.error("Error fetching submissions history:", error);
+    return [];
+  }
+};
+
+/**
+ * Download submission sebagai PDF/DOCX
+ * @param {string} submissionId
+ * @param {string} format pdf|docx (default: pdf)
+ * @returns {object} { filename, url, size }
+ */
+const downloadSubmission = async (submissionId, format = "pdf") => {
+  try {
+    const response = await api.get(`/submissions/${submissionId}/download`, {
+      params: { format },
+    });
+    // Response: { filename, url, size }
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Mendapat semua versi konten submission
+ * @param {string} submissionId
+ * @returns {Array} array versi submission
+ */
+const getSubmissionVersions = async (submissionId) => {
+  try {
+    const response = await api.get(`/submissions/${submissionId}/versions`);
+    return Array.isArray(response)
+      ? response.map((v) => ({
+          version: v.version,
+          content: v.content,
+          updatedAt: v.updatedAt,
+        }))
+      : [];
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Mendapat detail versi spesifik dari submission
+ * @param {string} submissionId
+ * @param {number} version
+ * @returns {object} versi submission
+ */
+const getSubmissionVersionById = async (submissionId, version) => {
+  try {
+    const response = await api.get(
+      `/submissions/${submissionId}/versions/${version}`
+    );
+    return {
+      version: response.version,
+      content: response.content,
+      updatedAt: response.updatedAt,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Monitoring submission untuk assignment tertentu (instructor only)
+ * @param {string} classId
+ * @param {string} assignmentId
+ * @returns {Array} array submission sesuai BE
+ */
+const getAssignmentSubmissions = async (classId, assignmentId) => {
+  try {
+    const response = await api.get(
+      `/classes/${classId}/assignments/${assignmentId}/submissions`
+    );
+    return Array.isArray(response)
+      ? response.map((item) => ({
+          id: item.id,
+          student: item.student,
+          status: item.status,
+          updatedAt: item.updatedAt,
+          plagiarismChecks: item.plagiarismChecks || null,
+        }))
+      : [];
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Mendapat riwayat submission di kelas (instructor only)
+ * @param {string} classId
+ * @returns {Array} array submission sesuai BE
+ */
+const getClassHistory = async (classId) => {
+  try {
+    const response = await api.get(`/classes/${classId}/history`);
+    return Array.isArray(response)
+      ? response.map((item) => ({
+          id: item.id,
+          student: item.student,
+          assignment: item.assignment,
+          status: item.status,
+          createdAt: item.createdAt,
+        }))
+      : [];
+  } catch (error) {
+    throw error;
+  }
+};
+
 const submissionsService = {
-  // Create submission for assignment (student only)
-  createSubmission: async (assignmentId, submissionData) => {
-    try {
-      const response = await api.post(
-        `/assignments/${assignmentId}/submissions`,
-        submissionData
-      );
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  // Get submission detail by ID
-  getSubmissionById: async (submissionId) => {
-    try {
-      const response = await api.get(`/submissions/${submissionId}`);
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  // Update submission content (auto-save)
-  updateSubmissionContent: async (submissionId, content) => {
-    try {
-      const response = await api.patch(`/submissions/${submissionId}/content`, {
-        content,
-      });
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  // Submit final submission (student only)
-  submitSubmission: async (submissionId) => {
-    try {
-      const response = await api.post(`/submissions/${submissionId}/submit`);
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  // Grade submission (instructor only)
-  gradeSubmission: async (submissionId, gradeData) => {
-    try {
-      const response = await api.patch(
-        `/submissions/${submissionId}/grade`,
-        gradeData
-      );
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  // Get submission history for student
-  getHistory: async () => {
-    try {
-      const response = await api.get("/submissions/history");
-      // Pastikan response array dan lakukan transform agar kompatibel
-      if (!Array.isArray(response)) return [];
-
-      return response.map((item) => ({
-        id: item.id,
-        assignmentId: item.assignmentId,
-        content: item.content,
-        status: item.status,
-        createdAt: item.createdAt,
-        updatedAt: item.updatedAt,
-        submittedAt: item.submittedAt || null, // field baru, fallback null
-        grade: typeof item.grade === "number" ? item.grade : null, // field baru, fallback null
-        plagiarismScore:
-          typeof item.plagiarismScore === "number"
-            ? item.plagiarismScore
-            : null, // field baru, fallback null
-        assignment: item.assignment
-          ? {
-              id: item.assignment.id,
-              title: item.assignment.title,
-              deadline: item.assignment.deadline,
-              class: item.assignment.class
-                ? { name: item.assignment.class.name }
-                : { name: "" }, // pastikan assignment.class.name selalu ada
-            }
-          : null,
-        // Tambahkan field lain jika diperlukan
-      }));
-    } catch (error) {
-      console.error("Error fetching submissions history:", error);
-      return []; // Return empty array on error
-    }
-  },
-
-  // Enhanced download with format options
-  downloadSubmission: async (submissionId, format = "pdf", options = {}) => {
-    try {
-      const response = await api.get(`/submissions/${submissionId}/download`, {
-        params: {
-          format,
-          ...options,
-        },
-        responseType: "blob", // Important for file downloads
-      });
-
-      // Create download link
-      const filename =
-        response.headers["content-disposition"]
-          ?.split("filename=")[1]
-          ?.replace(/"/g, "") || `submission-${submissionId}.${format}`;
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", filename);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-
-      return { success: true, filename };
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  // Download with custom options
-  downloadSubmissionWithOptions: async (submissionId, downloadOptions = {}) => {
-    const {
-      format = "pdf",
-      includeAttachments = true,
-      watermark = null,
-      quality = "high",
-    } = downloadOptions;
-
-    try {
-      const response = await api.post(
-        `/submissions/${submissionId}/download-custom`,
-        {
-          format,
-          includeAttachments,
-          watermark,
-          quality,
-        },
-        {
-          responseType: "blob",
-        }
-      );
-
-      // Handle download response
-      const contentDisposition = response.headers["content-disposition"];
-      const filename = contentDisposition
-        ? contentDisposition.split("filename=")[1].replace(/"/g, "")
-        : `submission-${submissionId}-custom.${format}`;
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", filename);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-
-      return { success: true, filename, size: response.data.size };
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  // Bulk download submissions
-  downloadMultipleSubmissions: async (submissionIds, format = "zip") => {
-    try {
-      const response = await api.post(
-        "/submissions/download-bulk",
-        {
-          submissionIds,
-          format,
-        },
-        {
-          responseType: "blob",
-        }
-      );
-
-      const filename = `submissions-bulk-${
-        new Date().toISOString().split("T")[0]
-      }.${format}`;
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", filename);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-
-      return { success: true, filename };
-    } catch (error) {
-      throw error;
-    }
-  },
+  createSubmission,
+  getSubmissionById,
+  updateSubmissionContent,
+  submitSubmission,
+  gradeSubmission,
+  getHistory,
+  downloadSubmission,
+  getSubmissionVersions,
+  getSubmissionVersionById,
+  getAssignmentSubmissions,
+  getClassHistory,
 };
 
 export default submissionsService;

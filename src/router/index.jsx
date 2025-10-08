@@ -12,7 +12,16 @@ import PublicRoute from "../components/PublicRoute";
 import ErrorBoundary from "../components/ErrorBoundary";
 
 // Public Pages
-import { Home, About, Pricing, Help, Docs, Privacy, Terms, NotFound } from "../pages/public";
+import {
+  Home,
+  About,
+  Pricing,
+  Help,
+  Docs,
+  Privacy,
+  Terms,
+  NotFound,
+} from "../pages/public";
 
 // Auth Pages
 import {
@@ -176,7 +185,7 @@ export const router = createBrowserRouter([
         element: <StudentClassDetail />,
       },
       {
-        path: "assignments/:assignmentId/write",
+        path: "assignments/:id/write",
         element: <WriteAssignment />,
       },
       {
@@ -258,6 +267,10 @@ export const router = createBrowserRouter([
   {
     path: "register",
     element: <Navigate to="/auth/register" replace />,
+  },
+  {
+    path: "classes/:classId/assignments/:assignmentId/write",
+    element: <WriteAssignment />,
   },
 ]);
 

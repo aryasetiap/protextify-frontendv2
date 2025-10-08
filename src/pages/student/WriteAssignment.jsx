@@ -22,171 +22,231 @@ import CopyPasteMonitor from "../../components/editor/CopyPasteMonitor";
 import FileAttachment from "../../components/submission/FileAttachment";
 import SubmissionActions from "../../components/submission/SubmissionActions";
 
-import { useDraftManager } from "../../hooks/useDraftManager";
-import { useAutoSave } from "../../hooks/useAutoSave";
 import { useTextAnalytics } from "../../hooks/useTextAnalytics";
-import { useWebSocket } from "../../hooks/useWebSocket";
-
 import { assignmentsService, submissionsService } from "../../services";
 
+// TODO: WebSocket logic dihapus, gunakan polling HTTP
+
 export default function WriteAssignment() {
-  const { submissionId } = useParams();
+  const { classId, assignmentId } = useParams();
   const navigate = useNavigate();
   const editorRef = useRef(null);
 
   // State
   const [assignment, setAssignment] = useState(null);
+  const [submission, setSubmission] = useState(null);
+  const [localSubmissionId, setLocalSubmissionId] = useState(null);
   const [content, setContent] = useState("");
   const [citations, setCitations] = useState([]);
-  const [isInitializing, setIsInitializing] = useState(true);
-
-  // Hooks
-  const {
-    submission,
-    loading: draftLoading,
-    saving,
-    submitting,
-    saveDraft,
-    submitSubmission,
-    loadSubmission,
-    canEdit,
-    canSubmit,
-    getStatusInfo,
-  } = useDraftManager(submissionId);
-
-  const { autoSave, manualSave } = useAutoSave(submissionId, {
-    enabled: canEdit(),
-    onSuccess: () => {
-      console.log("Auto-save successful");
-    },
-    onError: (error) => {
-      console.error("Auto-save failed:", error);
-    },
-  });
-
-  const { stats, limitChecks, validation, updateContent } = useTextAnalytics(
-    content,
-    {
-      maxWords: 5000,
-      maxCharacters: 25000,
-      minWords: 100,
-    }
-  );
-
-  const { on, off, joinSubmission, leaveSubmission } = useWebSocket();
+  const [loadingAssignment, setLoadingAssignment] = useState(true);
+  const [loadingSubmission, setLoadingSubmission] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   // Load assignment data
   useEffect(() => {
     const loadAssignmentData = async () => {
-      if (!submission?.assignmentId) return;
-
+      setLoadingAssignment(true);
+      console.log("[WriteAssignment] Mulai load assignment:", assignmentId);
       try {
-        const assignmentData = await assignmentsService.getAssignmentById(
-          submission.assignmentId
+        const assignmentData = await assignmentsService.getAssignmentDetail(
+          classId,
+          assignmentId
         );
+        console.log("[WriteAssignment] Assignment response:", assignmentData);
         setAssignment(assignmentData);
       } catch (error) {
-        console.error("Error loading assignment:", error);
+        console.error("[WriteAssignment] ERROR assignment:", error);
         toast.error("Gagal memuat data tugas");
-        setAssignment(null); // Hindari loading tak berujung
+        setAssignment(null);
+      } finally {
+        setLoadingAssignment(false);
+        console.log("[WriteAssignment] Selesai load assignment:", assignmentId);
       }
     };
+    if (classId && assignmentId) loadAssignmentData();
+  }, [classId, assignmentId]);
 
-    loadAssignmentData();
-  }, [submission?.assignmentId]);
-
-  // Initialize content and WebSocket
+  // Create draft submission jika belum ada
   useEffect(() => {
-    if (submission && !isInitializing) return;
-
-    if (submission) {
-      setContent(submission.content || "");
-      updateContent(submission.content || "");
-      joinSubmission(submissionId);
-      setIsInitializing(false); // Pastikan ini dipanggil!
-    }
-
-    return () => {
-      leaveSubmission(submissionId);
+    const createOrFetchSubmission = async () => {
+      if (!assignmentId || !assignment) return;
+      setLoadingSubmission(true);
+      console.log(
+        "[WriteAssignment] Mulai cek/membuat submission draft:",
+        assignmentId
+      );
+      try {
+        const history = await submissionsService.getHistory();
+        console.log("[WriteAssignment] Submission history:", history);
+        const existing = history.find((s) => s.assignmentId === assignmentId);
+        if (existing) {
+          console.log(
+            "[WriteAssignment] Submission draft sudah ada:",
+            existing.id
+          );
+          setLocalSubmissionId(existing.id);
+        } else {
+          const newSubmission = await submissionsService.createSubmission(
+            assignmentId,
+            {}
+          );
+          console.log(
+            "[WriteAssignment] Submission draft baru dibuat:",
+            newSubmission
+          );
+          setLocalSubmissionId(newSubmission.id);
+        }
+      } catch (error) {
+        console.error("[WriteAssignment] ERROR submission draft:", error);
+        toast.error("Gagal membuat/memuat submission");
+      } finally {
+        setLoadingSubmission(false);
+        console.log(
+          "[WriteAssignment] Selesai cek/membuat submission draft:",
+          assignmentId
+        );
+      }
     };
-  }, [
-    submission,
-    submissionId,
-    joinSubmission,
-    leaveSubmission,
-    updateContent,
-    isInitializing,
-  ]);
+    if (assignment && assignmentId) createOrFetchSubmission();
+  }, [assignment, assignmentId]);
+
+  // Fetch submission detail setiap kali localSubmissionId berubah
+  useEffect(() => {
+    const fetchSubmission = async () => {
+      if (!localSubmissionId) return;
+      setLoadingSubmission(true);
+      console.log(
+        "[WriteAssignment] Mulai fetch submission detail:",
+        localSubmissionId
+      );
+      try {
+        const data = await submissionsService.getSubmissionById(
+          localSubmissionId
+        );
+        console.log("[WriteAssignment] Submission detail response:", data);
+        setSubmission(data);
+        setContent(data.content || "");
+      } catch (error) {
+        console.error(
+          "[WriteAssignment] ERROR fetch submission detail:",
+          error
+        );
+        toast.error("Gagal memuat detail submission");
+        setSubmission(null);
+      } finally {
+        setLoadingSubmission(false);
+        console.log(
+          "[WriteAssignment] Selesai fetch submission detail:",
+          localSubmissionId
+        );
+      }
+    };
+    if (localSubmissionId) fetchSubmission();
+  }, [localSubmissionId]);
+
+  // Polling submission status setiap 45 detik
+  useEffect(() => {
+    if (!localSubmissionId) return;
+    const interval = setInterval(async () => {
+      try {
+        const data = await submissionsService.getSubmissionById(
+          localSubmissionId
+        );
+        setSubmission(data);
+      } catch (error) {
+        // Silent error
+      }
+    }, 45000);
+    return () => clearInterval(interval);
+  }, [localSubmissionId]);
+
+  // Auto-save konten setiap 15 detik
+  useEffect(() => {
+    if (!localSubmissionId || !submission || submission.status !== "DRAFT")
+      return;
+    const interval = setInterval(async () => {
+      if (content.trim() === "") return;
+      setSaving(true);
+      try {
+        await submissionsService.updateSubmissionContent(
+          localSubmissionId,
+          content
+        );
+        toast.success("Draft tersimpan otomatis");
+      } catch (error) {
+        toast.error("Auto-save gagal");
+      } finally {
+        setSaving(false);
+      }
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [localSubmissionId, content, submission]);
 
   // Handle content change
   const handleContentChange = (newContent) => {
     setContent(newContent);
-    updateContent(newContent);
-
-    // Auto-save
-    if (canEdit()) {
-      autoSave(newContent);
-    }
   };
 
-  // Handle manual save
+  // Manual save
   const handleSave = async () => {
+    if (!localSubmissionId) return;
+    setSaving(true);
     try {
-      await manualSave(content);
-      await loadSubmission(); // Refresh data
+      await submissionsService.updateSubmissionContent(
+        localSubmissionId,
+        content
+      );
+      toast.success("Draft berhasil disimpan");
     } catch (error) {
-      toast.error("Gagal menyimpan");
+      toast.error("Gagal menyimpan draft");
+    } finally {
+      setSaving(false);
     }
   };
 
-  // Handle submit
+  // Submit tugas
   const handleSubmit = async () => {
-    // FE: Tampilkan warning/error, tapi tetap bisa submit jika BE mengizinkan
-    if (!canSubmit()) {
+    if (
+      !localSubmissionId ||
+      !submission ||
+      submission.status !== "DRAFT" ||
+      !content.trim()
+    ) {
       toast.error(
-        "Submission tidak bisa dikumpulkan. Pastikan status draft dan konten sudah diisi."
+        "Submission tidak bisa dikumpulkan. Pastikan draft sudah diisi."
       );
       return;
     }
-
-    // FE: Tampilkan warning jika ada error/warning validasi, tapi tetap lanjut submit
-    if (!validation.isValid) {
-      toast.warning(
-        "Konten melebihi batas FE (kata/karakter). Submit tetap dilanjutkan, validasi akhir di backend.",
-        { duration: 6000 }
-      );
-      // Lanjutkan submit, biarkan BE yang menolak jika memang tidak valid
-    }
-
+    setSubmitting(true);
     try {
-      await submitSubmission();
+      await submissionsService.submitSubmission(localSubmissionId);
       toast.success("Tugas berhasil dikumpulkan!");
+      // Refresh submission status
+      const updated = await submissionsService.getSubmissionById(
+        localSubmissionId
+      );
+      setSubmission(updated);
       navigate(`/dashboard/classes/${assignment?.classId}`);
     } catch (error) {
       toast.error("Gagal mengumpulkan tugas");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   // Citation handlers
-  const handleAddCitation = (citation) => {
+  const handleAddCitation = (citation) =>
     setCitations([...citations, citation]);
-  };
-
   const handleEditCitation = (index, citation) => {
     const newCitations = [...citations];
     newCitations[index] = citation;
     setCitations(newCitations);
   };
-
-  const handleRemoveCitation = (index) => {
+  const handleRemoveCitation = (index) =>
     setCitations(citations.filter((_, i) => i !== index));
-  };
-
   const handleInsertCitation = (citationText) => {
-    // Insert citation into TipTap editor
-    if (editorRef.current) {
-      editorRef.current.insertText(`(${citationText})`);
-    }
+    if (editorRef.current) editorRef.current.insertText(`(${citationText})`);
   };
 
   // Suspicious activity handler
@@ -197,36 +257,8 @@ export default function WriteAssignment() {
     );
   };
 
-  useEffect(() => {
-    // Handler untuk update submission status secara realtime
-    const handleSubmissionUpdated = (data) => {
-      if (data.submissionId === submissionId) {
-        // Update local submission state
-        loadSubmission();
-        toast.success(`Status tugas diperbarui: ${data.status}`);
-        if (typeof data.grade === "number") {
-          toast.info(`Tugas sudah dinilai: ${data.grade}`);
-        }
-        if (typeof data.plagiarismScore === "number") {
-          toast.info(`Skor plagiarisme: ${data.plagiarismScore}`);
-        }
-      }
-    };
-
-    const handleNotification = (notif) => {
-      toast[notif.type || "info"](notif.message || "Notifikasi baru");
-    };
-
-    on("submissionUpdated", handleSubmissionUpdated);
-    on("notification", handleNotification);
-
-    return () => {
-      off("submissionUpdated", handleSubmissionUpdated);
-      off("notification", handleNotification);
-    };
-  }, [on, off, submissionId, loadSubmission]);
-
-  if (draftLoading || isInitializing) {
+  // Loading state
+  if (loadingAssignment || loadingSubmission) {
     return (
       <Container className="py-6">
         <div className="flex items-center justify-center h-64">
@@ -236,7 +268,7 @@ export default function WriteAssignment() {
     );
   }
 
-  if (!submission || !assignment) {
+  if (!assignment || !submission) {
     return (
       <Container className="py-6">
         <Alert variant="destructive">
@@ -250,7 +282,22 @@ export default function WriteAssignment() {
     );
   }
 
-  const statusInfo = getStatusInfo();
+  // Text analytics
+  const { stats, limitChecks, validation, updateContent } = useTextAnalytics(
+    content,
+    {
+      maxWords: 5000,
+      maxCharacters: 25000,
+      minWords: 100,
+    }
+  );
+
+  // Status info
+  const statusInfo = {
+    DRAFT: { label: "Draft", color: "yellow" },
+    SUBMITTED: { label: "Dikumpulkan", color: "blue" },
+    GRADED: { label: "Dinilai", color: "green" },
+  }[submission.status] || { label: "Draft", color: "yellow" };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -268,7 +315,6 @@ export default function WriteAssignment() {
                   Kembali ke Kelas
                 </Link>
               </div>
-
               <Breadcrumb
                 items={[
                   { label: "Dashboard", href: "/dashboard" },
@@ -280,21 +326,18 @@ export default function WriteAssignment() {
                 ]}
               />
             </div>
-
             <div className="flex items-center space-x-4">
-              {statusInfo && (
-                <div
-                  className={`px-3 py-1 rounded-lg text-sm font-medium ${
-                    statusInfo.color === "yellow"
-                      ? "bg-yellow-100 text-yellow-800"
-                      : statusInfo.color === "blue"
-                      ? "bg-blue-100 text-blue-800"
-                      : "bg-green-100 text-green-800"
-                  }`}
-                >
-                  {statusInfo.label}
-                </div>
-              )}
+              <div
+                className={`px-3 py-1 rounded-lg text-sm font-medium ${
+                  statusInfo.color === "yellow"
+                    ? "bg-yellow-100 text-yellow-800"
+                    : statusInfo.color === "blue"
+                    ? "bg-blue-100 text-blue-800"
+                    : "bg-green-100 text-green-800"
+                }`}
+              >
+                {statusInfo.label}
+              </div>
             </div>
           </div>
         </Container>
@@ -338,8 +381,7 @@ export default function WriteAssignment() {
                   ref={editorRef}
                   value={content}
                   onChange={handleContentChange}
-                  onAutoSave={autoSave}
-                  disabled={!canEdit()}
+                  disabled={submission.status !== "DRAFT"}
                   maxWords={5000}
                   placeholder="Mulai tulis jawaban Anda di sini..."
                 />
@@ -405,7 +447,7 @@ export default function WriteAssignment() {
             <CopyPasteMonitor
               editorRef={editorRef}
               onSuspiciousActivity={handleSuspiciousActivity}
-              enabled={canEdit()}
+              enabled={submission.status === "DRAFT"}
             />
 
             {/* Additional Info */}
@@ -447,13 +489,19 @@ export default function WriteAssignment() {
       {/* Fixed Bottom Actions */}
       <DraftActions
         submission={submission}
-        canEdit={canEdit()}
-        canSubmit={canSubmit()}
+        canEdit={submission.status === "DRAFT"}
+        canSubmit={submission.status === "DRAFT" && content.trim()}
         saving={saving}
         submitting={submitting}
         onSave={handleSave}
         onSubmit={handleSubmit}
-        onRefresh={loadSubmission}
+        onRefresh={() => {
+          if (localSubmissionId) {
+            submissionsService
+              .getSubmissionById(localSubmissionId)
+              .then(setSubmission);
+          }
+        }}
         validation={validation}
       />
     </div>
