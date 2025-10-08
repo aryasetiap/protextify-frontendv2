@@ -48,25 +48,31 @@ export default function Register() {
     },
   });
 
-  // const watchedRole = watch("role");
-
   const onSubmit = async (data) => {
     try {
       clearError();
-      await registerUser(data);
+      // Kirim payload sesuai BE
+      const response = await registerUser({
+        email: data.email,
+        password: data.password,
+        fullName: data.fullName,
+        role: data.role,
+        institution: data.institution,
+      });
 
-      // Navigate to email verification page
+      // Setelah sukses, arahkan ke halaman verifikasi email
       navigate("/auth/email-verification", {
         state: { email: data.email, justRegistered: true },
       });
     } catch (error) {
-      // Error handled by AuthContext
-      console.error("Registration failed:", error);
+      // Error sudah ditangani oleh context
     }
   };
 
   const handleGoogleRegister = () => {
+    // Gunakan service untuk Google OAuth
     window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
+    // Atau: authService.googleLogin();
   };
 
   return (

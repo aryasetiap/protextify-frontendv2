@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   Button,
   Input,
@@ -18,16 +18,22 @@ export default function ResetPassword() {
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus("loading");
     setError("");
     try {
-      await authService.resetPassword({ token, password });
+      await authService.resetPassword({ token, newPassword: password });
       setStatus("success");
+      setTimeout(() => {
+        navigate("/auth/login");
+      }, 2000);
     } catch (err) {
-      setError(err.response?.data?.message || "Gagal reset password");
+      setError(
+        err.response?.data?.message || err.message || "Gagal reset password"
+      );
       setStatus("error");
     }
   };

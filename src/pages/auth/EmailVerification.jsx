@@ -28,13 +28,13 @@ export default function EmailVerification() {
   const justRegistered = location.state?.justRegistered || false;
   const verificationToken = searchParams.get("token");
 
-  // Pindahkan deklarasi verifyEmail ke atas sebelum useEffect
+  // Verifikasi email sesuai BE
   const verifyEmail = useCallback(
     async (token) => {
       setStatus("loading");
       setErrorMessage(""); // Reset error message
       try {
-        await authService.verifyEmail(token);
+        await authService.verifyEmail(token); // payload { token }
         setStatus("success");
         toast.success("Email berhasil diverifikasi!");
 
@@ -56,23 +56,22 @@ export default function EmailVerification() {
   );
 
   useEffect(() => {
-    // If there's a token in URL, verify it automatically
+    // Jika ada token di URL, verifikasi otomatis
     if (verificationToken) {
       verifyEmail(verificationToken);
     }
   }, [verificationToken, verifyEmail]);
 
   useEffect(() => {
-    // Countdown timer for resend button
+    // Countdown timer untuk resend button
     if (countdown > 0) {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       return () => clearTimeout(timer);
     }
   }, [countdown]);
 
-  // Gunakan localStorage untuk persist cooldown agar tidak bisa diakali dengan refresh
+  // Saat mount, cek cooldown di localStorage
   useEffect(() => {
-    // Saat mount, cek apakah ada cooldown tersimpan
     const cooldownKey = `resendCooldown:${email}`;
     const lastResend = localStorage.getItem(cooldownKey);
     if (lastResend) {
@@ -84,16 +83,15 @@ export default function EmailVerification() {
     }
   }, [email]);
 
+  // Resend email verifikasi sesuai BE
   const resendVerification = async () => {
     if (!email || countdown > 0) return;
 
     setIsResending(true);
     try {
-      await authService.sendVerification(email);
+      await authService.sendVerification(email); // payload { email }
       toast.success("Email verifikasi telah dikirim ulang!");
-      setCountdown(60); // 60 seconds cooldown
-
-      // Simpan waktu resend ke localStorage
+      setCountdown(60); // 60 detik cooldown
       localStorage.setItem(`resendCooldown:${email}`, Date.now().toString());
     } catch (error) {
       toast.error(

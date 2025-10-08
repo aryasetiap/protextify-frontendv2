@@ -27,39 +27,49 @@ const GoogleCallback = () => {
         const errorMessage = errorDescription || "Google login failed";
         dispatch({ type: "LOGIN_ERROR", payload: errorMessage });
         toast.error(`Login Google gagal: ${errorMessage}`);
-        navigate("/auth/login", { replace: true }); // ✅ Update route
+        navigate("/auth/login", { replace: true });
         return;
       }
 
       if (token) {
         try {
+          // Simpan token ke localStorage
           localStorage.setItem("token", token);
-          const user = await authService.getCurrentUser();
+
+          // Ambil data user dan accessToken dari BE
+          const response = await authService.getGoogleUser();
+          const { accessToken, user } = response;
+
+          // Simpan accessToken dan user ke localStorage
+          localStorage.setItem("token", accessToken);
+          localStorage.setItem("user", JSON.stringify(user));
 
           dispatch({
             type: "LOGIN_SUCCESS",
-            payload: { user, token },
+            payload: { user, token: accessToken },
           });
 
           toast.success(`Selamat datang, ${user.fullName}!`);
 
-          // ✅ Use getDefaultRoute function
+          // Redirect sesuai role
           const redirectPath = getDefaultRoute(user.role);
-          console.warn("Google login success:", {
-            userRole: user.role,
-            redirectPath,
-          });
-
           navigate(redirectPath, { replace: true });
         } catch (error) {
-          console.error("Failed to get user info:", error);
           dispatch({
             type: "LOGIN_ERROR",
-            payload: "Gagal mendapatkan informasi pengguna",
+            payload:
+              error?.response?.data?.message ||
+              error?.message ||
+              "Gagal mendapatkan informasi pengguna",
           });
           localStorage.removeItem("token");
-          toast.error("Gagal mendapatkan informasi pengguna");
-          navigate("/auth/login", { replace: true }); // ✅ Update route
+          localStorage.removeItem("user");
+          toast.error(
+            error?.response?.data?.message ||
+              error?.message ||
+              "Gagal mendapatkan informasi pengguna"
+          );
+          navigate("/auth/login", { replace: true });
         }
       } else {
         dispatch({
@@ -67,7 +77,7 @@ const GoogleCallback = () => {
           payload: "Token tidak ditemukan",
         });
         toast.error("Token tidak ditemukan");
-        navigate("/auth/login", { replace: true }); // ✅ Update route
+        navigate("/auth/login", { replace: true });
       }
     };
 

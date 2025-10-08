@@ -43,37 +43,26 @@ export default function Login() {
   const onSubmit = async (data) => {
     try {
       clearError();
-      console.warn("🚀 Starting login process...");
-
-      const response = await login(data);
-
-      console.warn("✅ Login successful, response:", {
-        user: response.user,
-        userRole: response.user?.role,
-        from,
+      // Kirim payload login ke context
+      const response = await login({
+        email: data.email,
+        password: data.password,
       });
 
-      // ✅ PERBAIKAN: Pastikan menggunakan getDefaultRoute
+      // Redirect sesuai role (gunakan helper)
       const redirectPath = getDefaultRoute(response.user.role);
-
-      console.warn("🎯 Redirecting to:", {
-        userRole: response.user.role,
-        from,
-        redirectPath,
-        getDefaultRouteResult: getDefaultRoute(response.user.role),
-      });
-
-      // ✅ Navigate dengan delay untuk memastikan state terupdate
       setTimeout(() => {
         navigate(redirectPath, { replace: true });
       }, 100);
     } catch (error) {
-      console.error("❌ Login failed:", error);
+      // Error sudah ditangani oleh context
     }
   };
 
   const handleGoogleLogin = () => {
+    // Gunakan endpoint BE untuk Google OAuth
     window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
+    // Atau: authService.googleLogin();
   };
 
   return (

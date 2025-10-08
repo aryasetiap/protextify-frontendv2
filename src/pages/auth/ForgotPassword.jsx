@@ -9,22 +9,30 @@ import {
   Container,
   Alert,
 } from "../../components";
-import { authService } from "../../services"; 
+import { authService } from "../../services";
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus("loading");
     setError("");
+    setSuccessMsg("");
     try {
-      await authService.forgotPassword(email);
+      // Kirim request ke service sesuai BE
+      const response = await authService.forgotPassword(email);
       setStatus("success");
+      setSuccessMsg(
+        response.message ||
+          "Jika email terdaftar, link reset password akan dikirim ke email Anda."
+      );
     } catch (err) {
       setError(
-        err.response?.data?.message ||
+        err?.response?.data?.message ||
+          err?.message ||
           "Gagal mengirim permintaan reset password"
       );
       setStatus("error");
@@ -81,8 +89,7 @@ export default function ForgotPassword() {
                 </Button>
                 {status === "success" && (
                   <Alert variant="success" title="Berhasil!">
-                    Jika email terdaftar, link reset password akan dikirim ke
-                    email Anda.
+                    {successMsg}
                   </Alert>
                 )}
                 {status === "error" && (
