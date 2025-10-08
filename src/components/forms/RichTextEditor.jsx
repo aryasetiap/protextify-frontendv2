@@ -1,44 +1,142 @@
 import {
-  useState,
   useRef,
-  useCallback,
   useEffect,
+  useState,
   forwardRef,
   useImperativeHandle,
 } from "react";
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import { Placeholder } from "@tiptap/extension-placeholder";
-import { TextStyle } from "@tiptap/extension-text-style";
-import { Color } from "@tiptap/extension-color";
-import { TextAlign } from "@tiptap/extension-text-align";
-import { Link } from "@tiptap/extension-link";
 import {
-  Save,
-  FileText,
-  Type,
-  AlertCircle,
-  Bold,
-  Italic,
-  Underline,
-  List,
-  ListOrdered,
-  Quote,
-  Undo,
-  Redo,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  LinkIcon,
-  Unlink,
-  CheckCircle,
-  Eye,
-  Heading1,
-  Heading2,
-  Heading3,
-} from "lucide-react";
-import { Badge, Button, Input, Modal } from "../ui";
+  $getSelection,
+  $isRangeSelection,
+  $getRoot,
+  $insertNodes,
+} from "lexical";
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
+import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import { ListPlugin } from "@lexical/react/LexicalListPlugin";
+import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
+import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin";
+import { TablePlugin } from "@lexical/react/LexicalTablePlugin";
+import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
+import { CheckListPlugin } from "@lexical/react/LexicalCheckListPlugin";
+import { AutoLinkPlugin } from "@lexical/react/LexicalAutoLinkPlugin";
+import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
+import { ClearEditorPlugin } from "@lexical/react/LexicalClearEditorPlugin";
+import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
+
+import { $generateHtmlFromNodes, $generateNodesFromDOM } from "@lexical/html";
+
+// Nodes
+import { HeadingNode, QuoteNode } from "@lexical/rich-text";
+import { ListNode, ListItemNode } from "@lexical/list";
+import { CodeNode, CodeHighlightNode } from "@lexical/code";
+import { AutoLinkNode, LinkNode } from "@lexical/link";
+import { TableNode, TableCellNode, TableRowNode } from "@lexical/table";
+import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
+import { ImageNode } from "./plugins/ImageNode";
+
+// Custom Plugins
+import { AdvancedToolbarPlugin } from "./plugins/AdvancedToolbarPlugin";
+import { FloatingTextFormatToolbarPlugin } from "./plugins/FloatingTextFormatToolbarPlugin";
+import { ImagePlugin } from "./plugins/ImagePlugin";
+import { DragDropPlugin } from "./plugins/DragDropPlugin";
+import { WordCountPlugin } from "./plugins/WordCountPlugin";
+
+import { Badge } from "../ui";
+import { Save, AlertCircle, CheckCircle } from "lucide-react";
 import toast from "react-hot-toast";
+import "../../styles/lexical-editor.css";
+
+const theme = {
+  ltr: "ltr",
+  rtl: "rtl",
+  placeholder: "editor-placeholder",
+  paragraph: "editor-paragraph",
+  quote: "editor-quote",
+  heading: {
+    h1: "editor-heading-h1",
+    h2: "editor-heading-h2",
+    h3: "editor-heading-h3",
+    h4: "editor-heading-h4",
+    h5: "editor-heading-h5",
+  },
+  list: {
+    nested: {
+      listitem: "editor-nested-listitem",
+    },
+    ol: "editor-list-ol",
+    ul: "editor-list-ul",
+    listitem: "editor-listitem",
+  },
+  image: "editor-image",
+  link: "editor-link",
+  text: {
+    bold: "editor-text-bold",
+    italic: "editor-text-italic",
+    overflowed: "editor-text-overflowed",
+    hashtag: "editor-text-hashtag",
+    underline: "editor-text-underline",
+    strikethrough: "editor-text-strikethrough",
+    underlineStrikethrough: "editor-text-underlineStrikethrough",
+    code: "editor-text-code",
+  },
+  code: "editor-code",
+  codeHighlight: {
+    atrule: "editor-tokenAttr",
+    attr: "editor-tokenAttr",
+    boolean: "editor-tokenProperty",
+    builtin: "editor-tokenSelector",
+    cdata: "editor-tokenComment",
+    char: "editor-tokenSelector",
+    class: "editor-tokenFunction",
+    "class-name": "editor-tokenFunction",
+    comment: "editor-tokenComment",
+    constant: "editor-tokenProperty",
+    deleted: "editor-tokenProperty",
+    doctype: "editor-tokenComment",
+    entity: "editor-tokenOperator",
+    function: "editor-tokenFunction",
+    important: "editor-tokenVariable",
+    inserted: "editor-tokenSelector",
+    keyword: "editor-tokenAttr",
+    namespace: "editor-tokenVariable",
+    number: "editor-tokenProperty",
+    operator: "editor-tokenOperator",
+    prolog: "editor-tokenComment",
+    property: "editor-tokenProperty",
+    punctuation: "editor-tokenPunctuation",
+    regex: "editor-tokenVariable",
+    selector: "editor-tokenSelector",
+    string: "editor-tokenSelector",
+    symbol: "editor-tokenProperty",
+    tag: "editor-tokenProperty",
+    url: "editor-tokenOperator",
+    variable: "editor-tokenVariable",
+  },
+  table: "editor-table",
+  tableCell: "editor-tableCell",
+  tableCellHeader: "editor-tableCellHeader",
+  hr: "editor-hr",
+};
+
+// URL matcher for AutoLink
+const URL_MATCHER =
+  /((https?:\/\/(www\.)?)|(www\.))[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
+
+const EMAIL_MATCHER =
+  /(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/;
+
+function validateUrl(url) {
+  return (
+    url === "https://" ||
+    url === "mailto:" ||
+    URL_MATCHER.test(url) ||
+    EMAIL_MATCHER.test(url)
+  );
+}
 
 const RichTextEditor = forwardRef(
   (
@@ -50,192 +148,174 @@ const RichTextEditor = forwardRef(
       maxWords = 5000,
       maxCharacters = 25000,
       disabled = false,
-      showToolbar = true,
       autoSaveInterval = 3000,
       error,
-      enablePasteMonitoring = true,
-      allowedFormats = [
-        "bold",
-        "italic",
-        "underline",
-        "link",
-        "list",
-        "heading",
-      ],
+      showToolbar = true,
+      showFloatingToolbar = true,
+      enableAutoLink = true,
+      enableTables = false, // Disable by default for assignments
+      enableImages = true,
+      enableDragDrop = true,
+      enableMarkdownShortcuts = true,
     },
     ref
   ) => {
-    const [content, setContent] = useState(value);
+    const [editor, setEditor] = useState(null);
     const [wordCount, setWordCount] = useState(0);
     const [characterCount, setCharacterCount] = useState(0);
     const [isAutoSaving, setIsAutoSaving] = useState(false);
     const [lastSaved, setLastSaved] = useState(null);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-    const [showLinkModal, setShowLinkModal] = useState(false);
-    const [linkUrl, setLinkUrl] = useState("");
-    const [pasteEvents, setPasteEvents] = useState([]);
 
     const autoSaveTimeoutRef = useRef(null);
-    const editorRef = useRef(null);
 
-    // Enhanced TipTap Editor configuration
-    const editor = useEditor({
-      extensions: [
-        StarterKit.configure({
-          heading: {
-            levels: [1, 2, 3],
-          },
-        }),
-        Placeholder.configure({
-          placeholder,
-        }),
-        TextStyle,
-        Color.configure({
-          types: ["textStyle"],
-        }),
-        TextAlign.configure({
-          types: ["heading", "paragraph"],
-        }),
-        Link.configure({
-          openOnClick: false,
-          autolink: true,
-          defaultProtocol: "https",
-        }),
+    // Initial config with all nodes
+    const initialConfig = {
+      namespace: "ProtextifyEditor",
+      theme,
+      onError(error) {
+        console.error("Lexical Error:", error);
+        toast.error("Editor error: " + error.message);
+      },
+      nodes: [
+        HeadingNode,
+        QuoteNode,
+        ListNode,
+        ListItemNode,
+        CodeNode,
+        CodeHighlightNode,
+        AutoLinkNode,
+        LinkNode,
+        ...(enableTables ? [TableNode, TableCellNode, TableRowNode] : []),
+        HorizontalRuleNode,
+        ...(enableImages ? [ImageNode] : []),
       ],
-      content: value,
-      editable: !disabled,
-      onUpdate: ({ editor }) => {
-        const newContent = editor.getHTML();
-        handleContentChange(newContent);
-      },
-      onPaste: (view, event) => {
-        if (enablePasteMonitoring) {
-          handlePasteEvent(event);
-        }
-      },
-    });
+      editorState: null,
+    };
 
     // Expose editor methods to parent via ref
     useImperativeHandle(ref, () => ({
       getEditor: () => editor,
       insertText: (text) => {
         if (editor) {
-          editor.commands.insertContent(text);
+          editor.update(() => {
+            const selection = $getSelection();
+            if ($isRangeSelection(selection)) {
+              selection.insertText(text);
+            }
+          });
         }
       },
       focus: () => {
         if (editor) {
-          editor.commands.focus();
+          editor.focus();
         }
       },
-      getContent: () => editor?.getHTML() || "",
+      getContent: () => {
+        if (!editor) return "";
+        return editor
+          .getEditorState()
+          .read(() => $generateHtmlFromNodes(editor, null));
+      },
       getWordCount: () => wordCount,
       getCharacterCount: () => characterCount,
+      clear: () => {
+        if (editor) {
+          editor.update(() => {
+            const root = $getRoot();
+            root.clear();
+          });
+        }
+      },
+      insertHtml: (html) => {
+        if (editor) {
+          editor.update(() => {
+            const parser = new DOMParser();
+            const dom = parser.parseFromString(html, "text/html");
+            const nodes = $generateNodesFromDOM(editor, dom);
+            $insertNodes(nodes);
+          });
+        }
+      },
     }));
 
-    // Enhanced paste event monitoring (FE only, no BE log)
-    const handlePasteEvent = useCallback((event) => {
-      const clipboardData = event.clipboardData || window.clipboardData;
-      const pastedData = clipboardData.getData("text");
+    // Handle content change
+    const handleEditorChange = (editorState, editorInstance) => {
+      if (!editorInstance) return;
 
-      if (pastedData.length > 50) {
-        const newPasteEvent = {
-          id: Date.now(),
-          timestamp: new Date(),
-          length: pastedData.length,
-          wordCount: pastedData.split(/\s+/).filter((word) => word.length > 0)
-            .length,
-          suspicious:
-            pastedData.length > 500 || pastedData.split("\n").length > 10,
-        };
+      setEditor(editorInstance);
 
-        setPasteEvents((prev) => [...prev, newPasteEvent].slice(-10));
+      const html = editorState.read(() =>
+        $generateHtmlFromNodes(editorInstance, null)
+      );
+      const plainText = editorState.read(
+        () => editorInstance.getRootElement()?.textContent || ""
+      );
 
-        if (newPasteEvent.suspicious) {
-          toast.warning(
-            "Paste konten besar terdeteksi. Pastikan ini adalah karya Anda sendiri."
-          );
-        }
-      }
-    }, []);
-
-    // Calculate word and character count with enhanced accuracy
-    const calculateCounts = useCallback((html) => {
-      const plainText = html
-        .replace(/<[^>]*>/g, "")
-        .replace(/&nbsp;/g, " ")
-        .trim();
-
+      // Calculate word and character counts
       const words =
-        plainText === ""
+        plainText.trim() === ""
           ? 0
-          : plainText.split(/\s+/).filter((word) => word.length > 0).length;
+          : plainText.trim().split(/\s+/).filter(Boolean).length;
       const characters = plainText.length;
 
       setWordCount(words);
       setCharacterCount(characters);
+      setHasUnsavedChanges(true);
 
-      return { words, characters, plainText };
-    }, []);
+      // Limit checks
+      if (words > maxWords) {
+        toast.error(`Melebihi batas maksimal ${maxWords} kata`);
+      }
+      if (characters > maxCharacters) {
+        toast.error(`Melebihi batas maksimal ${maxCharacters} karakter`);
+      }
 
-    // Handle content change with enhanced validation
-    const handleContentChange = useCallback(
-      (newContent) => {
-        setContent(newContent);
-        setHasUnsavedChanges(true);
+      // Call onChange callback
+      if (onChange) onChange(html);
 
-        const counts = calculateCounts(newContent);
-
-        // Check limits
-        if (counts.words > maxWords) {
-          toast.error(`Melebihi batas maksimal ${maxWords} kata`);
+      // Auto-save logic
+      if (onAutoSave && !disabled) {
+        if (autoSaveTimeoutRef.current) {
+          clearTimeout(autoSaveTimeoutRef.current);
         }
-        if (counts.characters > maxCharacters) {
-          toast.error(`Melebihi batas maksimal ${maxCharacters} karakter`);
-        }
+        autoSaveTimeoutRef.current = setTimeout(() => {
+          setIsAutoSaving(true);
+          Promise.resolve(onAutoSave(html))
+            .then(() => {
+              setLastSaved(new Date());
+              setHasUnsavedChanges(false);
+            })
+            .catch(() => {
+              toast.error("Auto-save gagal. Pastikan koneksi internet stabil.");
+            })
+            .finally(() => {
+              setIsAutoSaving(false);
+            });
+        }, autoSaveInterval);
+      }
+    };
 
-        if (onChange) {
-          onChange(newContent);
-        }
-
-        // Auto-save logic
-        if (onAutoSave) {
-          if (autoSaveTimeoutRef.current) {
-            clearTimeout(autoSaveTimeoutRef.current);
-          }
-          autoSaveTimeoutRef.current = setTimeout(() => {
-            setIsAutoSaving(true);
-            onAutoSave(newContent)
-              .then(() => {
-                setLastSaved(new Date());
-                setHasUnsavedChanges(false);
-              })
-              .catch(() => {
-                toast.error(
-                  "Auto-save gagal. Pastikan koneksi internet stabil."
-                );
-              })
-              .finally(() => {
-                setIsAutoSaving(false);
-              });
-          }, autoSaveInterval);
-        }
-      },
-      [
-        onChange,
-        onAutoSave,
-        autoSaveInterval,
-        maxWords,
-        maxCharacters,
-        calculateCounts,
-      ]
-    );
-
-    // Initialize content
+    // Set initial content when value changes
     useEffect(() => {
-      setContent(value);
-      calculateCounts(value);
-    }, [value, calculateCounts]);
+      if (
+        editor &&
+        value &&
+        value !==
+          editor
+            .getEditorState()
+            .read(() => $generateHtmlFromNodes(editor, null))
+      ) {
+        editor.update(() => {
+          const parser = new DOMParser();
+          const dom = parser.parseFromString(value, "text/html");
+          const nodes = $generateNodesFromDOM(editor, dom);
+          const root = $getRoot();
+          root.clear();
+          root.append(...nodes);
+        });
+      }
+    }, [editor, value]);
 
     // Cleanup
     useEffect(() => {
@@ -246,14 +326,7 @@ const RichTextEditor = forwardRef(
       };
     }, []);
 
-    // Update editor editable state
-    useEffect(() => {
-      if (editor) {
-        editor.setEditable(!disabled);
-      }
-    }, [editor, disabled]);
-
-    // Get status colors
+    // Helper functions untuk warna
     const getWordCountColor = () => {
       const percentage = (wordCount / maxWords) * 100;
       if (percentage >= 100) return "text-red-600";
@@ -270,307 +343,36 @@ const RichTextEditor = forwardRef(
       return "text-gray-600";
     };
 
-    // Enhanced Toolbar component
-    const Toolbar = () => {
-      if (!showToolbar || !editor) return null;
-
-      return (
-        <div className="flex flex-wrap items-center gap-1 p-3 border-b border-gray-200 bg-gray-50">
-          {/* Text Formatting */}
-          <div className="flex items-center gap-1 pr-2 border-r border-gray-300">
-            {allowedFormats.includes("bold") && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => editor.chain().focus().toggleBold().run()}
-                className={editor.isActive("bold") ? "bg-gray-200" : ""}
-                disabled={disabled}
-                title="Bold (Ctrl+B)"
-              >
-                <Bold className="h-4 w-4" />
-              </Button>
-            )}
-
-            {allowedFormats.includes("italic") && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => editor.chain().focus().toggleItalic().run()}
-                className={editor.isActive("italic") ? "bg-gray-200" : ""}
-                disabled={disabled}
-                title="Italic (Ctrl+I)"
-              >
-                <Italic className="h-4 w-4" />
-              </Button>
-            )}
-
-            {allowedFormats.includes("underline") && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => editor.chain().focus().toggleStrike().run()}
-                className={editor.isActive("strike") ? "bg-gray-200" : ""}
-                disabled={disabled}
-                title="Strikethrough"
-              >
-                <Underline className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-
-          {/* Headings */}
-          {allowedFormats.includes("heading") && (
-            <div className="flex items-center gap-1 pr-2 border-r border-gray-300">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() =>
-                  editor.chain().focus().toggleHeading({ level: 1 }).run()
-                }
-                className={
-                  editor.isActive("heading", { level: 1 }) ? "bg-gray-200" : ""
-                }
-                disabled={disabled}
-                title="Heading 1"
-              >
-                <Heading1 className="h-4 w-4" />
-              </Button>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() =>
-                  editor.chain().focus().toggleHeading({ level: 2 }).run()
-                }
-                className={
-                  editor.isActive("heading", { level: 2 }) ? "bg-gray-200" : ""
-                }
-                disabled={disabled}
-                title="Heading 2"
-              >
-                <Heading2 className="h-4 w-4" />
-              </Button>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() =>
-                  editor.chain().focus().toggleHeading({ level: 3 }).run()
-                }
-                className={
-                  editor.isActive("heading", { level: 3 }) ? "bg-gray-200" : ""
-                }
-                disabled={disabled}
-                title="Heading 3"
-              >
-                <Heading3 className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-
-          {/* Lists */}
-          {allowedFormats.includes("list") && (
-            <div className="flex items-center gap-1 pr-2 border-r border-gray-300">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => editor.chain().focus().toggleBulletList().run()}
-                className={editor.isActive("bulletList") ? "bg-gray-200" : ""}
-                disabled={disabled}
-                title="Bullet List"
-              >
-                <List className="h-4 w-4" />
-              </Button>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                className={editor.isActive("orderedList") ? "bg-gray-200" : ""}
-                disabled={disabled}
-                title="Numbered List"
-              >
-                <ListOrdered className="h-4 w-4" />
-              </Button>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => editor.chain().focus().toggleBlockquote().run()}
-                className={editor.isActive("blockquote") ? "bg-gray-200" : ""}
-                disabled={disabled}
-                title="Quote"
-              >
-                <Quote className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-
-          {/* Alignment */}
-          <div className="flex items-center gap-1 pr-2 border-r border-gray-300">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => editor.chain().focus().setTextAlign("left").run()}
-              className={
-                editor.isActive({ textAlign: "left" }) ? "bg-gray-200" : ""
-              }
-              disabled={disabled}
-              title="Align Left"
-            >
-              <AlignLeft className="h-4 w-4" />
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() =>
-                editor.chain().focus().setTextAlign("center").run()
-              }
-              className={
-                editor.isActive({ textAlign: "center" }) ? "bg-gray-200" : ""
-              }
-              disabled={disabled}
-              title="Align Center"
-            >
-              <AlignCenter className="h-4 w-4" />
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => editor.chain().focus().setTextAlign("right").run()}
-              className={
-                editor.isActive({ textAlign: "right" }) ? "bg-gray-200" : ""
-              }
-              disabled={disabled}
-              title="Align Right"
-            >
-              <AlignRight className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Links */}
-          {allowedFormats.includes("link") && (
-            <div className="flex items-center gap-1 pr-2 border-r border-gray-300">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleAddLink}
-                className={editor.isActive("link") ? "bg-gray-200" : ""}
-                disabled={disabled}
-                title="Add Link"
-              >
-                <LinkIcon className="h-4 w-4" />
-              </Button>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => editor.chain().focus().unsetLink().run()}
-                disabled={disabled || !editor.isActive("link")}
-                title="Remove Link"
-              >
-                <Unlink className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-
-          {/* Undo/Redo */}
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => editor.chain().focus().undo().run()}
-              disabled={disabled || !editor.can().undo()}
-              title="Undo (Ctrl+Z)"
-            >
-              <Undo className="h-4 w-4" />
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => editor.chain().focus().redo().run()}
-              disabled={disabled || !editor.can().redo()}
-              title="Redo (Ctrl+Y)"
-            >
-              <Redo className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      );
-    };
-
-    // Enhanced link handling
-    const handleAddLink = useCallback(() => {
-      if (!editor) return;
-
-      const { from, to } = editor.state.selection;
-      const selectedText = editor.state.doc.textBetween(from, to);
-
-      if (selectedText) {
-        setShowLinkModal(true);
-      } else {
-        toast.warning("Pilih teks terlebih dahulu untuk menambahkan link");
-      }
-    }, [editor]);
-
-    const insertLink = useCallback(() => {
-      if (!editor || !linkUrl) return;
-
-      const url = linkUrl.startsWith("http") ? linkUrl : `https://${linkUrl}`;
-      editor.chain().focus().setLink({ href: url }).run();
-      setShowLinkModal(false);
-      setLinkUrl("");
-    }, [editor, linkUrl]);
-
     return (
       <div className="w-full">
-        {/* Enhanced Editor Header */}
+        {/* Editor Header */}
         <div className="flex items-center justify-between mb-3 p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg border border-gray-200">
           <div className="flex items-center space-x-6">
             <div className="flex items-center space-x-2">
-              <Type className="h-5 w-5 text-gray-500" />
               <span className={`text-sm font-medium ${getWordCountColor()}`}>
                 {wordCount.toLocaleString()} / {maxWords.toLocaleString()} kata
               </span>
             </div>
-
             <div className="flex items-center space-x-2">
-              <FileText className="h-5 w-5 text-gray-500" />
               <span className={`text-sm ${getCharacterCountColor()}`}>
                 {characterCount.toLocaleString()} /{" "}
                 {maxCharacters.toLocaleString()} karakter
               </span>
             </div>
-
-            {pasteEvents.length > 0 && (
-              <div className="flex items-center space-x-2">
-                <Eye className="h-4 w-4 text-orange-500" />
-                <span className="text-sm text-orange-600">
-                  {pasteEvents.length} paste events
-                </span>
-              </div>
-            )}
           </div>
-
           <div className="flex items-center space-x-3">
-            {/* Auto-save status */}
             {isAutoSaving && (
               <Badge variant="info" size="sm">
                 <Save className="h-3 w-3 mr-1 animate-pulse" />
                 Menyimpan...
               </Badge>
             )}
-
             {hasUnsavedChanges && !isAutoSaving && (
               <Badge variant="warning" size="sm">
                 <AlertCircle className="h-3 w-3 mr-1" />
                 Belum tersimpan
               </Badge>
             )}
-
             {lastSaved && !hasUnsavedChanges && !isAutoSaving && (
               <Badge variant="success" size="sm">
                 <CheckCircle className="h-3 w-3 mr-1" />
@@ -586,18 +388,87 @@ const RichTextEditor = forwardRef(
             error ? "border-red-300" : "border-gray-200"
           }`}
         >
-          <Toolbar />
-          <div className="relative">
-            <EditorContent
-              editor={editor}
-              className="prose prose-sm max-w-none min-h-[400px] p-4 focus:outline-none"
-            />
-          </div>
+          <LexicalComposer initialConfig={initialConfig}>
+            <div className="editor-container">
+              {showToolbar && <AdvancedToolbarPlugin disabled={disabled} />}
+
+              <div className="editor-inner">
+                <RichTextPlugin
+                  contentEditable={
+                    <ContentEditable
+                      className="editor-input"
+                      aria-placeholder={placeholder}
+                      placeholder={
+                        <div className="editor-placeholder">{placeholder}</div>
+                      }
+                    />
+                  }
+                  placeholder={null}
+                  ErrorBoundary={LexicalErrorBoundary}
+                />
+
+                <OnChangePlugin onChange={handleEditorChange} />
+                <HistoryPlugin />
+                <ListPlugin />
+                <TabIndentationPlugin />
+                <AutoFocusPlugin />
+                <ClearEditorPlugin />
+                <WordCountPlugin />
+
+                {enableAutoLink && (
+                  <>
+                    <AutoLinkPlugin
+                      matchers={[
+                        (text) => {
+                          const match = URL_MATCHER.exec(text);
+                          if (match === null) {
+                            return null;
+                          }
+                          const fullMatch = match[0];
+                          return {
+                            index: match.index,
+                            length: fullMatch.length,
+                            text: fullMatch,
+                            url: fullMatch.startsWith("http")
+                              ? fullMatch
+                              : `https://${fullMatch}`,
+                          };
+                        },
+                        (text) => {
+                          const match = EMAIL_MATCHER.exec(text);
+                          if (match === null) {
+                            return null;
+                          }
+                          const fullMatch = match[0];
+                          return {
+                            index: match.index,
+                            length: fullMatch.length,
+                            text: fullMatch,
+                            url: `mailto:${fullMatch}`,
+                          };
+                        },
+                      ]}
+                    />
+                    <LinkPlugin validateUrl={validateUrl} />
+                  </>
+                )}
+
+                {enableTables && <TablePlugin />}
+                {enableImages && <ImagePlugin />}
+                {enableDragDrop && <DragDropPlugin />}
+
+                {enableMarkdownShortcuts && (
+                  <MarkdownShortcutPlugin transformers={[]} />
+                )}
+
+                {showFloatingToolbar && <FloatingTextFormatToolbarPlugin />}
+              </div>
+            </div>
+          </LexicalComposer>
         </div>
 
         {/* Progress Bars */}
         <div className="mt-3 space-y-2">
-          {/* Word Progress */}
           <div>
             <div className="flex justify-between text-xs text-gray-500 mb-1">
               <span>Kata</span>
@@ -620,8 +491,6 @@ const RichTextEditor = forwardRef(
               />
             </div>
           </div>
-
-          {/* Character Progress */}
           <div>
             <div className="flex justify-between text-xs text-gray-500 mb-1">
               <span>Karakter</span>
@@ -677,31 +546,6 @@ const RichTextEditor = forwardRef(
             </div>
           </div>
         )}
-
-        {/* Link Modal */}
-        <Modal
-          isOpen={showLinkModal}
-          onClose={() => setShowLinkModal(false)}
-          title="Tambah Link"
-        >
-          <div className="space-y-4">
-            <Input
-              label="URL Link"
-              value={linkUrl}
-              onChange={(e) => setLinkUrl(e.target.value)}
-              placeholder="https://example.com"
-              autoFocus
-            />
-            <div className="flex justify-end space-x-3">
-              <Button variant="outline" onClick={() => setShowLinkModal(false)}>
-                Batal
-              </Button>
-              <Button onClick={insertLink} disabled={!linkUrl}>
-                Tambah Link
-              </Button>
-            </div>
-          </div>
-        </Modal>
       </div>
     );
   }

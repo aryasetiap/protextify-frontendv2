@@ -109,7 +109,7 @@ export default function WriteAssignment() {
         } else {
           const newSubmission = await submissionsService.createSubmission(
             effectiveAssignmentId,
-            {}
+            { content: "" }
           );
           console.log(
             "[WriteAssignment] Submission draft baru dibuat:",
