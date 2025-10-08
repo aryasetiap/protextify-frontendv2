@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, User, LogOut, Bell, ChevronDown } from "lucide-react";
 import { cn } from "../../utils/helpers";
-import { useAuth } from "../../hooks/useAuth";
+import useAuth from "../../hooks/useAuth";
 import { getDefaultRoute } from "../../utils/constants";
 import { Button } from "../ui";
 

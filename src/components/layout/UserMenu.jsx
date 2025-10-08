@@ -8,7 +8,7 @@ import {
   HelpCircle,
   CreditCard,
 } from "lucide-react";
-import { useAuth } from "../../hooks/useAuth";
+import useAuth from "../../hooks/useAuth";
 import { getDefaultRoute, USER_ROLES } from "../../utils/constants";
 
 export default function UserMenu({

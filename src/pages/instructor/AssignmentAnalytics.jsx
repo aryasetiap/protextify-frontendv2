@@ -1,433 +1,215 @@
-// src/pages/instructor/AssignmentAnalytics.jsx
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import {
-  ArrowLeft,
-  TrendingUp,
-  Users,
-  Clock,
-  AlertTriangle,
-} from "lucide-react";
+import { useParams } from "react-router-dom";
+import { assignmentsService, submissionsService } from "../../services";
+import { useAsyncData } from "../../hooks";
+import { BarChart3, FileText, CheckCircle, AlertCircle } from "lucide-react";
+import { Card } from "../../components/ui/Card";
+import Button from "../../components/ui/Button";
+import toast from "react-hot-toast";
 
-import {
-  Container,
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  Button,
-  Breadcrumb,
-  LoadingSpinner,
-} from "../../components";
-import { assignmentsService } from "../../services";
-import { useAsyncData } from "../../hooks/useAsyncData";
-import { useWebSocket } from "../../hooks/useWebSocket";
-
+// Tidak ada WebSocket, hanya polling data dari BE
 export default function AssignmentAnalytics() {
   const { assignmentId } = useParams();
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const { joinMonitoring, leaveMonitoring, on, off } = useWebSocket();
-
-  // Get assignment detail
-  const { data: assignment } = useAsyncData(
+  // Get assignment detail (gunakan service sesuai BE)
+  const { data: assignment, loading: loadingAssignment } = useAsyncData(
     () => assignmentsService.getAssignmentById(assignmentId),
     [assignmentId]
   );
 
-  useEffect(() => {
-    fetchAnalytics();
-
-    if (assignmentId) {
-      joinMonitoring(assignmentId);
-
-      return () => {
-        leaveMonitoring(assignmentId);
-      };
-    }
-  }, [assignmentId]);
-
-  useEffect(() => {
-    const handleSubmissionUpdate = () => {
-      fetchAnalytics();
-    };
-
-    on("submissionListUpdated", handleSubmissionUpdate);
-    on("submissionUpdated", handleSubmissionUpdate);
-
-    return () => {
-      off("submissionListUpdated", handleSubmissionUpdate);
-      off("submissionUpdated", handleSubmissionUpdate);
-    };
-  }, [on, off]);
-
+  // Fetch assignment submissions for analytics
   const fetchAnalytics = async () => {
+    if (!assignment?.classId || !assignmentId) return;
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await assignmentsService.getAssignmentSubmissions(
-        assignment?.classId,
+      // Ambil semua submission untuk assignment ini (endpoint sesuai BE)
+      const submissions = await submissionsService.getAssignmentSubmissions(
+        assignment.classId,
         assignmentId
       );
 
-      // Calculate analytics
-      const submissions = response;
-      const total = submissions.length;
-      const submitted = submissions.filter(
+      // Statistik: total submissions, submitted, graded, plagiarism score, average grade
+      const totalSubmissions = submissions.length;
+      const submittedCount = submissions.filter(
         (s) => s.status === "SUBMITTED"
       ).length;
-      const graded = submissions.filter((s) => s.status === "GRADED").length;
-      const pending = submissions.filter((s) => s.status === "DRAFT").length;
-
-      const grades = submissions.filter((s) => s.grade).map((s) => s.grade);
-      const averageGrade =
-        grades.length > 0
-          ? grades.reduce((sum, grade) => sum + grade, 0) / grades.length
-          : 0;
-
-      const plagiarismScores = submissions
-        .filter((s) => s.plagiarismScore)
-        .map((s) => s.plagiarismScore);
-      const averagePlagiarism =
-        plagiarismScores.length > 0
-          ? plagiarismScores.reduce((sum, score) => sum + score, 0) /
-            plagiarismScores.length
-          : 0;
-
-      const highPlagiarism = submissions.filter(
-        (s) => s.plagiarismScore > 30
+      const gradedCount = submissions.filter(
+        (s) => s.status === "GRADED"
       ).length;
-
-      // Grade distribution
-      const gradeDistribution = {
-        "90-100": grades.filter((g) => g >= 90).length,
-        "80-89": grades.filter((g) => g >= 80 && g < 90).length,
-        "70-79": grades.filter((g) => g >= 70 && g < 80).length,
-        "60-69": grades.filter((g) => g >= 60 && g < 70).length,
-        "< 60": grades.filter((g) => g < 60).length,
-      };
-
-      // Submission timeline (last 7 days)
-      const timeline = [];
-      for (let i = 6; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        const daySubmissions = submissions.filter((s) => {
-          if (!s.submittedAt) return false;
-          const submissionDate = new Date(s.submittedAt);
-          return submissionDate.toDateString() === date.toDateString();
-        }).length;
-
-        timeline.push({
-          date: date.toLocaleDateString("id-ID", {
-            month: "short",
-            day: "numeric",
-          }),
-          submissions: daySubmissions,
-        });
-      }
+      const plagiarismScores = submissions
+        .map((s) => s.plagiarismChecks?.score)
+        .filter((score) => typeof score === "number");
+      const avgPlagiarism =
+        plagiarismScores.length > 0
+          ? Math.round(
+              plagiarismScores.reduce((sum, s) => sum + s, 0) /
+                plagiarismScores.length
+            )
+          : 0;
+      const grades = submissions
+        .map((s) => s.grade)
+        .filter((g) => typeof g === "number");
+      const avgGrade =
+        grades.length > 0
+          ? Math.round(grades.reduce((sum, g) => sum + g, 0) / grades.length)
+          : 0;
 
       setAnalytics({
-        total,
-        submitted,
-        graded,
-        pending,
-        averageGrade,
-        averagePlagiarism,
-        highPlagiarism,
-        gradeDistribution,
-        timeline,
+        totalSubmissions,
+        submittedCount,
+        gradedCount,
+        avgPlagiarism,
+        avgGrade,
         submissions,
       });
     } catch (error) {
-      console.error("Error fetching analytics:", error);
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Gagal memuat data analytics"
+      );
+      setAnalytics(null);
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
+  // Polling data setiap 30 detik (jika ingin update berkala)
+  useEffect(() => {
+    fetchAnalytics();
+    const interval = setInterval(fetchAnalytics, 30000);
+    return () => clearInterval(interval);
+  }, [assignmentId, assignment?.classId]);
+
+  if (loading || loadingAssignment) {
     return (
-      <Container className="py-6">
-        <LoadingSpinner />
-      </Container>
+      <Card className="p-6 text-center">
+        <BarChart3 className="h-10 w-10 text-gray-400 mx-auto mb-4 animate-pulse" />
+        <p className="text-gray-500">Memuat data analytics...</p>
+      </Card>
+    );
+  }
+
+  if (!analytics || !assignment) {
+    return (
+      <Card className="p-6 text-center">
+        <AlertCircle className="h-10 w-10 text-red-400 mx-auto mb-4" />
+        <p className="text-gray-500">Data analytics tidak tersedia</p>
+      </Card>
     );
   }
 
   return (
-    <Container className="py-6">
-      {/* Breadcrumb */}
-      <Breadcrumb />
-
-      {/* Header */}
-      <div className="flex items-center mb-6">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => window.history.back()}
-          className="mr-4"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Kembali
-        </Button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900">
-            Analytics Assignment
-          </h1>
-          <p className="text-gray-600">{assignment?.title}</p>
+    <div className="space-y-6">
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold text-gray-900">
+            Analytics Assignment: {assignment.title}
+          </h2>
+          <Button onClick={fetchAnalytics} variant="outline" size="sm">
+            Refresh
+          </Button>
         </div>
-        <Link
-          to={`/instructor/assignments/${assignmentId}/monitor`}
-          className="text-blue-600 hover:text-blue-700"
-        >
-          Lihat Monitoring →
-        </Link>
-      </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatCard
+            title="Total Submission"
+            value={analytics.totalSubmissions}
+            subtitle="Semua submission"
+            icon={FileText}
+            color="blue"
+          />
+          <StatCard
+            title="Sudah Dikumpulkan"
+            value={analytics.submittedCount}
+            subtitle="Status SUBMITTED"
+            icon={CheckCircle}
+            color="green"
+          />
+          <StatCard
+            title="Sudah Dinilai"
+            value={analytics.gradedCount}
+            subtitle="Status GRADED"
+            icon={BarChart3}
+            color="purple"
+          />
+          <StatCard
+            title="Rata-rata Plagiarisme"
+            value={analytics.avgPlagiarism + "%"}
+            subtitle="Plagiarism Score"
+            icon={AlertCircle}
+            color="red"
+          />
+          <StatCard
+            title="Rata-rata Nilai"
+            value={analytics.avgGrade}
+            subtitle="Grade"
+            icon={CheckCircle}
+            color="yellow"
+          />
+        </div>
+      </Card>
 
-      {analytics && (
-        <>
-          {/* Overview Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <StatCard
-              title="Total Siswa"
-              value={analytics.total}
-              icon={Users}
-              color="bg-blue-500"
-            />
-            <StatCard
-              title="Sudah Mengumpulkan"
-              value={analytics.submitted}
-              subtitle={`${
-                analytics.total > 0
-                  ? Math.round((analytics.submitted / analytics.total) * 100)
-                  : 0
-              }%`}
-              icon={TrendingUp}
-              color="bg-green-500"
-            />
-            <StatCard
-              title="Sudah Dinilai"
-              value={analytics.graded}
-              subtitle={`${
-                analytics.submitted > 0
-                  ? Math.round((analytics.graded / analytics.submitted) * 100)
-                  : 0
-              }%`}
-              icon={Clock}
-              color="bg-purple-500"
-            />
-            <StatCard
-              title="Plagiarisme Tinggi"
-              value={analytics.highPlagiarism}
-              subtitle="(> 30%)"
-              icon={AlertTriangle}
-              color="bg-red-500"
-            />
-          </div>
-
-          {/* Charts Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {/* Grade Distribution */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Distribusi Nilai</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {Object.entries(analytics.gradeDistribution).map(
-                    ([range, count]) => (
-                      <div
-                        key={range}
-                        className="flex items-center justify-between"
-                      >
-                        <span className="text-sm font-medium text-gray-700">
-                          {range}
-                        </span>
-                        <div className="flex items-center space-x-2">
-                          <div
-                            className="bg-blue-500 h-4 rounded"
-                            style={{
-                              width: `${
-                                analytics.graded > 0
-                                  ? (count / analytics.graded) * 100
-                                  : 0
-                              }%`,
-                              minWidth: count > 0 ? "20px" : "0px",
-                            }}
-                          />
-                          <span className="text-sm text-gray-500 w-8">
-                            {count}
-                          </span>
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Submission Timeline */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Timeline Pengumpulan (7 Hari)</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {analytics.timeline.map((day, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between"
-                    >
-                      <span className="text-sm font-medium text-gray-700">
-                        {day.date}
-                      </span>
-                      <div className="flex items-center space-x-2">
-                        <div
-                          className="bg-green-500 h-4 rounded"
-                          style={{
-                            width: `${Math.max(
-                              day.submissions * 10,
-                              day.submissions > 0 ? 20 : 0
-                            )}px`,
-                          }}
-                        />
-                        <span className="text-sm text-gray-500 w-8">
-                          {day.submissions}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Detailed Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Statistik Nilai</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Rata-rata:</span>
-                    <span className="font-semibold">
-                      {analytics.averageGrade.toFixed(1)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Tertinggi:</span>
-                    <span className="font-semibold">
-                      {analytics.submissions.filter((s) => s.grade).length > 0
-                        ? Math.max(
-                            ...analytics.submissions
-                              .filter((s) => s.grade)
-                              .map((s) => s.grade)
-                          )
-                        : "N/A"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Terendah:</span>
-                    <span className="font-semibold">
-                      {analytics.submissions.filter((s) => s.grade).length > 0
-                        ? Math.min(
-                            ...analytics.submissions
-                              .filter((s) => s.grade)
-                              .map((s) => s.grade)
-                          )
-                        : "N/A"}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Statistik Plagiarisme</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Rata-rata:</span>
-                    <span className="font-semibold">
-                      {analytics.averagePlagiarism.toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Sudah dicek:</span>
-                    <span className="font-semibold">
-                      {
-                        analytics.submissions.filter((s) => s.plagiarismScore)
-                          .length
-                      }
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Perlu perhatian:</span>
-                    <span className="font-semibold text-red-600">
-                      {analytics.highPlagiarism}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Progress Pengumpulan</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Draft:</span>
-                    <span className="font-semibold text-yellow-600">
-                      {analytics.pending}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Dikumpulkan:</span>
-                    <span className="font-semibold text-blue-600">
-                      {analytics.submitted}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Dinilai:</span>
-                    <span className="font-semibold text-green-600">
-                      {analytics.graded}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </>
-      )}
-    </Container>
+      {/* Tabel submissions jika ingin tampilkan detail */}
+      <Card className="p-6">
+        <h3 className="font-semibold mb-4">Daftar Submission</h3>
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead>
+              <tr>
+                <th className="text-left py-2 px-3">Nama Siswa</th>
+                <th className="text-left py-2 px-3">Status</th>
+                <th className="text-left py-2 px-3">Nilai</th>
+                <th className="text-left py-2 px-3">Plagiarisme</th>
+                <th className="text-left py-2 px-3">Waktu Update</th>
+              </tr>
+            </thead>
+            <tbody>
+              {analytics.submissions.map((s) => (
+                <tr key={s.id}>
+                  <td className="py-2 px-3">{s.student?.fullName || "-"}</td>
+                  <td className="py-2 px-3">{s.status}</td>
+                  <td className="py-2 px-3">
+                    {typeof s.grade === "number" ? s.grade : "-"}
+                  </td>
+                  <td className="py-2 px-3">
+                    {typeof s.plagiarismChecks?.score === "number"
+                      ? s.plagiarismChecks.score + "%"
+                      : "-"}
+                  </td>
+                  <td className="py-2 px-3">
+                    {s.updatedAt
+                      ? new Date(s.updatedAt).toLocaleString("id-ID")
+                      : "-"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
   );
 }
 
 function StatCard({ title, value, subtitle, icon: Icon, color }) {
+  const colorMap = {
+    blue: "text-blue-600 bg-blue-100",
+    green: "text-green-600 bg-green-100",
+    purple: "text-purple-600 bg-purple-100",
+    red: "text-red-600 bg-red-100",
+    yellow: "text-yellow-600 bg-yellow-100",
+    gray: "text-gray-600 bg-gray-100",
+  };
   return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex items-center">
-          <div className={`p-3 rounded-full ${color} text-white`}>
-            <Icon className="h-6 w-6" />
-          </div>
-          <div className="ml-4">
-            <p className="text-sm font-medium text-gray-500">{title}</p>
-            <div className="flex items-baseline">
-              <p className="text-2xl font-semibold text-gray-900">{value}</p>
-              {subtitle && (
-                <p className="ml-2 text-sm text-gray-600">{subtitle}</p>
-              )}
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div className={`p-4 rounded-lg ${colorMap[color] || colorMap.gray}`}>
+      <div className="flex items-center gap-2 mb-2">
+        <Icon className={`h-5 w-5 ${colorMap[color]}`} />
+        <span className="font-semibold">{title}</span>
+      </div>
+      <div className="text-2xl font-bold">{value}</div>
+      <div className="text-xs text-gray-600">{subtitle}</div>
+    </div>
   );
 }

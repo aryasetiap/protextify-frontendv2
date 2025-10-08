@@ -38,7 +38,6 @@ import {
   plagiarismService,
 } from "../../services";
 import { useAsyncData } from "../../hooks/useAsyncData";
-import { useWebSocket } from "../../hooks/useWebSocket";
 import { formatDate, formatRelativeTime } from "../../utils/formatters";
 
 export default function MonitorSubmissions() {
@@ -54,20 +53,19 @@ export default function MonitorSubmissions() {
   const [selectedSubmissions, setSelectedSubmissions] = useState([]);
   const [showExportModal, setShowExportModal] = useState(false);
 
-  const { joinMonitoring, leaveMonitoring, on, off } = useWebSocket();
-
   // Get assignment detail
   const { data: assignment, loading: assignmentLoading } = useAsyncData(
     () => assignmentsService.getAssignmentById(assignmentId),
     [assignmentId]
   );
 
-  // Fetch submissions
+  // Fetch submissions (hanya polling dari BE, tidak ada WebSocket)
   const fetchSubmissions = useCallback(async () => {
+    if (!assignment?.classId || !assignmentId) return;
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await assignmentsService.getAssignmentSubmissions(
-        assignment?.classId,
+      const response = await submissionsService.getAssignmentSubmissions(
+        assignment.classId,
         assignmentId
       );
       setSubmissions(response);
@@ -80,49 +78,12 @@ export default function MonitorSubmissions() {
     }
   }, [assignmentId, assignment?.classId]);
 
-  // Join WebSocket monitoring room
+  // Polling data setiap 30 detik (jika ingin update berkala)
   useEffect(() => {
-    if (assignmentId) {
-      joinMonitoring(assignmentId);
-
-      return () => {
-        leaveMonitoring(assignmentId);
-      };
-    }
-  }, [assignmentId, joinMonitoring, leaveMonitoring]);
-
-  // WebSocket event handlers
-  useEffect(() => {
-    const handleSubmissionListUpdate = (data) => {
-      if (data.assignmentId === assignmentId) {
-        setSubmissions(data.submissions);
-        setFilteredSubmissions(data.submissions);
-      }
-    };
-
-    const handleSubmissionUpdate = (data) => {
-      setSubmissions((prev) =>
-        prev.map((sub) =>
-          sub.id === data.submissionId ? { ...sub, ...data } : sub
-        )
-      );
-    };
-
-    on("submissionListUpdated", handleSubmissionListUpdate);
-    on("submissionUpdated", handleSubmissionUpdate);
-
-    return () => {
-      off("submissionListUpdated", handleSubmissionListUpdate);
-      off("submissionUpdated", handleSubmissionUpdate);
-    };
-  }, [assignmentId, on, off]);
-
-  // Fetch data when assignment is loaded
-  useEffect(() => {
-    if (assignment?.classId) {
-      fetchSubmissions();
-    }
-  }, [assignment?.classId, fetchSubmissions]);
+    fetchSubmissions();
+    const interval = setInterval(fetchSubmissions, 30000);
+    return () => clearInterval(interval);
+  }, [fetchSubmissions]);
 
   // Filter and search
   useEffect(() => {
@@ -166,8 +127,8 @@ export default function MonitorSubmissions() {
           bValue = b.grade || 0;
           break;
         case "plagiarismScore":
-          aValue = a.plagiarismScore || 0;
-          bValue = b.plagiarismScore || 0;
+          aValue = a.plagiarismChecks?.score || 0;
+          bValue = b.plagiarismChecks?.score || 0;
           break;
         default:
           aValue = a[sortBy];
@@ -316,7 +277,7 @@ export default function MonitorSubmissions() {
         <StatCard
           title="Rata-rata Nilai"
           value={stats.averageGrade.toFixed(1)}
-          icon={FileText}
+          icon={CheckCircle}
           color="text-indigo-600"
         />
       </div>
@@ -571,33 +532,25 @@ function SubmissionRow({ submission, isSelected, onSelect, assignmentId }) {
         )}
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        {submission.plagiarismScore ? (
+        {submission.plagiarismChecks?.score ? (
           <div className="flex items-center">
             <span
               className={`text-sm font-medium ${
-                submission.plagiarismScore > 30
+                submission.plagiarismChecks.score > 30
                   ? "text-red-600"
-                  : submission.plagiarismScore > 15
+                  : submission.plagiarismChecks.score > 15
                   ? "text-yellow-600"
                   : "text-green-600"
               }`}
             >
-              {submission.plagiarismScore}%
+              {submission.plagiarismChecks.score}%
             </span>
-            {submission.plagiarismScore > 30 && (
+            {submission.plagiarismChecks.score > 30 && (
               <AlertCircle className="h-4 w-4 text-red-600 ml-1" />
             )}
           </div>
         ) : (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handlePlagiarismCheck}
-            disabled={loading || submission.status === "DRAFT"}
-            className="text-xs"
-          >
-            {loading ? "Checking..." : "Cek"}
-          </Button>
+          <span className="text-sm text-gray-400">-</span>
         )}
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -638,11 +591,18 @@ function SubmissionRow({ submission, isSelected, onSelect, assignmentId }) {
               onClick={() =>
                 navigate(`/instructor/plagiarism/${submission.id}`)
               }
-              disabled={!submission.plagiarismScore}
+              disabled={!submission.plagiarismChecks?.score}
               className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Eye className="h-4 w-4 inline mr-2" />
               Analisis Plagiarisme
+            </button>
+            <button
+              onClick={handlePlagiarismCheck}
+              disabled={loading || submission.status === "DRAFT"}
+              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            >
+              {loading ? "Checking..." : "Cek"}
             </button>
           </div>
         </Dropdown>

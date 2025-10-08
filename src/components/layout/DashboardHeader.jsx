@@ -9,7 +9,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { cn } from "../../utils/helpers";
-import { useAuth } from "../../hooks/useAuth";
+import useAuth from "../../hooks/useAuth";
 import { getDefaultRoute } from "../../utils/constants";
 
 export default function DashboardHeader() {

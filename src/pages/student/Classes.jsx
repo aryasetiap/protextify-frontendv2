@@ -1,4 +1,12 @@
-import { useState, useEffect } from "react";
+/**
+ * Mapping utama:
+ * - classesService.getClasses() -> array kelas
+ * - Field kelas: id, name, description, classToken, instructor (fullName), enrollments[], assignments[], currentUserEnrollment (joinedAt), createdAt
+ * - assignments: id, title, instructions, deadline, active, createdAt
+ * - Tidak render fitur/field yang tidak ada di response BE.
+ */
+
+import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { BookOpen, Users, FileText, Plus, Calendar, Eye } from "lucide-react";
 import toast from "react-hot-toast";
@@ -260,6 +268,7 @@ function ClassCard({ classData, isNew = false }) {
             variant="outline"
             className="flex-1 border-[#23407a]/30 text-[#23407a] hover:bg-[#23407a] hover:text-white transition-all duration-300"
             onClick={() => navigate(`/dashboard/classes/${classData.id}`)}
+            aria-label={`Detail kelas ${classData.name}`}
           >
             <Eye className="h-4 w-4 mr-2" />
             Detail
@@ -276,6 +285,11 @@ function ClassCard({ classData, isNew = false }) {
               navigate(`/dashboard/classes/${classData.id}/assignments`)
             }
             disabled={activeAssignments === 0}
+            aria-label={
+              activeAssignments > 0
+                ? `Tugas (${activeAssignments})`
+                : "Belum Ada Tugas"
+            }
           >
             <FileText className="h-4 w-4 mr-2" />
             {activeAssignments > 0

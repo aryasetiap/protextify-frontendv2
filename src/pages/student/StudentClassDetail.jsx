@@ -1,5 +1,12 @@
-// src/pages/student/StudentClassDetail.jsx
-import { useState, useEffect } from "react";
+/**
+ * Mapping utama:
+ * - classesService.getClassById(classId) -> detail kelas
+ * - Field kelas: id, name, description, classToken, instructor (fullName), enrollments[], assignments[], currentUserEnrollment (joinedAt), createdAt
+ * - assignments: id, title, instructions, deadline, active, createdAt
+ * - Tidak render fitur/field yang tidak ada di response BE.
+ */
+
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   BookOpen,
@@ -322,26 +329,19 @@ function AssignmentsTab({ classDetail }) {
                     </p>
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
                       <span>Deadline: {formatDate(assignment.deadline)}</span>
+                      <span>
+                        Status:{" "}
+                        {assignment.active ? (
+                          <span className="text-green-600 font-medium">
+                            Aktif
+                          </span>
+                        ) : (
+                          <span className="text-gray-500 font-medium">
+                            Tidak Aktif
+                          </span>
+                        )}
+                      </span>
                     </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {assignment.active ? (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Aktif
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                        Tidak Aktif
-                      </span>
-                    )}
-                    {assignment.active && (
-                      <Button
-                        size="sm"
-                        className="bg-[#23407a] hover:bg-[#1a2f5c]"
-                      >
-                        Mulai Mengerjakan
-                      </Button>
-                    )}
                   </div>
                 </div>
               </CardContent>
@@ -400,14 +400,6 @@ function ClassmatesTab({ classDetail }) {
                     <p className="font-medium text-gray-900">
                       {enrollment.student.fullName || "Tidak diketahui"}
                     </p>
-                    <p className="text-sm text-gray-600">
-                      {enrollment.student.institution ||
-                        "Institusi tidak diketahui"}
-                    </p>
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    Bergabung:{" "}
-                    {formatDate(enrollment.createdAt || classDetail.createdAt)}
                   </div>
                 </div>
               ))}

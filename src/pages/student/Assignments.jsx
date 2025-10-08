@@ -1,3 +1,10 @@
+/**
+ * Mapping utama:
+ * - assignmentsService.getRecentAssignments(limit) -> array assignment
+ * - Field assignment: id, title, instructions, deadline, classId, class (name), expectedStudentCount, active, createdAt, submissions[], _count.submissions
+ * - Hanya assignment yang dikirim BE yang ditampilkan. Tidak render fitur/field yang tidak ada di response.
+ */
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -13,6 +20,7 @@ import {
 } from "../../components";
 import { assignmentsService } from "../../services";
 import { formatDate } from "../../utils/helpers";
+import { FileText } from "lucide-react";
 
 export default function StudentAssignments() {
   const navigate = useNavigate();
@@ -20,19 +28,27 @@ export default function StudentAssignments() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    async function fetchAssignments() {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await assignmentsService.getRecentAssignments(10);
-        setAssignments(Array.isArray(data) ? data : []);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
+  // Fetch assignments (recent, paginated)
+  const fetchAssignments = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await assignmentsService.getRecentAssignments(10);
+      setAssignments(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setError({
+        statusCode: err?.response?.data?.statusCode || err?.statusCode || 400,
+        message:
+          err?.response?.data?.message ||
+          err?.message ||
+          "Gagal memuat daftar tugas",
+      });
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     fetchAssignments();
   }, []);
 
@@ -74,6 +90,9 @@ export default function StudentAssignments() {
       ) : error ? (
         <Alert variant="error" className="mb-8">
           <p>Gagal memuat daftar tugas: {error.message}</p>
+          <Button size="sm" onClick={fetchAssignments} className="mt-3">
+            Coba Lagi
+          </Button>
         </Alert>
       ) : (
         <div>
@@ -137,11 +156,14 @@ function CardTugas({ assignment, onKerjakan }) {
             <p className="text-sm text-gray-600 mb-1">
               Jumlah Submission: {assignment._count?.submissions || 0}
             </p>
-            {assignment.submissions?.length > 0 && (
-              <p className="text-sm text-gray-600 mb-1">
-                Grade: {assignment.submissions[0]?.grade ?? "-"}
-              </p>
-            )}
+            {/* Hanya tampilkan grade jika submissions ada dan field grade dikirim BE */}
+            {Array.isArray(assignment.submissions) &&
+              assignment.submissions.length > 0 &&
+              typeof assignment.submissions[0]?.grade === "number" && (
+                <p className="text-sm text-gray-600 mb-1">
+                  Grade: {assignment.submissions[0].grade}
+                </p>
+              )}
           </div>
         </div>
       </CardHeader>
@@ -151,6 +173,7 @@ function CardTugas({ assignment, onKerjakan }) {
             size="sm"
             className="bg-[#23407a] hover:bg-[#1a2f5c] shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
             onClick={onKerjakan}
+            aria-label={`Kerjakan ${assignment.title}`}
           >
             Kerjakan
           </Button>

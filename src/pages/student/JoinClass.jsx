@@ -1,3 +1,10 @@
+/**
+ * Mapping utama:
+ * - classesService.previewClass(classToken) -> preview kelas (id, name, description, instructor, studentsCount, assignmentsCount, createdAt)
+ * - classesService.joinClass(classToken) -> { message, class }
+ * - Tidak render data/fitur yang tidak dikirim BE.
+ */
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -27,6 +34,7 @@ import {
 } from "../../components";
 import { classesService } from "../../services";
 import { joinClassSchema } from "../../utils/validation";
+import { formatDate } from "../../utils/helpers";
 
 export default function JoinClass() {
   const navigate = useNavigate();
@@ -74,7 +82,6 @@ export default function JoinClass() {
 
     try {
       setPreviewLoading(true);
-      // Get class preview (we'll use getClassById with token validation)
       const classData = await classesService.previewClass(tokenValue);
       setPreviewData(classData);
       setShowPreview(true);
@@ -105,7 +112,7 @@ export default function JoinClass() {
 
       toast.success("Berhasil bergabung ke kelas!");
 
-      // Redirect to class detail or student classes
+      // Redirect to class list, highlight new class
       navigate("/dashboard/classes", {
         state: {
           newClass: response.class,
@@ -113,9 +120,6 @@ export default function JoinClass() {
         },
       });
     } catch (error) {
-      console.error("Error joining class:", error);
-
-      // Handle specific errors
       if (error.response?.status === 404) {
         setError("classToken", {
           message: "Token kelas tidak ditemukan",
@@ -239,6 +243,8 @@ export default function JoinClass() {
                         maxLength={8}
                         className="font-mono text-xl text-center tracking-widest h-14 border-2 border-gray-300 focus:border-[#23407a] transition-all duration-300"
                         error={errors.classToken?.message}
+                        aria-label="Token Kelas"
+                        autoFocus
                       />
                       <div className="absolute -bottom-6 left-0 right-0">
                         <div className="flex justify-center space-x-1">
@@ -274,6 +280,7 @@ export default function JoinClass() {
                       }
                       loading={previewLoading}
                       className="w-full h-14 border-2 border-[#23407a]/30 text-[#23407a] hover:bg-[#23407a] hover:text-white transition-all duration-300 group"
+                      aria-label="Preview Kelas"
                     >
                       <Search className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
                       Preview Kelas
@@ -299,6 +306,7 @@ export default function JoinClass() {
                   disabled={!showPreview || !previewData}
                   size="lg"
                   className="order-1 sm:order-2 bg-[#23407a] hover:bg-[#1a2f5c] shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                  aria-label="Gabung Kelas Sekarang"
                 >
                   <CheckCircle className="h-5 w-5 mr-2" />
                   Gabung Kelas Sekarang
@@ -414,37 +422,36 @@ function ClassPreview({ classData }) {
                 <Users className="h-5 w-5 text-white" />
               </div>
               <p className="text-2xl font-bold text-gray-900">
-                {classData.enrollments?.length || 0}
+                {classData.studentsCount ?? 0}
               </p>
               <p className="text-xs text-gray-600 font-medium">Siswa</p>
             </div>
-
             <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-xl border border-purple-200/50">
               <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mx-auto mb-2">
                 <FileText className="h-5 w-5 text-white" />
               </div>
               <p className="text-2xl font-bold text-gray-900">
-                {classData.assignments?.length || 0}
+                {classData.assignmentsCount ?? 0}
               </p>
               <p className="text-xs text-gray-600 font-medium">Tugas</p>
             </div>
-
             <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100/50 rounded-xl border border-green-200/50">
               <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-2">
                 <Calendar className="h-5 w-5 text-white" />
               </div>
               <p className="text-xs font-bold text-gray-900">
-                {new Date(classData.createdAt).toLocaleDateString("id-ID", {
-                  day: "2-digit",
-                  month: "short",
-                })}
+                {classData.createdAt
+                  ? new Date(classData.createdAt).toLocaleDateString("id-ID", {
+                      day: "2-digit",
+                      month: "short",
+                    })
+                  : "-"}
               </p>
               <p className="text-xs text-gray-600 font-medium">Dibuat</p>
             </div>
-
             <div className="text-center p-4 bg-gradient-to-br from-yellow-50 to-yellow-100/50 rounded-xl border border-yellow-200/50">
               <div className="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center mx-auto mb-2">
-                <Users className="h-5 w-5 text-white" />
+                <BookOpen className="h-5 w-5 text-white" />
               </div>
               <p className="text-sm font-bold text-gray-900 truncate">
                 {classData.instructor?.fullName || "Instruktur"}
@@ -452,43 +459,6 @@ function ClassPreview({ classData }) {
               <p className="text-xs text-gray-600 font-medium">Pengajar</p>
             </div>
           </div>
-
-          {/* Recent Assignments Preview */}
-          {classData.assignments && classData.assignments.length > 0 && (
-            <div className="border-t border-gray-200 pt-4">
-              <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-                <FileText className="h-4 w-4 mr-2 text-[#23407a]" />
-                Tugas Terbaru ({classData.assignments.length})
-              </h4>
-              <div className="space-y-2">
-                {classData.assignments.slice(0, 3).map((assignment) => (
-                  <div
-                    key={assignment.id}
-                    className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                  >
-                    <span className="font-medium text-gray-900 flex-1 truncate">
-                      {assignment.title}
-                    </span>
-                    <span
-                      className={`text-xs px-3 py-1 rounded-full font-medium ml-3 ${
-                        assignment.active
-                          ? "bg-green-100 text-green-700 border border-green-200"
-                          : "bg-gray-100 text-gray-600 border border-gray-200"
-                      }`}
-                    >
-                      {assignment.active ? "Aktif" : "Tidak Aktif"}
-                    </span>
-                  </div>
-                ))}
-
-                {classData.assignments.length > 3 && (
-                  <p className="text-sm text-gray-500 text-center py-2">
-                    +{classData.assignments.length - 3} tugas lainnya
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Enhanced Success Alert */}

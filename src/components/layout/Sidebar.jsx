@@ -13,7 +13,7 @@ import {
   ChevronRight,
   CreditCard,
 } from "lucide-react";
-import { useAuth } from "../../hooks/useAuth";
+import useAuth from "../../hooks/useAuth";
 import { USER_ROLES } from "../../utils/constants";
 
 export default function Sidebar() {

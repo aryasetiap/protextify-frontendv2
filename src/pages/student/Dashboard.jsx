@@ -1,26 +1,24 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+/**
+ * Mapping utama:
+ * - useStudentDashboard() -> { stats, recentClasses, recentAssignments, activityTimeline }
+ * - stats: totalClasses, activeAssignments, completedAssignments, pendingSubmissions, overdueAssignments (opsional)
+ * - recentClasses: array kelas (id, name, instructor, assignments, enrollments, currentUserEnrollment)
+ * - recentAssignments: array assignment (id, title, deadline, class, active)
+ * - activityTimeline: array aktivitas (type, title, time, status, grade, plagiarismScore)
+ * - Tidak render data/fitur yang tidak dikirim BE.
+ */
+
 import {
   BookOpen,
   FileText,
   Clock,
   CheckCircle,
   Plus,
-  TrendingUp,
   AlertCircle,
 } from "lucide-react";
-import { useAuth } from "../../contexts/AuthContext";
+import useAuth from "../../hooks/useAuth";
 import { useStudentDashboard } from "../../hooks/useStudentDashboard";
-import {
-  Container,
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  LoadingSpinner,
-  Alert,
-  Button,
-} from "../../components";
+import { Container, LoadingSpinner, Alert, Button } from "../../components";
 import {
   QuickActions,
   RecentClasses,
@@ -80,7 +78,6 @@ export default function StudentDashboard() {
       typeof stats?.pendingSubmissions === "number"
         ? stats.pendingSubmissions
         : 0,
-    // Fallback untuk field baru jika nanti ada (misal: overdueAssignments)
     overdueAssignments:
       typeof stats?.overdueAssignments === "number"
         ? stats.overdueAssignments
@@ -96,7 +93,6 @@ export default function StudentDashboard() {
     ? activityTimeline
     : [];
 
-  // Ganti welcome section dengan:
   return (
     <Container className="py-8">
       {/* Enhanced Welcome Section with Gradient & Glass Effect */}
@@ -127,7 +123,6 @@ export default function StudentDashboard() {
               </p>
             </div>
 
-            {/* Connection Status Indicator */}
             <div className="flex items-center space-x-3">
               <div
                 className={`flex items-center px-4 py-2 rounded-full backdrop-blur-sm border border-white/20 ${
@@ -150,7 +145,7 @@ export default function StudentDashboard() {
         </div>
       </div>
 
-      {/* Enhanced Statistics Cards with Hover Effects */}
+      {/* Statistics Cards */}
       <div className="mb-12">
         <div className="flex items-center mb-6">
           <div className="w-1 h-8 bg-gradient-to-b from-[#23407a] to-[#3b5fa4] rounded-full mr-4"></div>
@@ -187,7 +182,6 @@ export default function StudentDashboard() {
             color="purple"
             gradient="from-purple-500 to-indigo-600"
           />
-          {/* Tambahkan StatCard baru jika ada field tambahan */}
           {safeStats.overdueAssignments > 0 && (
             <StatCard
               title="Tugas Terlambat"
@@ -200,7 +194,7 @@ export default function StudentDashboard() {
         </Grid>
       </div>
 
-      {/* Enhanced Main Content Grid */}
+      {/* Main Content Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
         <div className="xl:col-span-4">
           <QuickActions stats={safeStats} />
@@ -225,24 +219,26 @@ function StatCard({ title, value, icon: Icon, color, gradient }) {
     blue: "bg-blue-100 text-blue-600",
     yellow: "bg-yellow-100 text-yellow-600",
     green: "bg-green-100 text-green-600",
+    purple: "bg-purple-100 text-purple-600",
+    red: "bg-red-100 text-red-600",
     gray: "bg-gray-100 text-gray-600",
   };
 
   return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex items-center">
-          <div
-            className={`p-2 rounded-lg ${colorClasses[color]} bg-gradient-to-r ${gradient}`}
-          >
-            <Icon className="h-6 w-6" />
-          </div>
-          <div className="ml-4">
-            <p className="text-sm font-medium text-gray-600">{title}</p>
-            <p className="text-2xl font-bold text-gray-900">{value}</p>
-          </div>
+    <div className="transition-all duration-300 hover:scale-105">
+      <div
+        className={`p-6 rounded-2xl shadow-lg flex items-center bg-white border border-gray-100`}
+      >
+        <div
+          className={`p-2 rounded-lg ${colorClasses[color]} bg-gradient-to-r ${gradient} mr-4`}
+        >
+          <Icon className="h-6 w-6" />
         </div>
-      </CardContent>
-    </Card>
+        <div>
+          <p className="text-sm font-medium text-gray-600">{title}</p>
+          <p className="text-2xl font-bold text-gray-900">{value}</p>
+        </div>
+      </div>
+    </div>
   );
 }
