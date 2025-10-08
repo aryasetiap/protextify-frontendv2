@@ -1,12 +1,11 @@
 // src/hooks/useStudentDashboard.js
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
-import { useWebSocket } from "./useWebSocket";
-
-// Import services dengan safe fallback
-import classesService from "../services/classes";
-import submissionsService from "../services/submissions";
-import { assignmentsService } from "../services"; // pastikan sudah diekspor
+import {
+  classesService,
+  submissionsService,
+  assignmentsService,
+} from "../services";
 
 export const useStudentDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -21,9 +20,6 @@ export const useStudentDashboard = () => {
   const [recentAssignments, setRecentAssignments] = useState([]);
   const [activityTimeline, setActivityTimeline] = useState([]);
 
-  // WebSocket for real-time updates
-  const { socket, isConnected } = useWebSocket();
-
   const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
@@ -33,11 +29,11 @@ export const useStudentDashboard = () => {
       const [classesData, submissionsData, recentAssignmentsData] =
         await Promise.allSettled([
           classesService.getClasses(),
-          submissionsService.getHistory?.() || Promise.resolve([]),
-          assignmentsService.getRecentAssignments?.(3) || Promise.resolve([]),
+          submissionsService.getHistory(),
+          assignmentsService.getRecentAssignments(3),
         ]);
 
-      // Safe handling untuk classesData dengan struktur baru
+      // Safe handling untuk classesData
       const safeClassesData =
         classesData.status === "fulfilled" && Array.isArray(classesData.value)
           ? classesData.value
@@ -121,33 +117,19 @@ export const useStudentDashboard = () => {
 
       setActivityTimeline(timeline);
     } catch (err) {
-      console.error("Error fetching dashboard data:", err);
-      setError(err);
-      toast.error("Gagal memuat data dashboard");
+      const formattedError = {
+        statusCode: err?.response?.data?.statusCode || err?.statusCode || 400,
+        message:
+          err?.response?.data?.message ||
+          err?.message ||
+          "Gagal memuat data dashboard",
+      };
+      setError(formattedError);
+      toast.error(formattedError.message);
     } finally {
       setLoading(false);
     }
   }, []);
-
-  // Setup WebSocket listeners
-  useEffect(() => {
-    if (socket && isConnected) {
-      socket.on("notification", (data) => {
-        if (data.type === "new_assignment" || data.type === "class_update") {
-          fetchDashboardData();
-        }
-      });
-
-      socket.on("submissionUpdated", () => {
-        fetchDashboardData();
-      });
-
-      return () => {
-        socket.off("notification");
-        socket.off("submissionUpdated");
-      };
-    }
-  }, [socket, isConnected, fetchDashboardData]);
 
   // Initial data fetch
   useEffect(() => {
@@ -166,7 +148,6 @@ export const useStudentDashboard = () => {
     recentAssignments,
     activityTimeline,
     refetch,
-    isConnected,
   };
 };
 

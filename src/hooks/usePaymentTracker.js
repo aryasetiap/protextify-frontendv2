@@ -59,13 +59,24 @@ export const usePaymentTracker = (orderId, options = {}) => {
       setAttempts((prev) => prev + 1);
 
       // Stop if max attempts reached
-      if (attempts >= maxAttempts) {
+      if (attempts + 1 >= maxAttempts) {
         stopPolling();
-        setError("Maksimum polling attempts reached");
+        setError({
+          statusCode: 408,
+          message: "Maksimum polling attempts tercapai",
+        });
+        if (onTimeout) onTimeout();
       }
     } catch (err) {
-      setError(err.message);
-      console.error("Payment status check error:", err);
+      const formattedError = {
+        statusCode: err?.response?.data?.statusCode || err?.statusCode || 400,
+        message:
+          err?.response?.data?.message ||
+          err?.message ||
+          "Gagal cek status pembayaran",
+      };
+      setError(formattedError);
+      if (onFailure) onFailure(formattedError);
     } finally {
       setLoading(false);
     }
@@ -85,7 +96,10 @@ export const usePaymentTracker = (orderId, options = {}) => {
     if (timeout > 0) {
       timeoutRef.current = setTimeout(() => {
         stopPolling();
-        setError("Payment timeout reached");
+        setError({
+          statusCode: 408,
+          message: "Payment timeout tercapai",
+        });
         if (onTimeout) onTimeout();
       }, timeout);
     }
@@ -121,6 +135,7 @@ export const usePaymentTracker = (orderId, options = {}) => {
     if (orderId && !intervalRef.current) {
       startPolling();
     }
+    // eslint-disable-next-line
   }, [orderId]);
 
   return {

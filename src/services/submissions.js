@@ -271,6 +271,10 @@ const getClassHistory = async (classId) => {
   }
 };
 
+// const logPasteEvent = async (submissionId, event) => {
+//   return await api.post(`/submissions/${submissionId}/paste-events`, event);
+// };
+
 const submissionsService = {
   createSubmission,
   getSubmissionById,

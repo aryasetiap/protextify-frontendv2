@@ -1,11 +1,7 @@
 // src/hooks/useInstructorDashboard.js
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
-import { useWebSocket } from "./useWebSocket";
-
-// Import services dengan safe fallback
-import classesService from "../services/classes";
-import paymentsService from "../services/payments";
+import { classesService, paymentsService } from "../services";
 
 export const useInstructorDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -31,17 +27,12 @@ export const useInstructorDashboard = () => {
     classActivity: [],
   });
 
-  const websocketHook = useWebSocket();
-
-  // Safe destructuring dengan default functions
-  const { on = () => {}, off = () => {} } = websocketHook || {};
-
   const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Fetch all necessary data in parallel dengan safe error handling
+      // Fetch all necessary data in parallel
       const [classesData, transactionsData] = await Promise.all([
         classesService.getClasses().catch((err) => {
           console.warn("Failed to fetch classes:", err);
@@ -53,7 +44,7 @@ export const useInstructorDashboard = () => {
         }),
       ]);
 
-      // Calculate comprehensive statistics
+      // Calculate statistics
       const totalClasses = classesData.length;
 
       // Get all students across all classes
@@ -95,7 +86,7 @@ export const useInstructorDashboard = () => {
         (s) => s.status === "SUBMITTED"
       ).length;
 
-      // Calculate revenue dari response backend yang baru
+      // Calculate revenue dari response backend
       const transactionsList = transactionsData.data || [];
       const totalRevenue = transactionsList
         .filter((t) => t.status === "SUCCESS")
@@ -167,9 +158,15 @@ export const useInstructorDashboard = () => {
         classActivity: prepareClassActivity(classesData),
       });
     } catch (err) {
-      console.error("Error fetching instructor dashboard data:", err);
-      setError(err);
-      toast.error("Gagal memuat data dashboard");
+      const formattedError = {
+        statusCode: err?.response?.data?.statusCode || err?.statusCode || 400,
+        message:
+          err?.response?.data?.message ||
+          err?.message ||
+          "Gagal memuat data dashboard",
+      };
+      setError(formattedError);
+      toast.error(formattedError.message);
     } finally {
       setLoading(false);
     }
@@ -221,38 +218,6 @@ export const useInstructorDashboard = () => {
       activity: (cls.enrollments?.length || 0) * (cls.assignments?.length || 0),
     }));
   };
-
-  // WebSocket event handlers dengan safety check
-  useEffect(() => {
-    const handleSubmissionUpdate = (data) => {
-      console.log("Submission updated:", data);
-      fetchDashboardData();
-    };
-
-    const handleNotification = (notification) => {
-      console.log("Received notification:", notification);
-      if (
-        notification.type === "PAYMENT_SUCCESS" ||
-        notification.type === "ASSIGNMENT_ACTIVATED"
-      ) {
-        fetchDashboardData();
-      }
-    };
-
-    // Safe event binding
-    if (typeof on === "function") {
-      on("submissionListUpdated", handleSubmissionUpdate);
-      on("notification", handleNotification);
-    }
-
-    return () => {
-      // Safe cleanup
-      if (typeof off === "function") {
-        off("submissionListUpdated", handleSubmissionUpdate);
-        off("notification", handleNotification);
-      }
-    };
-  }, [on, off, fetchDashboardData]);
 
   useEffect(() => {
     fetchDashboardData();

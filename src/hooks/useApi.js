@@ -15,12 +15,13 @@ export const useApi = () => {
       showSuccessToast = false,
     } = options;
 
+    let toastId;
     try {
       setLoading(true);
       setError(null);
 
       if (loadingMessage) {
-        toast.loading(loadingMessage);
+        toastId = toast.loading(loadingMessage, { id: "api-loading" });
       }
 
       const response = await apiCall();
@@ -31,21 +32,27 @@ export const useApi = () => {
 
       return response;
     } catch (err) {
-      setError(err);
+      // Format error dari BE: { statusCode, message }
+      const message =
+        errorMessage ||
+        err?.response?.data?.message ||
+        err?.message ||
+        "Terjadi kesalahan";
+
+      setError({
+        statusCode: err?.response?.data?.statusCode || err?.statusCode || 400,
+        message,
+      });
 
       if (showErrorToast) {
-        const message =
-          errorMessage ||
-          err.response?.data?.message ||
-          err.message ||
-          "Terjadi kesalahan";
         toast.error(message);
       }
 
       throw err;
     } finally {
       setLoading(false);
-      toast.dismiss(); // Dismiss loading toast
+      if (loadingMessage && toastId) toast.dismiss(toastId);
+      else toast.dismiss();
     }
   }, []);
 

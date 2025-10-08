@@ -57,7 +57,7 @@ const authReducer = (state, action) => {
 const initialState = {
   user: null,
   token: authService.getToken(),
-  isAuthenticated: false,
+  isAuthenticated: !!authService.getToken(),
   loading: true,
   error: null,
 };
@@ -68,6 +68,7 @@ export const AuthProvider = ({ children }) => {
   // Check auth status on mount
   useEffect(() => {
     checkAuthStatus();
+    // eslint-disable-next-line
   }, []);
 
   // Auto-refresh token every 50 minutes (if token expires in 1 hour)
@@ -109,8 +110,9 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await authService.login(credentials);
 
-      // Store token
-      localStorage.setItem("token", response.accessToken);
+      if (response.accessToken) {
+        localStorage.setItem("token", response.accessToken);
+      }
 
       dispatch({
         type: "LOGIN_SUCCESS",
@@ -125,9 +127,13 @@ export const AuthProvider = ({ children }) => {
       // Return response agar bisa digunakan di Login component
       return response;
     } catch (error) {
-      const errorMessage = error.response?.data?.message || "Login gagal";
-      dispatch({ type: "LOGIN_ERROR", payload: errorMessage });
-      toast.error(errorMessage);
+      const formattedError = {
+        statusCode: error.response?.data?.statusCode || error.statusCode || 400,
+        message:
+          error.response?.data?.message || error.message || "Login gagal",
+      };
+      dispatch({ type: "LOGIN_ERROR", payload: formattedError });
+      toast.error(formattedError.message);
       throw error;
     }
   };
@@ -143,9 +149,13 @@ export const AuthProvider = ({ children }) => {
 
       return response;
     } catch (error) {
-      const errorMessage = error.response?.data?.message || "Registrasi gagal";
-      dispatch({ type: "LOGIN_ERROR", payload: errorMessage });
-      toast.error(errorMessage);
+      const formattedError = {
+        statusCode: error.response?.data?.statusCode || error.statusCode || 400,
+        message:
+          error.response?.data?.message || error.message || "Registrasi gagal",
+      };
+      dispatch({ type: "LOGIN_ERROR", payload: formattedError });
+      toast.error(formattedError.message);
       throw error;
     }
   };
@@ -167,7 +177,14 @@ export const AuthProvider = ({ children }) => {
       toast.success("Profil berhasil diperbarui");
       return updatedUser;
     } catch (error) {
-      toast.error("Gagal memperbarui profil");
+      const formattedError = {
+        statusCode: error.response?.data?.statusCode || error.statusCode || 400,
+        message:
+          error.response?.data?.message ||
+          error.message ||
+          "Gagal memperbarui profil",
+      };
+      toast.error(formattedError.message);
       throw error;
     }
   };
@@ -176,8 +193,6 @@ export const AuthProvider = ({ children }) => {
     try {
       await authService.refreshToken();
     } catch (error) {
-      console.error("Silent refresh failed:", error);
-      // Don't show error to user, just logout silently
       logout();
     }
   };

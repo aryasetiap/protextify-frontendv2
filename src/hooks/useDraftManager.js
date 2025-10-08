@@ -19,8 +19,15 @@ export const useDraftManager = (submissionId) => {
       const data = await submissionsService.getSubmissionById(submissionId);
       setSubmission(data);
     } catch (err) {
-      setError(err);
-      toast.error("Gagal memuat data submission");
+      const formattedError = {
+        statusCode: err?.response?.data?.statusCode || err?.statusCode || 400,
+        message:
+          err?.response?.data?.message ||
+          err?.message ||
+          "Gagal memuat data submission",
+      };
+      setError(formattedError);
+      toast.error(formattedError.message);
     } finally {
       setLoading(false);
     }
@@ -43,13 +50,20 @@ export const useDraftManager = (submissionId) => {
 
         setSubmission((prev) => ({
           ...prev,
-          content,
-          updatedAt: updatedSubmission.updatedAt,
+          ...updatedSubmission,
         }));
 
         return updatedSubmission;
       } catch (err) {
-        setError(err);
+        const formattedError = {
+          statusCode: err?.response?.data?.statusCode || err?.statusCode || 400,
+          message:
+            err?.response?.data?.message ||
+            err?.message ||
+            "Gagal menyimpan draft",
+        };
+        setError(formattedError);
+        toast.error(formattedError.message);
         throw err;
       } finally {
         setSaving(false);
@@ -70,15 +84,22 @@ export const useDraftManager = (submissionId) => {
 
       setSubmission((prev) => ({
         ...prev,
-        status: "SUBMITTED",
+        status: result.status,
         submittedAt: result.submittedAt,
       }));
 
       toast.success("Tugas berhasil dikumpulkan!");
       return result;
     } catch (err) {
-      setError(err);
-      toast.error("Gagal mengumpulkan tugas");
+      const formattedError = {
+        statusCode: err?.response?.data?.statusCode || err?.statusCode || 400,
+        message:
+          err?.response?.data?.message ||
+          err?.message ||
+          "Gagal mengumpulkan tugas",
+      };
+      setError(formattedError);
+      toast.error(formattedError.message);
       throw err;
     } finally {
       setSubmitting(false);

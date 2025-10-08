@@ -13,9 +13,15 @@ export const useAsyncData = (asyncFunction, dependencies = []) => {
       const result = await asyncFunction();
       setData(result);
     } catch (err) {
-      console.error("Async data fetch error:", err);
-      setError(err);
+      // Format error dari BE: { statusCode, message }
+      const formattedError = {
+        statusCode: err?.response?.data?.statusCode || err?.statusCode || 400,
+        message:
+          err?.response?.data?.message || err?.message || "Terjadi kesalahan",
+      };
+      setError(formattedError);
       setData(null); // Reset data on error
+      console.error("Async data fetch error:", formattedError);
     } finally {
       setLoading(false);
     }

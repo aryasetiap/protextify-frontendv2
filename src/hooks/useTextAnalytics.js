@@ -1,4 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
+import { submissionsService, plagiarismService } from "../services";
+import { toast } from "react-hot-toast";
 
 export const useTextAnalytics = (initialContent = "", limits = {}) => {
   const {
@@ -7,9 +9,12 @@ export const useTextAnalytics = (initialContent = "", limits = {}) => {
     minWords = 0,
     warnAtWordPercentage = 90,
     warnAtCharacterPercentage = 90,
+    submissionId = null, // opsional, jika ingin auto-save ke BE
   } = limits;
 
   const [content, setContent] = useState(initialContent);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
 
   // Calculate text statistics
   const stats = useMemo(() => {
@@ -135,6 +140,56 @@ export const useTextAnalytics = (initialContent = "", limits = {}) => {
     setContent(newContent);
   }, []);
 
+  // Auto-save ke BE jika submissionId tersedia
+  const autoSaveContent = useCallback(async () => {
+    if (!submissionId) return;
+    setSaving(true);
+    setError(null);
+    try {
+      await submissionsService.updateSubmissionContent(submissionId, content);
+      toast.success("Draft berhasil disimpan");
+    } catch (err) {
+      const formattedError = {
+        statusCode: err?.response?.data?.statusCode || err?.statusCode || 400,
+        message:
+          err?.response?.data?.message ||
+          err?.message ||
+          "Gagal menyimpan draft",
+      };
+      setError(formattedError);
+      toast.error(formattedError.message);
+    } finally {
+      setSaving(false);
+    }
+  }, [submissionId, content]);
+
+  // Fungsi untuk trigger pengecekan plagiarisme (opsional, jika diperlukan)
+  const checkPlagiarism = useCallback(
+    async (options = {}) => {
+      if (!submissionId) return;
+      try {
+        const result = await plagiarismService.checkPlagiarism(
+          submissionId,
+          options
+        );
+        toast.success("Pengecekan plagiarisme berhasil dimulai");
+        return result;
+      } catch (err) {
+        const formattedError = {
+          statusCode: err?.response?.data?.statusCode || err?.statusCode || 400,
+          message:
+            err?.response?.data?.message ||
+            err?.message ||
+            "Gagal memulai pengecekan plagiarisme",
+        };
+        setError(formattedError);
+        toast.error(formattedError.message);
+        throw formattedError;
+      }
+    },
+    [submissionId]
+  );
+
   // Get display statistics
   const getDisplayStats = useCallback(() => {
     return {
@@ -153,5 +208,9 @@ export const useTextAnalytics = (initialContent = "", limits = {}) => {
     limitChecks,
     validation,
     getDisplayStats,
+    autoSaveContent,
+    saving,
+    error,
+    checkPlagiarism,
   };
 };

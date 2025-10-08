@@ -1,11 +1,14 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef } from "react";
 import toast from "react-hot-toast";
+import { submissionsService } from "../services"; // Import jika ingin log ke BE
 
 export const useCopyPasteMonitor = (options = {}) => {
   const {
     enabled = true,
     showWarnings = true,
     logEvents = true,
+    logToBackend = false, // opsi baru
+    submissionId = null, // jika ingin log ke BE
     maxPasteLength = 500,
     onPasteDetected,
     onSuspiciousActivity,
@@ -16,7 +19,28 @@ export const useCopyPasteMonitor = (options = {}) => {
   const [isMonitoring, setIsMonitoring] = useState(enabled);
 
   const editorRef = useRef(null);
-  const observerRef = useRef(null);
+
+  // Kirim event ke backend (opsional)
+  const sendPasteEventToBackend = useCallback(
+    async (event) => {
+      if (!logToBackend || !submissionId) return;
+      try {
+        // Contoh: kirim ke endpoint khusus (pastikan BE support)
+        await submissionsService.logPasteEvent(submissionId, event);
+      } catch (error) {
+        const formattedError = {
+          statusCode:
+            error.response?.data?.statusCode || error.statusCode || 400,
+          message:
+            error.response?.data?.message ||
+            error.message ||
+            "Gagal log paste event",
+        };
+        toast.error(formattedError.message);
+      }
+    },
+    [logToBackend, submissionId]
+  );
 
   // Monitor paste events
   const handlePaste = useCallback(
@@ -28,12 +52,12 @@ export const useCopyPasteMonitor = (options = {}) => {
 
       const pasteEvent = {
         id: Date.now(),
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
         textLength: pastedText.length,
         htmlLength: pastedHtml.length,
         hasFormatting: pastedHtml !== pastedText,
         source: detectPasteSource(pastedHtml),
-        text: pastedText.substring(0, 200), // Store first 200 chars for analysis
+        text: pastedText.substring(0, 200),
       };
 
       // Check for suspicious paste
@@ -65,6 +89,11 @@ export const useCopyPasteMonitor = (options = {}) => {
         ]);
       }
 
+      // Kirim ke backend jika diaktifkan
+      if (logToBackend) {
+        sendPasteEventToBackend({ ...pasteEvent, suspicious: isSuspicious });
+      }
+
       if (onPasteDetected) {
         onPasteDetected(pasteEvent);
       }
@@ -74,6 +103,8 @@ export const useCopyPasteMonitor = (options = {}) => {
       maxPasteLength,
       showWarnings,
       logEvents,
+      logToBackend,
+      sendPasteEventToBackend,
       onPasteDetected,
       onSuspiciousActivity,
     ]
@@ -82,8 +113,6 @@ export const useCopyPasteMonitor = (options = {}) => {
   // Detect paste source
   const detectPasteSource = useCallback((html) => {
     if (!html) return "unknown";
-
-    // Common source patterns
     const sources = [
       { pattern: /docs\.google\.com/i, name: "Google Docs" },
       { pattern: /office\.live\.com/i, name: "Microsoft Office Online" },
@@ -92,13 +121,11 @@ export const useCopyPasteMonitor = (options = {}) => {
       { pattern: /mso-/i, name: "Microsoft Word" },
       { pattern: /apple-/i, name: "Apple Pages" },
     ];
-
     for (const source of sources) {
       if (source.pattern.test(html)) {
         return source.name;
       }
     }
-
     return html.includes("<") ? "formatted-text" : "plain-text";
   }, []);
 

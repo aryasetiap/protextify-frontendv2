@@ -1,81 +1,121 @@
 // src/hooks/useFileUpload.js
 import { useState, useCallback } from "react";
-import { uploadService } from "../services";
+import { storageService } from "../services";
 import { toast } from "react-hot-toast";
+
+const FILE_TYPE_MAP = {
+  pdf: "application/pdf",
+  doc: "application/msword",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  zip: "application/zip",
+};
+
+const getFileType = (file) => {
+  const ext = file.name.split(".").pop().toLowerCase();
+  return FILE_TYPE_MAP[ext] || file.type;
+};
+
+const getMaxSize = (type) => {
+  switch (type) {
+    case "application/pdf":
+    case "application/msword":
+    case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+      return 10 * 1024 * 1024; // 10MB
+    case "image/jpeg":
+    case "image/png":
+      return 5 * 1024 * 1024; // 5MB
+    case "application/zip":
+      return 20 * 1024 * 1024; // 20MB
+    default:
+      return 10 * 1024 * 1024;
+  }
+};
 
 export const useFileUpload = () => {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState(null);
 
-  const uploadFile = useCallback(async (file, type, entityId, options = {}) => {
+  const uploadFile = useCallback(async (file, options = {}) => {
     const {
-      maxSize = 10 * 1024 * 1024, // 10MB default
+      assignmentId,
+      submissionId,
+      description,
       allowedTypes = [],
       onSuccess = null,
       onError = null,
     } = options;
 
+    setUploading(true);
+    setProgress(0);
+    setError(null);
+
+    // Validasi file
+    const fileType = getFileType(file);
+    const maxSize = getMaxSize(fileType);
+
+    if (allowedTypes.length > 0 && !allowedTypes.includes(fileType)) {
+      const msg = "Tipe file tidak didukung";
+      setError({ statusCode: 400, message: msg });
+      toast.error(msg);
+      if (onError) onError({ statusCode: 400, message: msg });
+      setUploading(false);
+      return;
+    }
+
+    if (file.size > maxSize) {
+      const msg = `Ukuran file melebihi batas maksimal (${Math.round(
+        maxSize / 1024 / 1024
+      )}MB)`;
+      setError({ statusCode: 400, message: msg });
+      toast.error(msg);
+      if (onError) onError({ statusCode: 400, message: msg });
+      setUploading(false);
+      return;
+    }
+
     try {
-      setUploading(true);
-      setProgress(0);
-      setError(null);
+      // Progress upload (opsional, jika BE support)
+      // const onUploadProgress = (event) => {
+      //   if (event.total) {
+      //     setProgress(Math.round((event.loaded / event.total) * 100));
+      //   }
+      // };
 
-      // Validate file
-      const validation = uploadService.validateFile(
-        file,
-        maxSize,
-        allowedTypes
-      );
-      if (!validation.isValid) {
-        validation.errors.forEach((err) => toast.error(err));
-        throw new Error(validation.errors.join(", "));
-      }
+      const uploadOptions = {};
+      if (assignmentId) uploadOptions.assignmentId = assignmentId;
+      if (submissionId) uploadOptions.submissionId = submissionId;
+      if (description) uploadOptions.description = description;
 
-      let response;
-      const onProgress = (percent) => setProgress(percent);
-
-      // Upload based on type
-      switch (type) {
-        case "submission":
-          response = await uploadService.uploadSubmissionFile(
-            file,
-            entityId,
-            onProgress
-          );
-          break;
-        case "profile":
-          response = await uploadService.uploadProfilePicture(file, onProgress);
-          break;
-        case "assignment":
-          response = await uploadService.uploadAssignmentDocument(
-            file,
-            entityId,
-            onProgress
-          );
-          break;
-        default:
-          throw new Error("Invalid upload type");
-      }
+      // const result = await storageService.uploadFile(file, uploadOptions, onUploadProgress);
+      const result = await storageService.uploadFile(file, uploadOptions);
 
       setProgress(100);
-      toast.success("File berhasil diupload");
+      toast.success("File berhasil di-upload");
 
-      if (onSuccess) {
-        onSuccess(response);
-      }
+      if (onSuccess) onSuccess(result);
 
-      return response;
+      return result;
     } catch (err) {
-      setError(err);
+      const formattedError = {
+        statusCode: err?.response?.data?.statusCode || err?.statusCode || 400,
+        message:
+          err?.response?.data?.message ||
+          err?.message ||
+          "Gagal mengupload file",
+      };
+      setError(formattedError);
 
       if (onError) {
-        onError(err);
+        onError(formattedError);
       } else {
-        toast.error(err.message || "Gagal mengupload file");
+        toast.error(formattedError.message);
       }
 
-      throw err;
+      throw formattedError;
     } finally {
       setUploading(false);
     }
