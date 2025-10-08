@@ -1,13 +1,13 @@
 // src/components/export/ExportCenter.jsx
 import { useState } from "react";
-import { Download, FileText, BarChart3, Calendar, Filter } from "lucide-react";
-import Button from "../ui/Button"; // ✅ Change from named import to default import
+import { Download, FileText, BarChart3, Filter } from "lucide-react";
+import Button from "../ui/Button";
 import { Card } from "../ui/Card";
 import { Modal } from "../ui/Modal";
-import Select from "../ui/Select"; // ✅ Change to default import
+import Select from "../ui/Select";
 import { Switch } from "../ui/Switch";
 import { DatePicker } from "../ui/DatePicker";
-import Input from "../ui/Input"; // ✅ Add missing Input import as default
+import Input from "../ui/Input";
 import ExportModal from "../forms/ExportModal";
 import {
   exportSubmissionsToCSV,
@@ -37,6 +37,7 @@ export default function ExportCenter({
     maxScore: null,
   });
 
+  // Filter submissions sesuai field BE
   const filteredSubmissions = submissions.filter((submission) => {
     // Status filter
     if (filters.status !== "all" && submission.status !== filters.status) {
@@ -44,13 +45,23 @@ export default function ExportCenter({
     }
 
     // Grade filter
-    if (!filters.includeGraded && submission.grade) return false;
-    if (!filters.includeUngraded && !submission.grade) return false;
+    if (!filters.includeGraded && typeof submission.grade === "number")
+      return false;
+    if (!filters.includeUngraded && typeof submission.grade !== "number")
+      return false;
 
     // Score range filter
-    if (filters.minScore && submission.plagiarismScore < filters.minScore)
+    if (
+      filters.minScore !== null &&
+      typeof submission.plagiarismScore === "number" &&
+      submission.plagiarismScore < filters.minScore
+    )
       return false;
-    if (filters.maxScore && submission.plagiarismScore > filters.maxScore)
+    if (
+      filters.maxScore !== null &&
+      typeof submission.plagiarismScore === "number" &&
+      submission.plagiarismScore > filters.maxScore
+    )
       return false;
 
     // Date range filter
@@ -66,6 +77,7 @@ export default function ExportCenter({
     return true;
   });
 
+  // Export logic hanya field yang tersedia di BE
   const handleQuickExport = async (format) => {
     try {
       const dataToExport =
@@ -92,6 +104,7 @@ export default function ExportCenter({
     }
   };
 
+  // Analytics export hanya statistik FE
   const handleAnalyticsExport = async () => {
     try {
       const dataToAnalyze =
@@ -114,6 +127,7 @@ export default function ExportCenter({
     }
   };
 
+  // Export options hanya yang didukung BE
   const exportOptions = [
     {
       id: "csv",
@@ -315,39 +329,6 @@ export default function ExportCenter({
             </div>
           </div>
 
-          {/* Date Range Filter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Date Range
-            </label>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">
-                  Start Date
-                </label>
-                <DatePicker
-                  value={filters.startDate}
-                  onChange={(date) =>
-                    setFilters((prev) => ({ ...prev, startDate: date }))
-                  }
-                  placeholder="Select start date"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-gray-500 mb-1">
-                  End Date
-                </label>
-                <DatePicker
-                  value={filters.endDate}
-                  onChange={(date) =>
-                    setFilters((prev) => ({ ...prev, endDate: date }))
-                  }
-                  placeholder="Select end date"
-                />
-              </div>
-            </div>
-          </div>
-
           {/* Score Range Filter */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -396,16 +377,52 @@ export default function ExportCenter({
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Modal Actions */}
-        <div className="flex justify-end gap-3 pt-4 border-t">
-          <Button variant="ghost" onClick={() => setShowAnalyticsModal(false)}>
-            Cancel
-          </Button>
-          <Button onClick={() => setShowAnalyticsModal(false)}>
-            Apply Filters
-          </Button>
+          {/* Date Range Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Date Range
+            </label>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">
+                  Start Date
+                </label>
+                <DatePicker
+                  value={filters.startDate}
+                  onChange={(date) =>
+                    setFilters((prev) => ({ ...prev, startDate: date }))
+                  }
+                  placeholder="Select start date"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">
+                  End Date
+                </label>
+                <DatePicker
+                  value={filters.endDate}
+                  onChange={(date) =>
+                    setFilters((prev) => ({ ...prev, endDate: date }))
+                  }
+                  placeholder="Select end date"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Modal Actions */}
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button
+              variant="ghost"
+              onClick={() => setShowAnalyticsModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={() => setShowAnalyticsModal(false)}>
+              Apply Filters
+            </Button>
+          </div>
         </div>
       </Modal>
     </>

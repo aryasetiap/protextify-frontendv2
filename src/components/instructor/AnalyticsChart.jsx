@@ -2,7 +2,10 @@
 import { Card, CardHeader, CardTitle, CardContent } from "../ui";
 import { BarChart3, TrendingUp } from "lucide-react";
 
+// Data chart hanya menggunakan field yang tersedia dari BE/hooks
 const AnalyticsChart = ({ data, title, type = "bar" }) => {
+  // Untuk bar chart: activity, students, assignments (kelas)
+  // Untuk line/area chart: submissions, graded (tren submissions/penilaian)
   const maxValue = Math.max(
     ...data.map((d) =>
       type === "bar"

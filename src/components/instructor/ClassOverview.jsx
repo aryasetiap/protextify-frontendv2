@@ -37,7 +37,7 @@ const ClassOverview = ({ classes, totalClasses, detailed = false }) => {
       <CardContent>
         <div className="space-y-4">
           {classes.length > 0 ? (
-            classes.map((cls, index) => (
+            classes.map((cls) => (
               <div
                 key={cls.id}
                 className="group relative overflow-hidden p-4 bg-gradient-to-r from-gray-50 to-blue-50/30 rounded-2xl border border-gray-200/50 hover:border-[#23407a]/30 hover:shadow-lg transition-all duration-300"
@@ -54,20 +54,28 @@ const ClassOverview = ({ classes, totalClasses, detailed = false }) => {
                       <div className="flex items-center bg-white/70 px-2 py-1 rounded-lg">
                         <Users className="h-3 w-3 mr-1 text-blue-500" />
                         <span className="font-medium">
-                          {cls.enrollments?.length || 0} siswa
+                          {Array.isArray(cls.enrollments)
+                            ? cls.enrollments.length
+                            : 0}{" "}
+                          siswa
                         </span>
                       </div>
                       <div className="flex items-center bg-white/70 px-2 py-1 rounded-lg">
                         <FileText className="h-3 w-3 mr-1 text-purple-500" />
                         <span className="font-medium">
-                          {cls.assignments?.length || 0} tugas
+                          {Array.isArray(cls.assignments)
+                            ? cls.assignments.length
+                            : 0}{" "}
+                          tugas
                         </span>
                       </div>
                     </div>
                     {detailed && (
                       <div className="mt-3 text-xs text-gray-500 bg-white/50 px-2 py-1 rounded-lg inline-block">
                         Dibuat:{" "}
-                        {new Date(cls.createdAt).toLocaleDateString("id-ID")}
+                        {cls.createdAt
+                          ? new Date(cls.createdAt).toLocaleDateString("id-ID")
+                          : "-"}
                       </div>
                     )}
                   </div>

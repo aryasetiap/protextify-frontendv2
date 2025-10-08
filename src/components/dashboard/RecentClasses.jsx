@@ -31,6 +31,7 @@ const RecentClasses = ({ classes, totalClasses }) => {
         <div className="space-y-3">
           {classes.length > 0 ? (
             classes.map((cls) => {
+              // Mapping sesuai BE
               const assignmentsCount = Array.isArray(cls.assignments)
                 ? cls.assignments.length
                 : 0;

@@ -3,33 +3,35 @@ import { useState } from "react";
 import { FileText, Download, Upload, Trash2, Eye } from "lucide-react";
 import Button from "../ui/Button";
 import { Card } from "../ui/Card";
-import { Alert } from "../ui/Alert";
-import FileUpload from "../upload/FileUpload";
-import uploadService from "../../services/upload";
+import { FileUpload } from "../upload";
+import { storageService } from "../../services"; // gunakan storageService, bukan uploadService
 import toast from "react-hot-toast";
 
+// Hanya field dan fitur yang didukung BE
 export default function FileAttachment({
   submission,
   onFileUploaded,
   onFileDeleted,
   readOnly = false,
 }) {
+  // BE hanya mengembalikan: id, filename, size, mimeType, cloudKey, uploadedAt
   const [attachedFiles, setAttachedFiles] = useState(
     submission?.attachments || []
   );
   const [showUpload, setShowUpload] = useState(false);
 
+  // Upload file (hanya tipe yang didukung BE)
   const handleFileUpload = async (uploadedFiles) => {
     try {
-      // Process uploaded files
+      // Mapping sesuai response BE
       const newAttachments = uploadedFiles.map((file) => ({
         id: file.id,
         filename: file.filename,
-        originalName: file.originalName,
+        originalName: file.originalName || file.filename,
         size: file.size,
         mimeType: file.mimeType,
         cloudKey: file.cloudKey,
-        uploadedAt: new Date().toISOString(),
+        uploadedAt: file.uploadedAt || new Date().toISOString(),
       }));
 
       setAttachedFiles((prev) => [...prev, ...newAttachments]);
@@ -43,9 +45,15 @@ export default function FileAttachment({
     }
   };
 
+  // Download file (gunakan pre-signed URL dari BE)
   const handleFileDownload = async (file) => {
     try {
-      await uploadService.downloadFile(file.id, file.originalName);
+      // Mendapatkan pre-signed URL dari storageService
+      const presigned = await storageService.getPresignedUrl(
+        file.cloudKey,
+        file.filename
+      );
+      window.open(presigned.url, "_blank");
       toast.success("File berhasil didownload");
     } catch (error) {
       console.error("Download error:", error);
@@ -53,9 +61,10 @@ export default function FileAttachment({
     }
   };
 
+  // Delete file (hanya jika endpoint BE tersedia)
   const handleFileDelete = async (fileId) => {
     try {
-      await uploadService.deleteFile(fileId);
+      await storageService.deleteFile(fileId);
       setAttachedFiles((prev) => prev.filter((f) => f.id !== fileId));
       onFileDeleted?.(fileId);
       toast.success("File berhasil dihapus");
@@ -65,12 +74,19 @@ export default function FileAttachment({
     }
   };
 
+  // Preview file (hanya PDF/JPG/PNG, gunakan pre-signed URL dari BE)
   const handleFilePreview = async (file) => {
     try {
-      // For PDF files, open in new tab
-      if (file.mimeType === "application/pdf") {
-        const fileInfo = await uploadService.getFileInfo(file.id);
-        window.open(fileInfo.url, "_blank");
+      if (
+        file.mimeType === "application/pdf" ||
+        file.mimeType === "image/jpeg" ||
+        file.mimeType === "image/png"
+      ) {
+        const presigned = await storageService.getPresignedUrl(
+          file.cloudKey,
+          file.filename
+        );
+        window.open(presigned.url, "_blank");
       } else {
         toast.info("Preview tidak tersedia untuk tipe file ini");
       }
@@ -80,18 +96,21 @@ export default function FileAttachment({
     }
   };
 
+  // Format file size
   const formatFileSize = (bytes) => {
-    if (bytes === 0) return "0 Bytes";
+    if (!bytes) return "0 Bytes";
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
+  // File icon sesuai tipe
   const getFileIcon = (mimeType) => {
     if (mimeType?.includes("pdf")) return "🔴";
     if (mimeType?.includes("doc")) return "🔵";
     if (mimeType?.includes("image")) return "🟢";
+    if (mimeType?.includes("zip")) return "🟣";
     return "📄";
   };
 
@@ -166,14 +185,18 @@ export default function FileAttachment({
 
                 <div className="flex items-center gap-2">
                   {/* Preview Button */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleFilePreview(file)}
-                    title="Preview file"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
+                  {(file.mimeType === "application/pdf" ||
+                    file.mimeType === "image/jpeg" ||
+                    file.mimeType === "image/png") && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleFilePreview(file)}
+                      title="Preview file"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  )}
 
                   {/* Download Button */}
                   <Button

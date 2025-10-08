@@ -33,7 +33,7 @@ const InstructorQuickActions = ({ stats }) => {
       href: "/instructor/analytics",
       variant: "outline",
       description: `${stats.completionRate}% completion rate`,
-      disabled: true,
+      disabled: true, // Analytics belum didukung BE
     },
   ];
 
@@ -59,7 +59,15 @@ const InstructorQuickActions = ({ stats }) => {
       </CardHeader>
       <CardContent className="relative z-10 space-y-3">
         {actions.map((action, index) => (
-          <Link key={action.href} to={action.href} className="group block">
+          <Link
+            key={action.href}
+            to={action.href}
+            className={`group block ${
+              action.disabled ? "pointer-events-none opacity-60" : ""
+            }`}
+            tabIndex={action.disabled ? -1 : 0}
+            aria-disabled={action.disabled ? "true" : "false"}
+          >
             <div
               className={`relative overflow-hidden p-4 rounded-xl border-2 transition-all duration-300 
               hover:shadow-lg hover:scale-[1.02] group ${

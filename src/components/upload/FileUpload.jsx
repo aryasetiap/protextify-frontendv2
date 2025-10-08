@@ -8,12 +8,13 @@ import {
   CheckCircle,
   RotateCcw,
 } from "lucide-react";
-import Button from "../ui/Button"; // ✅ Change from named import to default import
+import Button from "../ui/Button";
 import { Card } from "../ui/Card";
 import { Alert } from "../ui/Alert";
-import uploadService from "../../services/upload";
+import { storageService } from "../../services"; // ✅ gunakan storageService, bukan uploadService
 import toast from "react-hot-toast";
 
+// Hanya field dan fitur yang didukung BE
 export default function FileUpload({
   uploadType = "submission",
   acceptedTypes = [".pdf", ".doc", ".docx", ".jpg", ".png", ".zip"],
@@ -37,6 +38,7 @@ export default function FileUpload({
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef(null);
 
+  // Validasi file sesuai BE (type & size)
   const validateAndAddFiles = useCallback(
     (fileList) => {
       const newFiles = Array.from(fileList).map((file) => {
@@ -45,17 +47,43 @@ export default function FileUpload({
         if (fileSizeLimits[ext]) {
           limit = fileSizeLimits[ext];
         }
-        const validation = uploadService.validateFileAdvanced(file, {
-          maxSize: limit,
-          allowedExtensions: acceptedTypes.map((type) => type.replace(".", "")),
-          checkMimeType: true,
-        });
-
+        // Validasi type dan size
+        const allowedExtensions = acceptedTypes.map((type) =>
+          type.replace(".", "")
+        );
+        const allowedMimeTypes = [
+          "application/pdf",
+          "application/msword",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          "image/jpeg",
+          "image/png",
+          "application/zip",
+        ];
+        const errors = [];
+        if (!allowedExtensions.includes(ext)) {
+          errors.push(`Ekstensi file tidak didukung: .${ext}`);
+        }
+        if (!allowedMimeTypes.includes(file.type)) {
+          errors.push(`Tipe file tidak didukung: ${file.type}`);
+        }
+        if (file.size > limit) {
+          errors.push(
+            `Ukuran file terlalu besar. Maksimal ${Math.round(
+              limit / 1024 / 1024
+            )}MB`
+          );
+        }
+        if (file.size < 1024) {
+          errors.push("File terlalu kecil. Minimal 1KB");
+        }
         return {
           file,
           id: Date.now() + Math.random(),
-          validation,
-          status: validation.isValid ? "ready" : "invalid",
+          validation: {
+            isValid: errors.length === 0,
+            errors,
+          },
+          status: errors.length === 0 ? "ready" : "invalid",
           progress: 0,
         };
       });
@@ -118,6 +146,7 @@ export default function FileUpload({
     });
   };
 
+  // Upload file ke BE (hanya POST /storage/upload, tidak ada chunked upload jika BE tidak support)
   const uploadFiles = async () => {
     const validFiles = files.filter(
       (f) => f.validation.isValid && f.status === "ready"
@@ -133,33 +162,18 @@ export default function FileUpload({
     try {
       const uploadPromises = validFiles.map(async (fileItem) => {
         try {
-          // Update file status
           setFiles((prev) =>
             prev.map((f) =>
               f.id === fileItem.id ? { ...f, status: "uploading" } : f
             )
           );
 
-          const result = await uploadService.uploadFileWithProgress(
-            fileItem.file,
-            uploadType,
-            {
-              onProgress: (percent, loaded, total) => {
-                setUploadProgress((prev) => ({
-                  ...prev,
-                  [fileItem.id]: { percent, loaded, total },
-                }));
+          // Kirim ke storageService.uploadFile
+          const result = await storageService.uploadFile(fileItem.file, {
+            // uploadType hanya untuk FE, BE hanya butuh assignmentId/submissionId/description
+            // Tambahkan assignmentId/submissionId jika diperlukan
+          });
 
-                setFiles((prev) =>
-                  prev.map((f) =>
-                    f.id === fileItem.id ? { ...f, progress: percent } : f
-                  )
-                );
-              },
-            }
-          );
-
-          // Update file status to completed
           setFiles((prev) =>
             prev.map((f) =>
               f.id === fileItem.id ? { ...f, status: "completed", result } : f
@@ -168,7 +182,6 @@ export default function FileUpload({
 
           return { success: true, fileItem, result };
         } catch (error) {
-          // Update file status to error
           setFiles((prev) =>
             prev.map((f) =>
               f.id === fileItem.id
@@ -238,7 +251,7 @@ export default function FileUpload({
       case "error":
         return <AlertCircle className="h-5 w-5 text-red-500" />;
       case "invalid":
-        return <AlertCircle className="h-5 w-5 text-red-500" />;
+        return <AlertCircle className="h-5 w-5 text-yellow-500" />;
       default:
         return <FileText className="h-5 w-5 text-gray-500" />;
     }

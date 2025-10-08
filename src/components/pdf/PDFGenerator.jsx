@@ -1,10 +1,10 @@
 // src/components/pdf/PDFGenerator.jsx
 import { useState } from "react";
 import { Download, FileText, Settings, Loader2 } from "lucide-react";
-import Button from "../ui/Button"; // ✅ Change from named import to default import
+import Button from "../ui/Button";
 import { Card } from "../ui/Card";
 import { Modal } from "../ui/Modal";
-import Input from "../ui/Input"; // ✅ Change to default import
+import Input from "../ui/Input";
 import { Switch } from "../ui/Switch";
 import pdfGenerator from "../../utils/pdfGenerator";
 import toast from "react-hot-toast";
@@ -28,6 +28,14 @@ export default function PDFGenerator({
     separatePages: true,
     includeTableOfContents: true,
   });
+
+  // Hapus/disable opsi yang tidak didukung BE:
+  // - comments
+  // - grading rubric
+  // - password protect
+  // - compression
+  // - color scheme
+  // - collaborative
 
   const handleGenerate = async () => {
     if (!submission && !submissions) {
@@ -56,7 +64,11 @@ export default function PDFGenerator({
         pdf = await pdfGenerator.generateBulkSubmissionPDF(
           submissions,
           submissions[0]?.assignment?.title || "Bulk Submissions",
-          settings
+          {
+            ...settings,
+            separatePages: settings.separatePages,
+            includeTableOfContents: settings.includeTableOfContents,
+          }
         );
       }
 

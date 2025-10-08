@@ -1,11 +1,12 @@
 // src/components/payments/PaymentCalculator.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calculator, Info, Users, CreditCard } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/Card";
 import Input from "../ui/Input";
 import Button from "../ui/Button";
 import { Alert } from "../ui/Alert";
 import { usePaymentCalculator } from "../../hooks/usePaymentCalculator";
+import { PAYMENT_CONFIG } from "../../utils/constants";
 
 export default function PaymentCalculator({
   initialStudentCount = 1,
@@ -18,8 +19,8 @@ export default function PaymentCalculator({
 
   const [showDetails, setShowDetails] = useState(false);
 
-  // Notify parent component of changes
-  useState(() => {
+  // Notify parent component of changes (useEffect, bukan useState)
+  useEffect(() => {
     if (onCalculationChange) {
       onCalculationChange({
         studentCount,

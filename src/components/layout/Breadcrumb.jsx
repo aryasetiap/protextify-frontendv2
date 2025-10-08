@@ -1,6 +1,26 @@
 import { Link, useLocation } from "react-router-dom";
 import { ChevronRight, Home } from "lucide-react";
 
+const LABEL_MAP = {
+  instructor: "Instructor",
+  dashboard: "Dashboard",
+  classes: "Kelas",
+  "create-class": "Buat Kelas",
+  settings: "Pengaturan",
+  assignments: "Tugas",
+  "create-assignment": "Buat Tugas",
+  "write-assignment": "Tulis Tugas",
+  submissions: "Submission",
+  transactions: "Transaksi",
+  profile: "Profil",
+  help: "Bantuan",
+  pricing: "Harga",
+  about: "Tentang",
+  docs: "Dokumentasi",
+  privacy: "Kebijakan Privasi",
+  terms: "Syarat & Ketentuan",
+};
+
 export default function Breadcrumb({ customItems = null, showHome = true }) {
   const location = useLocation();
 
@@ -18,16 +38,9 @@ export default function Breadcrumb({ customItems = null, showHome = true }) {
     pathSegments.forEach((segment, index) => {
       currentPath += `/${segment}`;
 
-      // Create readable labels
-      let label = segment.replace(/-/g, " ");
+      // Mapping label sesuai fitur BE
+      let label = LABEL_MAP[segment] || segment.replace(/-/g, " ");
       label = label.charAt(0).toUpperCase() + label.slice(1);
-
-      // Handle specific cases
-      if (segment === "instructor") label = "Instructor";
-      if (segment === "dashboard") label = "Dashboard";
-      if (segment === "classes") label = "Kelas";
-      if (segment === "create-class") label = "Buat Kelas";
-      if (segment === "settings") label = "Pengaturan";
 
       breadcrumbs.push({
         label,

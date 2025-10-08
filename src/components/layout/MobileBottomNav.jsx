@@ -1,7 +1,7 @@
 // src/components/layout/MobileBottomNav.jsx
 // filepath: src/components/layout/MobileBottomNav.jsx
 import { Link, useLocation } from "react-router-dom";
-import { Home, BookOpen, FileText, User, Plus } from "lucide-react";
+import { Home, BookOpen, FileText, User, Plus, CreditCard } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { cn } from "../../utils/helpers";
 
@@ -16,7 +16,7 @@ export default function MobileBottomNav() {
       return [
         {
           icon: Home,
-          label: "Home",
+          label: "Dashboard",
           href: "/instructor/dashboard",
           active: location.pathname === "/instructor/dashboard",
         },
@@ -28,13 +28,13 @@ export default function MobileBottomNav() {
         },
         {
           icon: Plus,
-          label: "Buat",
+          label: "Buat Kelas",
           href: "/instructor/create-class",
           active: location.pathname === "/instructor/create-class",
           isPrimary: true,
         },
         {
-          icon: FileText,
+          icon: CreditCard,
           label: "Transaksi",
           href: "/instructor/transactions",
           active: location.pathname.startsWith("/instructor/transactions"),
@@ -47,12 +47,13 @@ export default function MobileBottomNav() {
         },
       ];
     } else {
+      // Student
       return [
         {
           icon: Home,
-          label: "Home",
-          href: "/dashboard",
-          active: location.pathname === "/dashboard",
+          label: "Dashboard",
+          href: "/dashboard/overview",
+          active: location.pathname === "/dashboard/overview",
         },
         {
           icon: BookOpen,

@@ -12,7 +12,7 @@ import toast from "react-hot-toast";
 
 import { Modal, Button, Card, CardContent } from "../ui";
 import { Switch } from "../ui/Switch";
-import Input from "../ui/Input"; // ✅ Change from named import to default import
+import Input from "../ui/Input";
 import {
   exportSubmissionsToCSV,
   exportSubmissionsToExcel,
@@ -82,13 +82,24 @@ export default function ExportModal({
         ? options.customFilename
         : `${assignmentTitle}_${new Date().toISOString()}`;
 
+      // Hanya field yang tersedia di BE
       switch (selectedFormat) {
         case "csv":
           if (options.includeStatistics) {
             const statistics = calculateSubmissionStatistics(submissions);
-            exportSubmissionsToCSVAdvanced(submissions, statistics, fileName);
+            exportSubmissionsToCSVAdvanced(submissions, statistics, fileName, {
+              includeContent: options.includeContent,
+              includeTimestamps: options.includeTimestamps,
+              includePlagiarismDetails: options.includePlagiarismDetails,
+              includeGrades: options.includeGrades,
+            });
           } else {
-            exportSubmissionsToCSV(submissions, fileName);
+            exportSubmissionsToCSV(submissions, fileName, {
+              includeContent: options.includeContent,
+              includeTimestamps: options.includeTimestamps,
+              includePlagiarismDetails: options.includePlagiarismDetails,
+              includeGrades: options.includeGrades,
+            });
           }
           break;
         case "excel":
@@ -97,17 +108,41 @@ export default function ExportModal({
             await exportSubmissionsToExcelAdvanced(
               submissions,
               statistics,
-              fileName
+              fileName,
+              {
+                includeContent: options.includeContent,
+                includeTimestamps: options.includeTimestamps,
+                includePlagiarismDetails: options.includePlagiarismDetails,
+                includeGrades: options.includeGrades,
+                separateSheetsByStatus: options.separateSheetsByStatus,
+              }
             );
           } else {
-            await exportSubmissionsToExcel(submissions, fileName);
+            await exportSubmissionsToExcel(submissions, fileName, {
+              includeContent: options.includeContent,
+              includeTimestamps: options.includeTimestamps,
+              includePlagiarismDetails: options.includePlagiarismDetails,
+              includeGrades: options.includeGrades,
+              separateSheetsByStatus: options.separateSheetsByStatus,
+            });
           }
           break;
         case "json":
-          exportSubmissionsToJSON(submissions, options.prettifyJSON, fileName);
+          exportSubmissionsToJSON(submissions, fileName, {
+            prettify: options.prettifyJSON,
+            includeContent: options.includeContent,
+            includeTimestamps: options.includeTimestamps,
+            includePlagiarismDetails: options.includePlagiarismDetails,
+            includeGrades: options.includeGrades,
+          });
           break;
         case "xml":
-          exportSubmissionsToXML(submissions, fileName);
+          exportSubmissionsToXML(submissions, fileName, {
+            includeContent: options.includeContent,
+            includeTimestamps: options.includeTimestamps,
+            includePlagiarismDetails: options.includePlagiarismDetails,
+            includeGrades: options.includeGrades,
+          });
           break;
         default:
           throw new Error("Format tidak dikenal");

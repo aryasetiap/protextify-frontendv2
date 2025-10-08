@@ -10,7 +10,6 @@ import {
   Eye,
   Copy,
 } from "lucide-react";
-// ✅ Fix: Use named imports instead of default import
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/Card";
 import Button from "../ui/Button";
 import Badge from "../ui/Badge";
@@ -110,6 +109,7 @@ export default function PlagiarismReport({
     );
   }
 
+  // Mapping field sesuai BE
   const { detailedResults } = report;
   const { result, sources = [] } = detailedResults || {};
 
@@ -314,6 +314,36 @@ export default function PlagiarismReport({
                       <div className="text-xs text-gray-500">
                         {source.plagiarismWords} kata
                       </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm mt-2">
+                    <div>
+                      <span className="text-gray-500">Identik:</span>
+                      <span className="ml-1 font-medium">
+                        {source.identicalWordCounts}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Mirip:</span>
+                      <span className="ml-1 font-medium">
+                        {source.similarWordCounts}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Total:</span>
+                      <span className="ml-1 font-medium">
+                        {source.totalNumberOfWords}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Dapat diakses:</span>
+                      <span
+                        className={`ml-1 font-medium ${
+                          source.canAccess ? "text-green-600" : "text-red-600"
+                        }`}
+                      >
+                        {source.canAccess ? "Ya" : "Tidak"}
+                      </span>
                     </div>
                   </div>
                 </div>

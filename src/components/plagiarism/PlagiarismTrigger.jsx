@@ -5,13 +5,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Play, Settings, AlertCircle } from "lucide-react";
 import Button from "../ui/Button";
-// ✅ Fix: Use named import
 import { Card } from "../ui/Card";
 import Input from "../ui/Input";
 import { Modal } from "../ui/Modal";
 import { plagiarismService } from "../../services";
 import toast from "react-hot-toast";
 
+// Hanya field yang didukung BE
 const plagiarismCheckSchema = z.object({
   excluded_sources: z.array(z.string().url()).optional(),
   language: z.string().default("id"),
@@ -41,10 +41,12 @@ export default function PlagiarismTrigger({
     },
   });
 
+  // Hanya trigger pengecekan plagiarisme sesuai BE
   const handleStartCheck = async (data) => {
     try {
       setLoading(true);
 
+      // Kirim hanya field yang didukung BE
       const checkData = {
         ...data,
         excluded_sources: excludedSources.filter((source) => source.trim()),
@@ -69,6 +71,7 @@ export default function PlagiarismTrigger({
     }
   };
 
+  // Opsi exclude sources hanya jika didukung BE
   const addExcludedSource = () => {
     setExcludedSources([...excludedSources, ""]);
   };

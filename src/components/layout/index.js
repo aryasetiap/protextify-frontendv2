@@ -4,3 +4,4 @@ export { default as Sidebar } from "./Sidebar";
 export { default as DashboardHeader } from "./DashboardHeader";
 export { default as Breadcrumb } from "./Breadcrumb";
 export { default as UserMenu } from "./UserMenu";
+export { default as MobileBottomNav } from "./MobileBottomNav";

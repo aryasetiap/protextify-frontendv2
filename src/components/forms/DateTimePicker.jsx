@@ -1,13 +1,6 @@
 import { useState, useEffect } from "react";
 import { Calendar as CalendarIcon, Clock, AlertCircle } from "lucide-react";
-import {
-  format,
-  parseISO,
-  isValid,
-  addHours,
-  startOfDay,
-  endOfDay,
-} from "date-fns";
+import { format, parseISO, isValid, addHours, endOfDay } from "date-fns";
 import { id } from "date-fns/locale";
 
 export default function DateTimePicker({
@@ -26,47 +19,50 @@ export default function DateTimePicker({
   presets = [],
 }) {
   const [internalValue, setInternalValue] = useState("");
-  const [isValid, setIsValid] = useState(true);
+  const [isValidInput, setIsValidInput] = useState(true);
   const [validationMessage, setValidationMessage] = useState("");
 
-  // Convert value to internal format
+  // Convert value to internal format for input[type=datetime-local]
   useEffect(() => {
     if (value) {
       try {
         const date =
           typeof value === "string" ? parseISO(value) : new Date(value);
         if (isValid(date)) {
-          // Format for datetime-local input
-          const formatted = format(date, "yyyy-MM-dd'T'HH:mm");
-          setInternalValue(formatted);
-          setIsValid(true);
+          setInternalValue(
+            format(
+              date,
+              showSeconds ? "yyyy-MM-dd'T'HH:mm:ss" : "yyyy-MM-dd'T'HH:mm"
+            )
+          );
+          setIsValidInput(true);
           setValidationMessage("");
         } else {
           setInternalValue("");
-          setIsValid(false);
+          setIsValidInput(false);
           setValidationMessage("Format tanggal tidak valid");
         }
-      } catch (error) {
+      } catch {
         setInternalValue("");
-        setIsValid(false);
+        setIsValidInput(false);
         setValidationMessage("Format tanggal tidak valid");
       }
     } else {
       setInternalValue("");
-      setIsValid(true);
+      setIsValidInput(true);
       setValidationMessage("");
     }
-  }, [value]);
+  }, [value, showSeconds]);
 
-  // Enhanced validation
+  // Validasi sesuai kebutuhan BE
   const validateDateTime = (dateTimeValue) => {
     if (!dateTimeValue) {
       if (required) {
         setValidationMessage("Tanggal dan waktu wajib diisi");
-        setIsValid(false);
+        setIsValidInput(false);
         return false;
       }
-      setIsValid(true);
+      setIsValidInput(true);
       setValidationMessage("");
       return true;
     }
@@ -76,11 +72,10 @@ export default function DateTimePicker({
 
       if (!isValid(selectedDate)) {
         setValidationMessage("Format tanggal tidak valid");
-        setIsValid(false);
+        setIsValidInput(false);
         return false;
       }
 
-      // Check minimum date
       if (minDate && selectedDate < new Date(minDate)) {
         setValidationMessage(
           `Tanggal tidak boleh sebelum ${format(
@@ -89,11 +84,10 @@ export default function DateTimePicker({
             { locale: id }
           )}`
         );
-        setIsValid(false);
+        setIsValidInput(false);
         return false;
       }
 
-      // Check maximum date
       if (maxDate && selectedDate > new Date(maxDate)) {
         setValidationMessage(
           `Tanggal tidak boleh setelah ${format(
@@ -102,67 +96,50 @@ export default function DateTimePicker({
             { locale: id }
           )}`
         );
-        setIsValid(false);
+        setIsValidInput(false);
         return false;
       }
 
-      // Check if date is too far in the past
-      const oneYearAgo = addHours(new Date(), -8760); // 1 year ago
-      if (selectedDate < oneYearAgo) {
-        setValidationMessage("Tanggal terlalu jauh di masa lalu");
-        setIsValid(false);
-        return false;
-      }
-
-      // Check if date is too far in the future
-      const fiveYearsFromNow = addHours(new Date(), 43800); // 5 years from now
-      if (selectedDate > fiveYearsFromNow) {
-        setValidationMessage("Tanggal terlalu jauh di masa depan");
-        setIsValid(false);
-        return false;
-      }
-
-      setIsValid(true);
+      setIsValidInput(true);
       setValidationMessage("");
       return true;
-    } catch (err) {
-      setValidationMessage("Terjadi kesalahan saat memvalidasi tanggal");
-      setIsValid(false);
+    } catch {
+      setValidationMessage("Format tanggal tidak valid");
+      setIsValidInput(false);
       return false;
     }
   };
 
+  // Handle input change
   const handleDateTimeChange = (e) => {
     const dateTimeValue = e.target.value;
     setInternalValue(dateTimeValue);
 
     if (validateDateTime(dateTimeValue)) {
       if (dateTimeValue) {
+        // Convert to ISO string for BE
         const selectedDate = new Date(dateTimeValue);
-        // Convert to ISO string with timezone awareness
-        const isoString = selectedDate.toISOString();
-        onChange?.(isoString);
+        onChange?.(selectedDate.toISOString());
       } else {
         onChange?.(null);
       }
     }
   };
 
-  // Enhanced display formatting
+  // Format display value for info
   const formatDisplayValue = (value) => {
     if (!value) return "";
     try {
       const date =
         typeof value === "string" ? parseISO(value) : new Date(value);
       if (!isValid(date)) return "";
-
       return format(date, "EEEE, dd MMMM yyyy 'pukul' HH:mm", { locale: id });
     } catch {
       return "";
     }
   };
 
-  // Get timezone offset
+  // Get timezone offset (for info only)
   const getTimezoneOffset = () => {
     const offset = new Date().getTimezoneOffset();
     const hours = Math.floor(Math.abs(offset) / 60);
@@ -173,10 +150,13 @@ export default function DateTimePicker({
       .padStart(2, "0")}`;
   };
 
-  // Preset handlers
+  // Preset handlers (FE only)
   const handlePresetClick = (preset) => {
     const date = preset.getValue();
-    const formatted = format(date, "yyyy-MM-dd'T'HH:mm");
+    const formatted = format(
+      date,
+      showSeconds ? "yyyy-MM-dd'T'HH:mm:ss" : "yyyy-MM-dd'T'HH:mm"
+    );
     setInternalValue(formatted);
     onChange?.(date.toISOString());
   };
@@ -208,7 +188,10 @@ export default function DateTimePicker({
     if (!date) return undefined;
     try {
       const d = typeof date === "string" ? parseISO(date) : new Date(date);
-      return format(d, "yyyy-MM-dd'T'HH:mm");
+      return format(
+        d,
+        showSeconds ? "yyyy-MM-dd'T'HH:mm:ss" : "yyyy-MM-dd'T'HH:mm"
+      );
     } catch {
       return undefined;
     }
@@ -236,7 +219,7 @@ export default function DateTimePicker({
             w-full px-4 py-3 pr-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#23407a] focus:border-transparent
             transition-all duration-200
             ${
-              error || !isValid
+              error || !isValidInput
                 ? "border-red-300 focus:ring-red-500"
                 : "border-gray-300"
             }
@@ -275,7 +258,7 @@ export default function DateTimePicker({
       )}
 
       {/* Enhanced Display Value */}
-      {value && isValid && (
+      {value && isValidInput && (
         <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <div className="flex items-start space-x-2">
             <Clock className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
@@ -294,7 +277,7 @@ export default function DateTimePicker({
       )}
 
       {/* Error Messages */}
-      {(error || !isValid) && (
+      {(error || !isValidInput) && (
         <div className="flex items-center space-x-2 text-red-600">
           <AlertCircle className="h-4 w-4 flex-shrink-0" />
           <span className="text-sm">{error || validationMessage}</span>

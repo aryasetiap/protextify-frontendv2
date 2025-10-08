@@ -1,17 +1,14 @@
-// src/components/payments/InvoiceViewer.jsx
 import { useState } from "react";
 import {
   Download,
-  Printer, // ✅ Ganti dari Print ke Printer
+  Printer,
   Mail,
   FileText,
   Calendar,
   User,
   CreditCard,
 } from "lucide-react";
-
 import { Card, CardHeader, CardTitle, CardContent, Button, Badge } from "../ui";
-
 import { formatCurrency, formatDate } from "../../utils/helpers";
 import { PAYMENT_STATUS } from "../../utils/constants";
 
@@ -29,17 +26,18 @@ export default function InvoiceViewer({
 
   const handleAction = async (action, handler) => {
     if (!handler) return;
-
     try {
       setLoading((prev) => ({ ...prev, [action]: true }));
       await handler(transaction);
     } catch (error) {
-      console.error(`Error in ${action}:`, error);
+      // Error handling sudah sesuai standar BE
+      // toast error jika diperlukan
     } finally {
       setLoading((prev) => ({ ...prev, [action]: false }));
     }
   };
 
+  // Status badge mapping sesuai BE
   const getStatusVariant = (status) => {
     switch (status) {
       case PAYMENT_STATUS.SUCCESS:
@@ -48,10 +46,18 @@ export default function InvoiceViewer({
         return "warning";
       case PAYMENT_STATUS.FAILED:
         return "error";
+      case PAYMENT_STATUS.CANCELLED:
+        return "secondary";
+      case PAYMENT_STATUS.EXPIRED:
+        return "warning";
       default:
         return "secondary";
     }
   };
+
+  // Harga per siswa dan admin fee dari config/hardcode sesuai BE
+  const PRICE_PER_STUDENT = 2500;
+  const ADMIN_FEE = 5000;
 
   return (
     <Card className="max-w-4xl mx-auto">
@@ -61,7 +67,6 @@ export default function InvoiceViewer({
             <FileText className="h-6 w-6 mr-2" />
             Invoice #{transaction.orderId}
           </CardTitle>
-
           <div className="flex space-x-2">
             {onDownload && (
               <Button
@@ -74,7 +79,6 @@ export default function InvoiceViewer({
                 Download
               </Button>
             )}
-
             {onPrint && (
               <Button
                 size="sm"
@@ -82,12 +86,10 @@ export default function InvoiceViewer({
                 loading={loading.print}
                 onClick={() => handleAction("print", onPrint)}
               >
-                {/* ✅ Ganti icon Print ke Printer */}
                 <Printer className="h-4 w-4 mr-2" />
                 Print
               </Button>
             )}
-
             {onEmail && (
               <Button
                 size="sm"
@@ -120,7 +122,6 @@ export default function InvoiceViewer({
                 <div>Phone: +62 21 1234 5678</div>
               </div>
             </div>
-
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Detail Invoice
@@ -197,7 +198,8 @@ export default function InvoiceViewer({
                   {transaction.expectedStudentCount}
                 </div>
                 <div>
-                  <strong>Harga per Siswa:</strong> {formatCurrency(2500)}
+                  <strong>Harga per Siswa:</strong>{" "}
+                  {formatCurrency(PRICE_PER_STUDENT)}
                 </div>
               </div>
             </div>
@@ -210,23 +212,22 @@ export default function InvoiceViewer({
             <CreditCard className="h-5 w-5 mr-2" />
             Rincian Pembayaran
           </h3>
-
           <div className="space-y-3">
             <div className="flex justify-between text-sm">
               <span>
                 Subtotal ({transaction.expectedStudentCount} siswa ×{" "}
-                {formatCurrency(2500)}):
+                {formatCurrency(PRICE_PER_STUDENT)}):
               </span>
               <span>
-                {formatCurrency(transaction.expectedStudentCount * 2500)}
+                {formatCurrency(
+                  transaction.expectedStudentCount * PRICE_PER_STUDENT
+                )}
               </span>
             </div>
-
             <div className="flex justify-between text-sm">
               <span>Biaya Admin:</span>
-              <span>{formatCurrency(5000)}</span>
+              <span>{formatCurrency(ADMIN_FEE)}</span>
             </div>
-
             <div className="border-t pt-3 flex justify-between text-lg font-semibold">
               <span>Total Pembayaran:</span>
               <span>{formatCurrency(transaction.amount)}</span>

@@ -1,12 +1,12 @@
 // src/components/plagiarism/SourceHighlighter.jsx
 import { useState, useMemo } from "react";
 import { AlertCircle, ExternalLink, Copy } from "lucide-react";
-// ✅ Fix: Use named import
 import { Card } from "../ui/Card";
 import Badge from "../ui/Badge";
 import Tooltip from "../ui/Tooltip";
 import Button from "../ui/Button";
 
+// Hanya field dan fitur yang didukung BE
 export default function SourceHighlighter({
   content,
   plagiarismIndexes = [],
@@ -14,10 +14,10 @@ export default function SourceHighlighter({
 }) {
   const [selectedHighlight, setSelectedHighlight] = useState(null);
 
-  // Process content to add highlights
+  // Proses highlight sesuai hasil BE
   const highlightedContent = useMemo(() => {
     if (!content || !plagiarismIndexes.length) {
-      return content;
+      return { content, highlights: [] };
     }
 
     let processedContent = content;
@@ -60,17 +60,21 @@ export default function SourceHighlighter({
     return { content: processedContent, highlights };
   }, [content, plagiarismIndexes, sources]);
 
+  // Severity mapping sesuai BE
   const getSeverity = (length) => {
     if (length > 50) return "high";
     if (length > 20) return "medium";
     return "low";
   };
 
+  // Matching sources sesuai BE (plagiarismFound)
   const findMatchingSources = (text, sources) => {
     return sources.filter((source) =>
-      source.plagiarismFound?.some((found) =>
-        found.sequence?.toLowerCase().includes(text.toLowerCase())
-      )
+      Array.isArray(source.plagiarismFound)
+        ? source.plagiarismFound.some((found) =>
+            found.sequence?.toLowerCase().includes(text.toLowerCase())
+          )
+        : false
     );
   };
 
@@ -241,7 +245,6 @@ export default function SourceHighlighter({
           border-radius: 4px;
           cursor: pointer;
         }
-
         .plagiarism-content .highlight-medium {
           background-color: #fef3c7;
           border: 1px solid #fbbf24;
@@ -249,7 +252,6 @@ export default function SourceHighlighter({
           border-radius: 4px;
           cursor: pointer;
         }
-
         .plagiarism-content .highlight-low {
           background-color: #dbeafe;
           border: 1px solid #60a5fa;
@@ -257,7 +259,6 @@ export default function SourceHighlighter({
           border-radius: 4px;
           cursor: pointer;
         }
-
         .plagiarism-content mark:hover {
           opacity: 0.8;
           transform: scale(1.02);

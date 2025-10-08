@@ -55,6 +55,10 @@ const CitationManager = ({
   };
 
   const handleSubmit = () => {
+    // Validasi field wajib
+    if (!formData.title || !formData.author || !formData.year) return;
+    if (formData.type === "website" && !formData.url) return;
+
     if (editingIndex !== null) {
       onEdit(editingIndex, formData);
     } else {
@@ -64,18 +68,23 @@ const CitationManager = ({
     resetForm();
   };
 
+  // Format citation sesuai tipe dan field yang relevan
   const formatCitation = (citation) => {
-    const { type, author, year, title, publisher, url } = citation;
+    const { type, author, year, title, publisher, url, pages, doi } = citation;
 
     switch (type) {
       case "book":
-        return `${author} (${year}). ${title}. ${publisher}.`;
+        return `${author} (${year}). ${title}. ${publisher}${
+          pages ? `, ${pages}` : ""
+        }.`;
       case "article":
         return `${author} (${year}). ${title}.`;
       case "website":
         return `${author}. ${title}. Retrieved from ${url}`;
       case "journal":
-        return `${author} (${year}). ${title}.`;
+        return `${author} (${year}). ${title}. ${publisher}${
+          doi ? `. DOI: ${doi}` : ""
+        }${pages ? `, ${pages}` : ""}.`;
       default:
         return `${author} (${year}). ${title}.`;
     }
@@ -225,6 +234,19 @@ const CitationManager = ({
                   setFormData({ ...formData, publisher: e.target.value })
                 }
                 placeholder="Nama penerbit..."
+              />
+            </div>
+          )}
+
+          {(formData.type === "book" || formData.type === "journal") && (
+            <div>
+              <Input
+                label="Halaman"
+                value={formData.pages}
+                onChange={(e) =>
+                  setFormData({ ...formData, pages: e.target.value })
+                }
+                placeholder="1-10"
               />
             </div>
           )}

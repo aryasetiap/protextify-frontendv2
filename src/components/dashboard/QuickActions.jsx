@@ -1,8 +1,9 @@
 // src/components/dashboard/QuickActions.jsx
 import { Link } from "react-router-dom";
-import { Plus, FileText, TrendingUp, BookOpen, Clock } from "lucide-react";
+import { Plus, FileText, TrendingUp, BookOpen } from "lucide-react";
 import { Button, Card, CardHeader, CardTitle, CardContent } from "../ui";
 
+// Komponen QuickActions hanya menampilkan aksi yang didukung BE untuk student
 const QuickActions = ({ stats }) => {
   const actions = [
     {
@@ -23,13 +24,10 @@ const QuickActions = ({ stats }) => {
     {
       label: "Tugas Aktif",
       icon: FileText,
-      href:
-        stats.activeAssignments > 0
-          ? "/dashboard/assignments"
-          : "/dashboard/assignments", // tetap ke assignments, bisa tambahkan disabled jika 0
+      href: stats.activeAssignments > 0 ? "/dashboard/assignments" : "#",
       variant: "outline",
       description: `${stats.activeAssignments} tugas aktif`,
-      disabled: stats.activeAssignments === 0, // opsional: disable jika tidak ada tugas aktif
+      disabled: stats.activeAssignments === 0,
     },
     {
       label: "Riwayat Pengumpulan",

@@ -13,11 +13,6 @@ import { TextStyle } from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
 import { TextAlign } from "@tiptap/extension-text-align";
 import { Link } from "@tiptap/extension-link";
-import { Image } from "@tiptap/extension-image";
-import { Table } from "@tiptap/extension-table";
-import { TableRow } from "@tiptap/extension-table-row";
-import { TableHeader } from "@tiptap/extension-table-header";
-import { TableCell } from "@tiptap/extension-table-cell";
 import {
   Save,
   FileText,
@@ -36,11 +31,8 @@ import {
   AlignRight,
   LinkIcon,
   Unlink,
-  Image as ImageIcon,
-  Table as TableIcon,
   CheckCircle,
   Eye,
-  Code,
   Heading1,
   Heading2,
   Heading3,
@@ -109,17 +101,6 @@ const RichTextEditor = forwardRef(
           autolink: true,
           defaultProtocol: "https",
         }),
-        Image.configure({
-          HTMLAttributes: {
-            class: "max-w-full h-auto rounded-lg",
-          },
-        }),
-        Table.configure({
-          resizable: true,
-        }),
-        TableRow,
-        TableHeader,
-        TableCell,
       ],
       content: value,
       editable: !disabled,
@@ -152,13 +133,12 @@ const RichTextEditor = forwardRef(
       getCharacterCount: () => characterCount,
     }));
 
-    // Enhanced paste event monitoring
+    // Enhanced paste event monitoring (FE only, no BE log)
     const handlePasteEvent = useCallback((event) => {
       const clipboardData = event.clipboardData || window.clipboardData;
       const pastedData = clipboardData.getData("text");
 
       if (pastedData.length > 50) {
-        // Only track substantial pastes
         const newPasteEvent = {
           id: Date.now(),
           timestamp: new Date(),
@@ -169,7 +149,7 @@ const RichTextEditor = forwardRef(
             pastedData.length > 500 || pastedData.split("\n").length > 10,
         };
 
-        setPasteEvents((prev) => [...prev, newPasteEvent].slice(-10)); // Keep last 10 events
+        setPasteEvents((prev) => [...prev, newPasteEvent].slice(-10));
 
         if (newPasteEvent.suspicious) {
           toast.warning(
@@ -181,7 +161,6 @@ const RichTextEditor = forwardRef(
 
     // Calculate word and character count with enhanced accuracy
     const calculateCounts = useCallback((html) => {
-      // Remove HTML tags and get plain text
       const plainText = html
         .replace(/<[^>]*>/g, "")
         .replace(/&nbsp;/g, " ")
@@ -209,85 +188,54 @@ const RichTextEditor = forwardRef(
 
         // Check limits
         if (counts.words > maxWords) {
-          toast.error(`Batas maksimal ${maxWords} kata telah terlampaui`);
-          return;
+          toast.error(`Melebihi batas maksimal ${maxWords} kata`);
         }
-
         if (counts.characters > maxCharacters) {
-          toast.error(
-            `Batas maksimal ${maxCharacters} karakter telah terlampaui`
-          );
-          return;
+          toast.error(`Melebihi batas maksimal ${maxCharacters} karakter`);
         }
 
-        // Call parent onChange
         if (onChange) {
           onChange(newContent);
         }
 
-        // Setup auto-save
-        if (autoSaveTimeoutRef.current) {
-          clearTimeout(autoSaveTimeoutRef.current);
-        }
-
-        autoSaveTimeoutRef.current = setTimeout(() => {
-          handleAutoSave(newContent);
-        }, autoSaveInterval);
-      },
-      [onChange, maxWords, maxCharacters, autoSaveInterval, calculateCounts]
-    );
-
-    // Enhanced auto-save function
-    const handleAutoSave = useCallback(
-      async (contentToSave) => {
-        if (!onAutoSave || !contentToSave.trim()) return;
-
-        try {
-          setIsAutoSaving(true);
-          await onAutoSave(contentToSave);
-          setLastSaved(new Date());
-          setHasUnsavedChanges(false);
-        } catch (error) {
-          console.error("Auto-save failed:", error);
-          toast.error("Auto-save gagal. Pastikan koneksi internet stabil.");
-        } finally {
-          setIsAutoSaving(false);
+        // Auto-save logic
+        if (onAutoSave) {
+          if (autoSaveTimeoutRef.current) {
+            clearTimeout(autoSaveTimeoutRef.current);
+          }
+          autoSaveTimeoutRef.current = setTimeout(() => {
+            setIsAutoSaving(true);
+            onAutoSave(newContent)
+              .then(() => {
+                setLastSaved(new Date());
+                setHasUnsavedChanges(false);
+              })
+              .catch(() => {
+                toast.error(
+                  "Auto-save gagal. Pastikan koneksi internet stabil."
+                );
+              })
+              .finally(() => {
+                setIsAutoSaving(false);
+              });
+          }, autoSaveInterval);
         }
       },
-      [onAutoSave]
+      [
+        onChange,
+        onAutoSave,
+        autoSaveInterval,
+        maxWords,
+        maxCharacters,
+        calculateCounts,
+      ]
     );
-
-    // Enhanced link handling
-    const handleAddLink = useCallback(() => {
-      if (!editor) return;
-
-      const { from, to } = editor.state.selection;
-      const selectedText = editor.state.doc.textBetween(from, to);
-
-      if (selectedText) {
-        setShowLinkModal(true);
-      } else {
-        toast.warning("Pilih teks terlebih dahulu untuk menambahkan link");
-      }
-    }, [editor]);
-
-    const insertLink = useCallback(() => {
-      if (!editor || !linkUrl) return;
-
-      const url = linkUrl.startsWith("http") ? linkUrl : `https://${linkUrl}`;
-      editor.chain().focus().setLink({ href: url }).run();
-      setShowLinkModal(false);
-      setLinkUrl("");
-    }, [editor, linkUrl]);
 
     // Initialize content
     useEffect(() => {
-      if (editor && value !== content) {
-        editor.commands.setContent(value);
-        setContent(value);
-        calculateCounts(value);
-      }
-    }, [value, content, calculateCounts, editor]);
+      setContent(value);
+      calculateCounts(value);
+    }, [value, calculateCounts]);
 
     // Cleanup
     useEffect(() => {
@@ -553,6 +501,29 @@ const RichTextEditor = forwardRef(
         </div>
       );
     };
+
+    // Enhanced link handling
+    const handleAddLink = useCallback(() => {
+      if (!editor) return;
+
+      const { from, to } = editor.state.selection;
+      const selectedText = editor.state.doc.textBetween(from, to);
+
+      if (selectedText) {
+        setShowLinkModal(true);
+      } else {
+        toast.warning("Pilih teks terlebih dahulu untuk menambahkan link");
+      }
+    }, [editor]);
+
+    const insertLink = useCallback(() => {
+      if (!editor || !linkUrl) return;
+
+      const url = linkUrl.startsWith("http") ? linkUrl : `https://${linkUrl}`;
+      editor.chain().focus().setLink({ href: url }).run();
+      setShowLinkModal(false);
+      setLinkUrl("");
+    }, [editor, linkUrl]);
 
     return (
       <div className="w-full">

@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, User, LogOut, Bell, ChevronDown } from "lucide-react";
 import { cn } from "../../utils/helpers";
-import { useAuth } from "../../contexts/AuthContext";
-import { getDefaultRoute } from "../../utils/constants"; // ✅ Import dari constants
+import { useAuth } from "../../hooks/useAuth";
+import { getDefaultRoute } from "../../utils/constants";
 import { Button } from "../ui";
 
 export default function Header() {
@@ -16,10 +16,8 @@ export default function Header() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const isScrolled = window.scrollY > 10;
-      setScrolled(isScrolled);
+      setScrolled(window.scrollY > 10);
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -29,14 +27,12 @@ export default function Header() {
     setIsUserMenuOpen(false);
   }, [location]);
 
-  // Prevent body scroll when mobile menu is open
   useEffect(() => {
     if (isMenuOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
     }
-
     return () => {
       document.body.style.overflow = "unset";
     };
@@ -86,8 +82,6 @@ export default function Header() {
                   to="/"
                   className={cn(
                     "relative px-3 py-2 text-sm font-medium transition-all duration-200 hover:scale-105",
-                    "before:absolute before:bottom-0 before:left-0 before:w-0 before:h-0.5 before:bg-current before:transition-all before:duration-300",
-                    "hover:before:w-full",
                     scrolled
                       ? "text-gray-700 hover:text-[#23407a]"
                       : "text-white/90 hover:text-white"
@@ -99,14 +93,45 @@ export default function Header() {
                   to="/about"
                   className={cn(
                     "relative px-3 py-2 text-sm font-medium transition-all duration-200 hover:scale-105",
-                    "before:absolute before:bottom-0 before:left-0 before:w-0 before:h-0.5 before:bg-current before:transition-all before:duration-300",
-                    "hover:before:w-full",
                     scrolled
                       ? "text-gray-700 hover:text-[#23407a]"
                       : "text-white/90 hover:text-white"
                   )}
                 >
                   Tentang
+                </Link>
+                <Link
+                  to="/pricing"
+                  className={cn(
+                    "relative px-3 py-2 text-sm font-medium transition-all duration-200 hover:scale-105",
+                    scrolled
+                      ? "text-gray-700 hover:text-[#23407a]"
+                      : "text-white/90 hover:text-white"
+                  )}
+                >
+                  Harga
+                </Link>
+                <Link
+                  to="/help"
+                  className={cn(
+                    "relative px-3 py-2 text-sm font-medium transition-all duration-200 hover:scale-105",
+                    scrolled
+                      ? "text-gray-700 hover:text-[#23407a]"
+                      : "text-white/90 hover:text-white"
+                  )}
+                >
+                  Bantuan
+                </Link>
+                <Link
+                  to="/docs"
+                  className={cn(
+                    "relative px-3 py-2 text-sm font-medium transition-all duration-200 hover:scale-105",
+                    scrolled
+                      ? "text-gray-700 hover:text-[#23407a]"
+                      : "text-white/90 hover:text-white"
+                  )}
+                >
+                  Dokumentasi
                 </Link>
               </nav>
 
@@ -122,7 +147,7 @@ export default function Header() {
                           : "text-white/80 group-hover:text-white"
                       )}
                     />
-                    <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
+                    {/* Badge notifikasi hanya jika ada data dari BE */}
                   </button>
 
                   {/* User Menu */}
@@ -205,9 +230,9 @@ export default function Header() {
                           <div className="border-t border-gray-100 py-2">
                             <button
                               onClick={handleLogout}
-                              className="flex items-center w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors group"
+                              className="flex items-center w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                             >
-                              <LogOut className="h-4 w-4 mr-3 text-red-400 group-hover:text-red-600" />
+                              <LogOut className="h-4 w-4 mr-2" />
                               Logout
                             </button>
                           </div>
@@ -235,7 +260,7 @@ export default function Header() {
                   <Link to="/auth/register">
                     <Button
                       size="sm"
-                      className="bg-[#23407a] hover:bg-[#1a2f5c] shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+                      className="bg-[#23407a] hover:bg-[#1a2f5c]"
                     >
                       Daftar Gratis
                     </Button>
@@ -319,6 +344,29 @@ export default function Header() {
                   >
                     <span className="font-medium text-gray-900">Tentang</span>
                   </Link>
+                  <Link
+                    to="/pricing"
+                    className="mobile-nav-item"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <span className="font-medium text-gray-900">Harga</span>
+                  </Link>
+                  <Link
+                    to="/help"
+                    className="mobile-nav-item"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <span className="font-medium text-gray-900">Bantuan</span>
+                  </Link>
+                  <Link
+                    to="/docs"
+                    className="mobile-nav-item"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <span className="font-medium text-gray-900">
+                      Dokumentasi
+                    </span>
+                  </Link>
 
                   {isAuthenticated && (
                     <>
@@ -328,7 +376,6 @@ export default function Header() {
                         className="mobile-nav-item"
                         onClick={() => setIsMenuOpen(false)}
                       >
-                        <User className="h-5 w-5 mr-3 text-gray-500" />
                         <span className="font-medium text-gray-900">
                           Dashboard
                         </span>
@@ -338,58 +385,41 @@ export default function Header() {
                         className="mobile-nav-item"
                         onClick={() => setIsMenuOpen(false)}
                       >
-                        <User className="h-5 w-5 mr-3 text-gray-500" />
                         <span className="font-medium text-gray-900">
-                          Profil
+                          Profil Saya
                         </span>
                       </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors mt-4"
+                      >
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Logout
+                      </button>
                     </>
                   )}
-                </nav>
-              </div>
 
-              {/* Footer */}
-              <div className="border-t border-gray-200 p-6 bg-gray-50">
-                {isAuthenticated ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#23407a] to-[#3b5fa4] text-white flex items-center justify-center font-semibold">
-                        {user?.fullName?.charAt(0)?.toUpperCase()}
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-gray-900">
-                          {user?.fullName}
-                        </p>
-                        <p className="text-xs text-gray-500 capitalize">
-                          {user?.role?.toLowerCase()}
-                        </p>
-                      </div>
+                  {!isAuthenticated && (
+                    <div className="space-y-3 mt-6">
+                      <Link
+                        to="/auth/login"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <Button variant="outline" className="w-full">
+                          Masuk
+                        </Button>
+                      </Link>
+                      <Link
+                        to="/auth/register"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <Button className="w-full bg-[#23407a] hover:bg-[#1a2f5c]">
+                          Daftar Gratis
+                        </Button>
+                      </Link>
                     </div>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                    >
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Logout
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <Link to="/auth/login" onClick={() => setIsMenuOpen(false)}>
-                      <Button variant="outline" className="w-full">
-                        Masuk
-                      </Button>
-                    </Link>
-                    <Link
-                      to="/auth/register"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      <Button className="w-full bg-[#23407a] hover:bg-[#1a2f5c]">
-                        Daftar Gratis
-                      </Button>
-                    </Link>
-                  </div>
-                )}
+                  )}
+                </nav>
               </div>
             </div>
           </div>

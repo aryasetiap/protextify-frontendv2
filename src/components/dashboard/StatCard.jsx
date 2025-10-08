@@ -1,13 +1,14 @@
 // src/components/dashboard/StatCard.jsx
 import { Card, CardContent } from "../ui";
 
+// StatCard hanya menerima field yang tersedia dari BE/hook
 const StatCard = ({
   title,
   value,
   icon: Icon,
   color = "blue",
   gradient,
-  trend = "neutral",
+  trend = "neutral", // default neutral jika tidak ada data trend dari BE/hook
   onClick = null,
 }) => {
   const colorClasses = {
@@ -25,6 +26,10 @@ const StatCard = ({
     purple: "text-purple-600",
     red: "text-red-600",
   };
+
+  // Hanya tampilkan trend jika field trend valid (positive/warning/negative)
+  const showTrend =
+    ["positive", "warning", "negative"].includes(trend) && trend !== "neutral";
 
   return (
     <Card
@@ -50,7 +55,7 @@ const StatCard = ({
               <p className="text-3xl font-bold text-gray-900 group-hover:scale-105 transition-transform">
                 {value}
               </p>
-              {trend !== "neutral" && (
+              {showTrend && (
                 <span
                   className={`text-xs px-2 py-1 rounded-full bg-white/50 ${
                     trend === "positive"

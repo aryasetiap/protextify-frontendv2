@@ -8,6 +8,7 @@ import ExportCenter from "../export/ExportCenter";
 import submissionsService from "../../services/submissions";
 import toast from "react-hot-toast";
 
+// Hanya fitur yang didukung BE
 export default function SubmissionActions({
   submission,
   submissions, // For bulk actions
@@ -17,6 +18,7 @@ export default function SubmissionActions({
   const [showExportCenter, setShowExportCenter] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
+  // Download submission (PDF/DOCX/ZIP) sesuai endpoint BE
   const handleQuickDownload = async (format = "pdf") => {
     try {
       setDownloading(true);
@@ -26,12 +28,17 @@ export default function SubmissionActions({
         await submissionsService.downloadSubmission(submission.id, format);
         toast.success(`File ${format.toUpperCase()} berhasil didownload`);
       } else if (type === "bulk" && submissions) {
-        const submissionIds = submissions.map((s) => s.id);
-        await submissionsService.downloadMultipleSubmissions(
-          submissionIds,
-          "zip"
-        );
-        toast.success("Bulk download berhasil");
+        // Bulk download hanya jika endpoint BE tersedia
+        if (submissionsService.downloadMultipleSubmissions) {
+          const submissionIds = submissions.map((s) => s.id);
+          await submissionsService.downloadMultipleSubmissions(
+            submissionIds,
+            "zip"
+          );
+          toast.success("Bulk download berhasil");
+        } else {
+          toast.error("Bulk download belum didukung di BE");
+        }
       }
 
       onActionComplete?.();
@@ -43,6 +50,7 @@ export default function SubmissionActions({
     }
   };
 
+  // Share link (hanya copy/share URL, tidak ada endpoint khusus di BE)
   const handleShare = async () => {
     try {
       if (navigator.share && submission) {
@@ -62,6 +70,7 @@ export default function SubmissionActions({
     }
   };
 
+  // Action items hanya fitur yang didukung BE
   const actionItems = [
     {
       icon: Download,
@@ -69,7 +78,7 @@ export default function SubmissionActions({
       action: () => handleQuickDownload("pdf"),
     },
     {
-      icon: FileText,
+      icon: Download,
       label: "Download DOCX",
       action: () => handleQuickDownload("docx"),
     },

@@ -8,38 +8,41 @@ import {
   Info,
   AlertTriangle,
 } from "lucide-react";
-import { useWebSocket } from "../../hooks/useWebSocket";
 import { Button } from "./Button";
 import { Card } from "./Card";
+
+// Hanya fitur notifikasi yang didukung BE
+// Tidak ada event WebSocket, polling, atau notifikasi real-time dari BE
+// Notifikasi hanya dari FE (misal: toast, error, success, info)
 
 export default function NotificationCenter() {
   const [notifications, setNotifications] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const { subscribe } = useWebSocket();
 
+  // FE: Tambahkan notifikasi dari toast/error FE, atau polling dari BE jika tersedia
+  // BE belum menyediakan endpoint notifikasi, jadi hanya notifikasi FE yang ditampilkan
+
+  // Contoh: Tambahkan notifikasi dari FE (misal: error global, success, info)
   useEffect(() => {
-    const unsubscribe = subscribe("notification", (notification) => {
-      const newNotification = {
+    // Bisa tambahkan notifikasi dari global error handler, API, atau polling endpoint BE jika tersedia
+    // Contoh: window.addEventListener("app-notification", ...)
+    // Untuk sekarang, tidak ada logic WebSocket atau event listener BE
+  }, []);
+
+  // Fungsi untuk menambah notifikasi dari FE
+  const addNotification = (notification) => {
+    setNotifications((prev) => [
+      {
         id: Date.now() + Math.random(),
         ...notification,
         isRead: false,
         timestamp: new Date().toISOString(),
-      };
-
-      setNotifications((prev) => [newNotification, ...prev].slice(0, 50)); // Keep last 50
-      setUnreadCount((prev) => prev + 1);
-
-      // Auto-remove after 10 seconds for non-important notifications
-      if (notification.type !== "error") {
-        setTimeout(() => {
-          removeNotification(newNotification.id);
-        }, 10000);
-      }
-    });
-
-    return unsubscribe;
-  }, [subscribe]);
+      },
+      ...prev,
+    ]);
+    setUnreadCount((prev) => prev + 1);
+  };
 
   const removeNotification = (id) => {
     setNotifications((prev) => {

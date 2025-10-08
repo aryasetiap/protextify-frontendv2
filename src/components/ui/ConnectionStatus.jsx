@@ -1,18 +1,15 @@
 // src/components/ui/ConnectionStatus.jsx
 import { useState, useEffect } from "react";
-import { Wifi, WifiOff, AlertTriangle, RefreshCw } from "lucide-react";
-import { useWebSocket } from "../../hooks/useWebSocket";
+import { Wifi, WifiOff } from "lucide-react";
 import { Button } from "./Button";
 import { Card } from "./Card";
 
+// Tidak ada WebSocket, hanya status koneksi internet
 export default function ConnectionStatus({
   showDetails = false,
   position = "bottom-right", // "top-left" | "top-right" | "bottom-left" | "bottom-right"
 }) {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [showReconnect, setShowReconnect] = useState(false);
-  const { isSocketConnected, connect, disconnect, getConnectionStats } =
-    useWebSocket();
 
   // Monitor browser online/offline status
   useEffect(() => {
@@ -28,29 +25,6 @@ export default function ConnectionStatus({
     };
   }, []);
 
-  // Show reconnect option when offline for too long
-  useEffect(() => {
-    if (!isSocketConnected()) {
-      const timer = setTimeout(() => {
-        setShowReconnect(true);
-      }, 5000);
-
-      return () => clearTimeout(timer);
-    } else {
-      setShowReconnect(false);
-    }
-  }, [isSocketConnected]);
-
-  const handleReconnect = async () => {
-    try {
-      await disconnect();
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      await connect();
-    } catch (error) {
-      console.error("Manual reconnect failed:", error);
-    }
-  };
-
   const getStatusInfo = () => {
     if (!isOnline) {
       return {
@@ -64,26 +38,14 @@ export default function ConnectionStatus({
       };
     }
 
-    if (!isSocketConnected()) {
-      return {
-        status: "disconnected",
-        icon: AlertTriangle,
-        color: "text-yellow-600",
-        bgColor: "bg-yellow-100",
-        borderColor: "border-yellow-200",
-        message: "Terputus dari server",
-        description: "Mencoba menyambung kembali...",
-      };
-    }
-
     return {
-      status: "connected",
+      status: "online",
       icon: Wifi,
       color: "text-green-600",
       bgColor: "bg-green-100",
       borderColor: "border-green-200",
-      message: "Terhubung",
-      description: "Semua fitur aktif",
+      message: "Online",
+      description: "Koneksi internet aktif",
     };
   };
 
@@ -127,19 +89,6 @@ export default function ConnectionStatus({
             <p className="text-sm text-gray-600 mt-1">
               {statusInfo.description}
             </p>
-
-            {statusInfo.status === "connected" && (
-              <div className="text-xs text-gray-500 mt-2">
-                ID: {getConnectionStats().socketId?.substring(0, 8)}...
-              </div>
-            )}
-
-            {showReconnect && statusInfo.status === "disconnected" && (
-              <Button size="sm" onClick={handleReconnect} className="mt-2">
-                <RefreshCw className="h-3 w-3 mr-1" />
-                Sambung Ulang
-              </Button>
-            )}
           </div>
         </div>
       </Card>

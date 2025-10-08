@@ -9,17 +9,23 @@ const RecentActivity = ({ submissions, transactions }) => {
     ...submissions.slice(0, 3).map((s) => ({
       type: "submission",
       id: s.id,
-      title: s.assignmentTitle,
-      subtitle: `${s.student?.fullName} • ${s.className}`,
-      time: s.submittedAt || s.updatedAt,
+      title: s.assignment?.title || "Tugas",
+      subtitle: `${s.student?.fullName || "-"} • ${
+        s.assignment?.class?.name || "-"
+      }`,
+      time: s.submittedAt || s.updatedAt || s.createdAt,
       status: s.status,
       icon: FileText,
     })),
     ...transactions.slice(0, 2).map((t) => ({
       type: "transaction",
       id: t.id,
-      title: "Pembayaran Assignment",
-      subtitle: `Rp ${t.amount.toLocaleString()}`,
+      title: t.assignment?.title
+        ? `Pembayaran: ${t.assignment.title}`
+        : "Pembayaran Assignment",
+      subtitle: `${
+        t.assignment?.class?.name || "-"
+      } • Rp ${t.amount?.toLocaleString()}`,
       time: t.createdAt,
       status: t.status,
       icon: DollarSign,
@@ -93,12 +99,14 @@ const RecentActivity = ({ submissions, transactions }) => {
                   {activity.subtitle}
                 </p>
                 <div className="text-xs text-gray-500 mt-1">
-                  {new Date(activity.time).toLocaleDateString("id-ID", {
-                    day: "numeric",
-                    month: "short",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {activity.time
+                    ? new Date(activity.time).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    : "-"}
                 </div>
               </div>
               {activity.type === "submission" && (

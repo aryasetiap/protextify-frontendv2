@@ -18,7 +18,6 @@ import {
   Button,
   Badge,
   Alert,
-  LoadingSpinner,
 } from "../ui";
 
 import { usePaymentTracker } from "../../hooks/usePaymentTracker";
@@ -36,7 +35,7 @@ export default function PaymentStatusTracker({
   const { status, loading, error, attempts, refreshStatus, isPolling } =
     usePaymentTracker(transaction.orderId, {
       onStatusChange: (newStatus) => {
-        console.log("Payment status changed:", newStatus);
+        // Logging status change (opsional)
       },
       onSuccess: (response) => {
         if (onPaymentSuccess) onPaymentSuccess(response);
@@ -46,7 +45,7 @@ export default function PaymentStatusTracker({
       },
     });
 
-  // Status configuration
+  // Status configuration sesuai BE
   const getStatusConfig = (status) => {
     switch (status) {
       case PAYMENT_STATUS.SUCCESS:
@@ -195,7 +194,7 @@ export default function PaymentStatusTracker({
           <Alert variant="error">
             <AlertTriangle className="h-4 w-4" />
             <div className="text-sm">
-              <strong>Error:</strong> {error}
+              <strong>Error:</strong> {error.message || error}
             </div>
           </Alert>
         )}

@@ -15,22 +15,7 @@ const DraftActions = ({
 }) => {
   const [showSubmitModal, setShowSubmitModal] = useState(false);
 
-  const handleSubmitClick = () => {
-    if (!validation.isValid) {
-      return;
-    }
-    setShowSubmitModal(true);
-  };
-
-  const handleConfirmSubmit = async () => {
-    try {
-      await onSubmit();
-      setShowSubmitModal(false);
-    } catch (error) {
-      console.error("Submit failed:", error);
-    }
-  };
-
+  // Hanya status yang didukung BE
   const getStatusBadge = () => {
     if (!submission) return null;
 
@@ -43,6 +28,25 @@ const DraftActions = ({
     const status = statusMap[submission.status] || statusMap.DRAFT;
 
     return <Badge variant={status.variant}>{status.label}</Badge>;
+  };
+
+  // Submit hanya jika valid
+  const handleSubmitClick = () => {
+    if (!validation.isValid) {
+      return;
+    }
+    setShowSubmitModal(true);
+  };
+
+  // Submit ke BE
+  const handleConfirmSubmit = async () => {
+    try {
+      await onSubmit();
+      setShowSubmitModal(false);
+    } catch (error) {
+      // Error sudah dihandle oleh parent/page
+      console.error("Submit failed:", error);
+    }
   };
 
   return (

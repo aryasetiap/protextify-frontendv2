@@ -5,44 +5,50 @@ import { Button, Card, CardHeader, CardTitle, CardContent } from "../ui";
 import ExportCenter from "../export/ExportCenter";
 import SubmissionActions from "../submission/SubmissionActions";
 
+// Hanya status yang didukung BE
+const getStatusIcon = (status) => {
+  switch (status) {
+    case "SUBMITTED":
+      return <Clock className="h-4 w-4 text-yellow-600" />;
+    case "GRADED":
+      return <CheckCircle className="h-4 w-4 text-green-600" />;
+    default:
+      return <FileText className="h-4 w-4 text-gray-600" />;
+  }
+};
+
+const getStatusText = (status) => {
+  switch (status) {
+    case "SUBMITTED":
+      return "Menunggu Penilaian";
+    case "GRADED":
+      return "Sudah Dinilai";
+    default:
+      return "Draft";
+  }
+};
+
+const getStatusColor = (status) => {
+  switch (status) {
+    case "SUBMITTED":
+      return "bg-yellow-100";
+    case "GRADED":
+      return "bg-green-100";
+    default:
+      return "bg-gray-100";
+  }
+};
+
 const SubmissionMonitor = ({ submissions, pendingCount, assignment }) => {
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case "SUBMITTED":
-        return <Clock className="h-4 w-4 text-yellow-600" />;
-      case "GRADED":
-        return <CheckCircle className="h-4 w-4 text-green-600" />;
-      default:
-        return <FileText className="h-4 w-4 text-gray-600" />;
-    }
-  };
-
-  const getStatusText = (status) => {
-    switch (status) {
-      case "SUBMITTED":
-        return "Menunggu Penilaian";
-      case "GRADED":
-        return "Sudah Dinilai";
-      default:
-        return "Draft";
-    }
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "SUBMITTED":
-        return "bg-yellow-100";
-      case "GRADED":
-        return "bg-green-100";
-      default:
-        return "bg-gray-100";
-    }
-  };
-
+  // Prioritas: hanya submission dengan status SUBMITTED
   const getPrioritySubmissions = () => {
     return submissions
       .filter((s) => s.status === "SUBMITTED")
-      .sort((a, b) => new Date(a.submittedAt) - new Date(b.submittedAt));
+      .sort(
+        (a, b) =>
+          new Date(a.submittedAt || a.updatedAt) -
+          new Date(b.submittedAt || b.updatedAt)
+      );
   };
 
   return (
@@ -100,10 +106,13 @@ const SubmissionMonitor = ({ submissions, pendingCount, assignment }) => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">
-                      {submission.assignmentTitle}
+                      {submission.assignment?.title ||
+                        submission.assignmentTitle ||
+                        "Tugas"}
                     </p>
                     <p className="text-xs text-gray-600 truncate">
-                      {submission.student?.fullName} • {submission.className}
+                      {submission.student?.fullName || "-"} •{" "}
+                      {submission.className || ""}
                     </p>
                     <div className="flex items-center text-xs text-gray-500 mt-1">
                       <span>{getStatusText(submission.status)}</span>
@@ -128,7 +137,7 @@ const SubmissionMonitor = ({ submissions, pendingCount, assignment }) => {
                             )}
                       </span>
                     </div>
-                    {submission.grade && (
+                    {typeof submission.grade === "number" && (
                       <div className="mt-1">
                         <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                           <Star className="h-3 w-3 mr-1" />

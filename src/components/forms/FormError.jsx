@@ -2,6 +2,11 @@
 export default function FormError({ error }) {
   if (!error) return null;
 
+  // Jika error adalah array (validasi), tampilkan semua pesan
+  const errorMessages = Array.isArray(error)
+    ? error.map((e) => e.message || e)
+    : [error.message || error];
+
   return (
     <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
       <div className="flex">
@@ -22,8 +27,12 @@ export default function FormError({ error }) {
           <h3 className="text-sm font-medium text-red-800">
             Terjadi kesalahan
           </h3>
-          <div className="mt-2 text-sm text-red-700">
-            {error.message || "Terjadi kesalahan yang tidak diketahui"}
+          <div className="mt-2 text-sm text-red-700 space-y-1">
+            {errorMessages.map((msg, idx) => (
+              <div key={idx}>
+                {msg || "Terjadi kesalahan yang tidak diketahui"}
+              </div>
+            ))}
           </div>
         </div>
       </div>

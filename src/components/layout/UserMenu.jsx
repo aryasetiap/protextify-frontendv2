@@ -1,16 +1,14 @@
 import { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   User,
   Settings,
   LogOut,
   ChevronDown,
-  Shield,
-  CreditCard,
-  Bell,
   HelpCircle,
+  CreditCard,
 } from "lucide-react";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../hooks/useAuth";
 import { getDefaultRoute, USER_ROLES } from "../../utils/constants";
 
 export default function UserMenu({
@@ -22,6 +20,7 @@ export default function UserMenu({
   const [isOpen, setIsOpen] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const menuRef = useRef(null);
 
   const handleLogout = () => {
@@ -51,6 +50,7 @@ export default function UserMenu({
     return null;
   }
 
+  // Menu items sesuai BE
   const menuItems = [
     {
       label: "Dashboard",
@@ -65,23 +65,10 @@ export default function UserMenu({
       show: true,
     },
     {
-      label: "Notifikasi",
-      icon: Bell,
-      path: "/notifications",
-      show: true,
-      badge: 3, // Example notification count
-    },
-    {
-      label: "Pembayaran",
+      label: "Transaksi",
       icon: CreditCard,
-      path: "/billing",
+      path: "/instructor/transactions",
       show: user.role === USER_ROLES.INSTRUCTOR,
-    },
-    {
-      label: "Admin Panel",
-      icon: Shield,
-      path: "/admin",
-      show: user.role === USER_ROLES.ADMIN,
     },
     {
       label: "Bantuan",
@@ -131,11 +118,6 @@ export default function UserMenu({
           >
             <item.icon className="h-5 w-5 mr-3" />
             {item.label}
-            {item.badge && (
-              <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-1">
-                {item.badge}
-              </span>
-            )}
           </Link>
         ))}
 
@@ -178,14 +160,8 @@ export default function UserMenu({
               >
                 <item.icon className="h-4 w-4 mr-3" />
                 {item.label}
-                {item.badge && (
-                  <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-1">
-                    {item.badge}
-                  </span>
-                )}
               </Link>
             ))}
-
             <div className="border-t border-gray-100 my-1"></div>
             <button
               onClick={handleLogout}
@@ -226,8 +202,6 @@ export default function UserMenu({
               {user.role?.toLowerCase()} • {user.institution}
             </p>
           </div>
-
-          {/* Menu Items */}
           <div className="py-1">
             {visibleMenuItems.map((item, index) => (
               <Link
@@ -238,16 +212,9 @@ export default function UserMenu({
               >
                 <item.icon className="h-4 w-4 mr-3" />
                 {item.label}
-                {item.badge && (
-                  <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-1">
-                    {item.badge}
-                  </span>
-                )}
               </Link>
             ))}
           </div>
-
-          {/* Logout */}
           <div className="border-t border-gray-100 py-1">
             <button
               onClick={handleLogout}

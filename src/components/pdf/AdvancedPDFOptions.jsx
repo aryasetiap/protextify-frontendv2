@@ -1,12 +1,12 @@
 // src/components/pdf/AdvancedPDFOptions.jsx
 import { useState } from "react";
 import { Settings, Download, FileText, Image, Palette } from "lucide-react";
-import Button from "../ui/Button"; // ✅ Change from named import to default import
+import Button from "../ui/Button";
 import { Card } from "../ui/Card";
 import { Modal } from "../ui/Modal";
 import { Switch } from "../ui/Switch";
-import Input from "../ui/Input"; // ✅ Change to default import
-import Select from "../ui/Select"; // ✅ Change to default import
+import Input from "../ui/Input";
+import Select from "../ui/Select";
 import pdfGenerator from "../../utils/pdfGenerator";
 import toast from "react-hot-toast";
 
@@ -27,14 +27,12 @@ export default function AdvancedPDFOptions({
 
     // Content Options
     includeAttachments: true,
-    includeComments: false,
     includePlagiarismReport: false,
-    includeGradingRubric: false,
 
     // Format Options
     pageFormat: "a4",
     orientation: "portrait",
-    margins: "normal", // "narrow", "normal", "wide"
+    margins: "normal",
     fontSize: "12",
     lineSpacing: "1.5",
 
@@ -42,19 +40,19 @@ export default function AdvancedPDFOptions({
     watermark: "",
     headerText: "",
     footerText: "",
-    colorScheme: "default", // "default", "grayscale", "blue"
-
-    // Advanced Options
-    quality: "high", // "draft", "normal", "high"
-    compression: "medium", // "none", "low", "medium", "high"
-    passwordProtect: false,
-    password: "",
 
     // Bulk Options (for multiple submissions)
     separateFiles: false,
     includeIndex: true,
     groupByStatus: false,
   });
+
+  // Hapus/disable opsi yang tidak didukung BE
+  // - includeComments
+  // - includeGradingRubric
+  // - passwordProtect
+  // - compression
+  // - colorScheme
 
   const handleOptionChange = (key, value) => {
     setOptions((prev) => ({ ...prev, [key]: value }));
@@ -74,7 +72,6 @@ export default function AdvancedPDFOptions({
       if (type === "single" && submission) {
         result = await pdfGenerator.generateSubmissionPDF(submission, {
           ...options,
-          // Convert string values to appropriate types
           fontSize: parseInt(options.fontSize),
           lineSpacing: parseFloat(options.lineSpacing),
         });
@@ -246,31 +243,11 @@ export default function AdvancedPDFOptions({
               </div>
 
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">Comments</label>
-                <Switch
-                  checked={options.includeComments}
-                  onCheckedChange={(checked) =>
-                    handleOptionChange("includeComments", checked)
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
                 <label className="text-sm font-medium">Plagiarism Report</label>
                 <Switch
                   checked={options.includePlagiarismReport}
                   onCheckedChange={(checked) =>
                     handleOptionChange("includePlagiarismReport", checked)
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">Grading Rubric</label>
-                <Switch
-                  checked={options.includeGradingRubric}
-                  onCheckedChange={(checked) =>
-                    handleOptionChange("includeGradingRubric", checked)
                   }
                 />
               </div>
@@ -357,7 +334,7 @@ export default function AdvancedPDFOptions({
           {/* Style Options */}
           <Card className="p-4">
             <h4 className="font-medium mb-4 flex items-center gap-2">
-              <Palette className="h-4 w-4" />
+              <Image className="h-4 w-4" />
               Style Options
             </h4>
             <div className="space-y-4">
@@ -371,6 +348,7 @@ export default function AdvancedPDFOptions({
                     handleOptionChange("watermark", e.target.value)
                   }
                   placeholder="Enter watermark text (optional)"
+                  className="w-full"
                 />
               </div>
 
@@ -384,24 +362,22 @@ export default function AdvancedPDFOptions({
                     handleOptionChange("headerText", e.target.value)
                   }
                   placeholder="Custom header text (optional)"
+                  className="w-full"
                 />
               </div>
 
               <div>
                 <label className="text-sm font-medium block mb-2">
-                  Color Scheme
+                  Footer Text
                 </label>
-                <select
-                  value={options.colorScheme}
+                <Input
+                  value={options.footerText}
                   onChange={(e) =>
-                    handleOptionChange("colorScheme", e.target.value)
+                    handleOptionChange("footerText", e.target.value)
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#23407a] focus:border-transparent"
-                >
-                  <option value="default">Default</option>
-                  <option value="grayscale">Grayscale</option>
-                  <option value="blue">Blue Theme</option>
-                </select>
+                  placeholder="Custom footer text (optional)"
+                  className="w-full"
+                />
               </div>
             </div>
           </Card>
@@ -444,58 +420,24 @@ export default function AdvancedPDFOptions({
             </Card>
           )}
 
-          {/* Security Options */}
-          <Card className="p-4">
-            <h4 className="font-medium mb-4">Security Options</h4>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">
-                  Password Protection
-                </label>
-                <Switch
-                  checked={options.passwordProtect}
-                  onCheckedChange={(checked) =>
-                    handleOptionChange("passwordProtect", checked)
-                  }
-                />
-              </div>
-
-              {options.passwordProtect && (
-                <div>
-                  <label className="text-sm font-medium block mb-2">
-                    Password
-                  </label>
-                  <Input
-                    type="password"
-                    value={options.password}
-                    onChange={(e) =>
-                      handleOptionChange("password", e.target.value)
-                    }
-                    placeholder="Enter PDF password"
-                  />
-                </div>
-              )}
-            </div>
-          </Card>
-        </div>
-
-        {/* Modal Actions */}
-        <div className="flex justify-end gap-3 pt-4 border-t">
-          <Button variant="ghost" onClick={() => setShowModal(false)}>
-            Cancel
-          </Button>
-          {type === "single" && (
-            <Button
-              variant="outline"
-              onClick={previewPDF}
-              disabled={generating}
-            >
-              Preview
+          {/* Modal Actions */}
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button variant="ghost" onClick={() => setShowModal(false)}>
+              Cancel
             </Button>
-          )}
-          <Button onClick={generatePDF} disabled={generating}>
-            {generating ? "Generating..." : "Generate PDF"}
-          </Button>
+            {type === "single" && (
+              <Button
+                variant="outline"
+                onClick={previewPDF}
+                disabled={generating}
+              >
+                Preview
+              </Button>
+            )}
+            <Button onClick={generatePDF} disabled={generating}>
+              {generating ? "Generating..." : "Generate PDF"}
+            </Button>
+          </div>
         </div>
       </Modal>
     </>

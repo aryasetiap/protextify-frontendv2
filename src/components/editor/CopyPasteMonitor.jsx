@@ -22,6 +22,7 @@ const CopyPasteMonitor = ({
     showWarnings,
     onSuspiciousActivity,
     maxPasteLength: 500,
+    logToBackend: false, // Pastikan log ke BE dinonaktifkan
   });
 
   const [isExpanded, setIsExpanded] = useState(false);
