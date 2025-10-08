@@ -42,6 +42,10 @@ import {
   StudentSubmissions,
   WriteAssignment,
   StudentClassDetail,
+  StudentProfile,
+  SubmissionDetail,
+  PlagiarismReport,
+  StorageHealth,
 } from "../pages/student";
 
 // Instructor Pages
@@ -187,6 +191,22 @@ export const router = createBrowserRouter([
       {
         path: "assignments/:id/write",
         element: <WriteAssignment />,
+      },
+      {
+        path: "profile",
+        element: <StudentProfile />,
+      },
+      {
+        path: "submissions/:id",
+        element: <SubmissionDetail />,
+      },
+      {
+        path: "submissions/:id/plagiarism-report",
+        element: <PlagiarismReport />,
+      },
+      {
+        path: "storage-health",
+        element: <StorageHealth />,
       },
       {
         path: "plagiarism/:submissionId",

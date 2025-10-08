@@ -1,3 +1,14 @@
+/**
+ * Mapping utama:
+ * - assignmentsService.getAssignmentDetail(classId, assignmentId) -> assignment
+ * - submissionsService.getHistory() -> array submission (cek draft)
+ * - submissionsService.createSubmission(assignmentId, { content }) -> submission draft
+ * - submissionsService.getSubmissionById(submissionId) -> detail submission
+ * - submissionsService.updateSubmissionContent(submissionId, content) -> update draft
+ * - submissionsService.submitSubmission(submissionId) -> submit final
+ * - Tidak render data/fitur yang tidak dikirim BE.
+ */
+
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Save, Send, AlertCircle, RefreshCw } from "lucide-react";
@@ -47,21 +58,17 @@ export default function WriteAssignment() {
   useEffect(() => {
     const loadAssignmentData = async () => {
       setLoadingAssignment(true);
-      console.log("[WriteAssignment] Mulai load assignment:", assignmentId);
       try {
         const assignmentData = await assignmentsService.getAssignmentDetail(
           classId,
           assignmentId
         );
-        console.log("[WriteAssignment] Assignment response:", assignmentData);
         setAssignment(assignmentData);
       } catch (error) {
-        console.error("[WriteAssignment] ERROR assignment:", error);
         toast.error("Gagal memuat data tugas");
         setAssignment(null);
       } finally {
         setLoadingAssignment(false);
-        console.log("[WriteAssignment] Selesai load assignment:", assignmentId);
       }
     };
     if (classId && assignmentId) loadAssignmentData();
@@ -72,40 +79,22 @@ export default function WriteAssignment() {
     const createOrFetchSubmission = async () => {
       if (!assignmentId || !assignment) return;
       setLoadingSubmission(true);
-      console.log(
-        "[WriteAssignment] Mulai cek/membuat submission draft:",
-        assignmentId
-      );
       try {
         const history = await submissionsService.getHistory();
-        console.log("[WriteAssignment] Submission history:", history);
         const existing = history.find((s) => s.assignmentId === assignmentId);
         if (existing) {
-          console.log(
-            "[WriteAssignment] Submission draft sudah ada:",
-            existing.id
-          );
           setLocalSubmissionId(existing.id);
         } else {
           const newSubmission = await submissionsService.createSubmission(
             assignmentId,
             {}
           );
-          console.log(
-            "[WriteAssignment] Submission draft baru dibuat:",
-            newSubmission
-          );
           setLocalSubmissionId(newSubmission.id);
         }
       } catch (error) {
-        console.error("[WriteAssignment] ERROR submission draft:", error);
         toast.error("Gagal membuat/memuat submission");
       } finally {
         setLoadingSubmission(false);
-        console.log(
-          "[WriteAssignment] Selesai cek/membuat submission draft:",
-          assignmentId
-        );
       }
     };
     if (assignment && assignmentId) createOrFetchSubmission();
@@ -116,30 +105,17 @@ export default function WriteAssignment() {
     const fetchSubmission = async () => {
       if (!localSubmissionId) return;
       setLoadingSubmission(true);
-      console.log(
-        "[WriteAssignment] Mulai fetch submission detail:",
-        localSubmissionId
-      );
       try {
         const data = await submissionsService.getSubmissionById(
           localSubmissionId
         );
-        console.log("[WriteAssignment] Submission detail response:", data);
         setSubmission(data);
         setContent(data.content || "");
       } catch (error) {
-        console.error(
-          "[WriteAssignment] ERROR fetch submission detail:",
-          error
-        );
         toast.error("Gagal memuat detail submission");
         setSubmission(null);
       } finally {
         setLoadingSubmission(false);
-        console.log(
-          "[WriteAssignment] Selesai fetch submission detail:",
-          localSubmissionId
-        );
       }
     };
     if (localSubmissionId) fetchSubmission();
@@ -310,6 +286,7 @@ export default function WriteAssignment() {
                 <Link
                   to={`/dashboard/classes/${assignment.classId}`}
                   className="flex items-center text-gray-600 hover:text-gray-900"
+                  aria-label="Kembali ke Kelas"
                 >
                   <ArrowLeft className="h-5 w-5 mr-2" />
                   Kembali ke Kelas
@@ -408,47 +385,9 @@ export default function WriteAssignment() {
             <Card className="p-6">
               <FileAttachment
                 submission={submission}
-                onFileUploaded={(files) => {
-                  // Handle file upload
-                  console.log("Files uploaded:", files);
-                }}
-                onFileDeleted={(fileId) => {
-                  // Handle file deletion
-                  console.log("File deleted:", fileId);
-                }}
-                readOnly={submission?.status === "SUBMITTED"}
+                enabled={submission.status === "DRAFT"}
               />
             </Card>
-
-            {/* Submission Actions */}
-            {submission && (
-              <Card className="p-4">
-                <SubmissionActions
-                  submission={submission}
-                  type="single"
-                  onActionComplete={() => {
-                    // Refresh data if needed
-                  }}
-                />
-              </Card>
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Text Statistics */}
-            <TextStatistics
-              stats={stats}
-              limitChecks={limitChecks}
-              validation={validation}
-            />
-
-            {/* Copy-Paste Monitor */}
-            <CopyPasteMonitor
-              editorRef={editorRef}
-              onSuspiciousActivity={handleSuspiciousActivity}
-              enabled={submission.status === "DRAFT"}
-            />
 
             {/* Additional Info */}
             <Card>
@@ -482,6 +421,36 @@ export default function WriteAssignment() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Submission Actions */}
+            {submission && (
+              <Card className="p-4">
+                <SubmissionActions
+                  submission={submission}
+                  type="single"
+                  onActionComplete={() => {
+                    // Refresh data if needed
+                  }}
+                />
+              </Card>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Text Statistics */}
+            <TextStatistics
+              stats={stats}
+              limitChecks={limitChecks}
+              validation={validation}
+            />
+
+            {/* Copy-Paste Monitor */}
+            <CopyPasteMonitor
+              editorRef={editorRef}
+              onSuspiciousActivity={handleSuspiciousActivity}
+              enabled={submission.status === "DRAFT"}
+            />
           </div>
         </div>
       </Container>

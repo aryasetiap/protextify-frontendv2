@@ -6,6 +6,7 @@ export { default as submissionsService } from "./submissions";
 export { default as paymentsService } from "./payments";
 export { default as plagiarismService } from "./plagiarism";
 export { default as storageService } from "./storage";
+export { default as usersService } from "./users";
 
 // Utility functions
 export { useApi } from "../hooks/useApi";

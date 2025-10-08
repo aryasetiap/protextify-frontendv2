@@ -5,3 +5,7 @@ export { default as StudentAssignments } from "./Assignments";
 export { default as StudentSubmissions } from "./Submissions";
 export { default as WriteAssignment } from "./WriteAssignment";
 export { default as StudentClassDetail } from "./StudentClassDetail";
+export { default as StudentProfile } from "./Profile";
+export { default as SubmissionDetail } from "./SubmissionDetail";
+export { default as PlagiarismReport } from "./PlagiarismReport";
+export { default as StorageHealth } from "./StorageHealth";
