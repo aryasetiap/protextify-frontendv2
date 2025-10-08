@@ -85,12 +85,12 @@ export default function Sidebar() {
           icon: Clock,
           path: "/dashboard/submissions",
         },
-        {
-          label: "Pengaturan",
-          icon: Settings,
-          path: "/dashboard/settings",
-          disabled: true, // Tidak ada endpoint di BE
-        },
+        // {
+        //   label: "Pengaturan",
+        //   icon: Settings,
+        //   path: "/dashboard/settings",
+        //   disabled: true, // Tidak ada endpoint di BE
+        // },
       ];
     }
   };

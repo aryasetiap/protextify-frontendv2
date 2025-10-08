@@ -39,6 +39,7 @@ export const updateProfileSchema = z.object({
   institution: requiredStringSchema
     .min(2, "Institusi minimal 2 karakter")
     .optional(),
+  phone: phoneSchema.optional(),
 });
 
 // Email verification schema
@@ -48,6 +49,12 @@ export const emailVerificationSchema = z.object({
 
 export const verifyTokenSchema = z.object({
   token: requiredStringSchema,
+});
+
+// Reset password schema
+export const resetPasswordSchema = z.object({
+  token: requiredStringSchema,
+  newPassword: passwordSchema,
 });
 
 // Class schemas

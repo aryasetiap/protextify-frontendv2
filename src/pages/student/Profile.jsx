@@ -18,10 +18,11 @@ import {
   LoadingSpinner,
   Breadcrumb,
 } from "../../components";
-import { usersService } from "../../services";
+import { usersService, authService } from "../../services";
 import { useAsyncData } from "../../hooks/useAsyncData";
 import { useApi } from "../../hooks/useApi";
-import { updateProfileSchema } from "../../utils/validation";
+import { updateProfileSchema, resetPasswordSchema } from "../../utils/validation";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
@@ -55,10 +56,24 @@ export default function StudentProfile() {
     defaultValues: {
       fullName: "",
       institution: "",
+      phone: "",
     },
   });
 
   const { loading: saving, error: saveError, execute: saveProfile } = useApi();
+
+  // Reset password form
+  const {
+    register: registerReset,
+    handleSubmit: handleSubmitReset,
+    formState: { errors: resetErrors },
+    reset: resetResetForm,
+  } = useForm({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: { token: "", newPassword: "" },
+  });
+  const { loading: resetting, error: resetError, execute: doReset } = useApi();
+  const { loading: sendingLink, execute: doSendLink } = useApi();
 
   // Sync form with user data
   React.useEffect(() => {
@@ -66,6 +81,7 @@ export default function StudentProfile() {
       reset({
         fullName: user.fullName || "",
         institution: user.institution || "",
+        phone: user.phone || "",
       });
     }
   }, [user, reset]);
@@ -214,6 +230,28 @@ export default function StudentProfile() {
                   )}
                 </div>
 
+                {/* Phone */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    Nomor Telepon
+                  </label>
+                  <div className="flex items-center space-x-3">
+                    <User className="h-5 w-5 text-gray-400" />
+                    <Input
+                      {...register("phone")}
+                      disabled={!isEditing}
+                      placeholder="Contoh: 081234567890"
+                      error={errors.phone?.message}
+                      className={isEditing ? "" : "bg-gray-100 text-gray-600"}
+                    />
+                  </div>
+                  {errors.phone && (
+                    <p className="text-xs text-red-600 mt-1">
+                      {errors.phone.message}
+                    </p>
+                  )}
+                </div>
+
                 {/* Email Verified */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-2">
@@ -281,6 +319,7 @@ export default function StudentProfile() {
                           reset({
                             fullName: user?.fullName || "",
                             institution: user?.institution || "",
+                            phone: user?.phone || "",
                           });
                         }}
                         disabled={saving}
@@ -313,6 +352,88 @@ export default function StudentProfile() {
                     </Button>
                   )}
                 </div>
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* Password Management */}
+          <Card className="border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 relative overflow-hidden">
+            <CardHeader className="relative z-10 pb-2">
+              <CardTitle className="text-xl font-bold text-gray-900">
+                Keamanan & Kata Sandi
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Send reset link */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-700 font-medium">Kirim tautan reset ke email</p>
+                  <p className="text-xs text-gray-500">Kami akan mengirimkan email ke {user?.email}</p>
+                </div>
+                <Button
+                  type="button"
+                  loading={sendingLink}
+                  onClick={() =>
+                    doSendLink(() => authService.forgotPassword(user.email), {
+                      loadingMessage: "Mengirim tautan reset...",
+                      successMessage: "Tautan reset terkirim ke email",
+                      showSuccessToast: true,
+                    })
+                  }
+                  className="bg-[#23407a] hover:bg-[#1a2f5c]"
+                >
+                  Kirim Link Reset
+                </Button>
+              </div>
+
+              {/* Divider */}
+              {/* <div className="h-px bg-gray-200" /> */}
+
+              {/* Reset with token */}
+              <form
+                onSubmit={handleSubmitReset(async (payload) => {
+                  try {
+                    await doReset(() => authService.resetPassword(payload), {
+                      loadingMessage: "Mereset password...",
+                      successMessage: "Password berhasil direset",
+                      showSuccessToast: true,
+                    });
+                    resetResetForm();
+                  } catch (e) {}
+                })}
+                className="space-y-4"
+              >
+                {/* <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    Token Reset
+                  </label>
+                  <Input
+                    {...registerReset("token")}
+                    placeholder="Tempel token dari email"
+                    error={resetErrors.token?.message}
+                  />
+                </div> */}
+                {/* <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    Password Baru
+                  </label>
+                  <Input
+                    type="password"
+                    {...registerReset("newPassword")}
+                    placeholder="Password baru"
+                    error={resetErrors.newPassword?.message}
+                  />
+                </div> */}
+                {resetError && (
+                  <Alert variant="error">
+                    <p>{resetError.message}</p>
+                  </Alert>
+                )}
+                {/* <div className="flex justify-end">
+                  <Button type="submit" loading={resetting} className="bg-[#23407a] hover:bg-[#1a2f5c]">
+                    Reset Password
+                  </Button>
+                </div> */}
               </form>
             </CardContent>
           </Card>

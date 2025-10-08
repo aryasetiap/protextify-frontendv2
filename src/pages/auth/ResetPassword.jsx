@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   Button,
@@ -20,8 +20,37 @@ export default function ResetPassword() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  // Check if token exists
+  React.useEffect(() => {
+    if (!token) {
+      setError("Token reset password tidak ditemukan. Silakan minta link reset password baru.");
+      setStatus("error");
+    } else {
+      console.log("Token found:", token); // Debug log
+    }
+  }, [token]);
+
+  // Debug: Show current URL
+  React.useEffect(() => {
+    console.log("Current URL:", window.location.href);
+    console.log("Search params:", window.location.search);
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!token) {
+      setError("Token reset password tidak ditemukan.");
+      setStatus("error");
+      return;
+    }
+
+    if (!password) {
+      setError("Password baru harus diisi.");
+      setStatus("error");
+      return;
+    }
+
     setStatus("loading");
     setError("");
     try {

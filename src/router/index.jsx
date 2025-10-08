@@ -131,12 +131,7 @@ export const router = createBrowserRouter([
           },
           {
             path: "reset-password",
-            element: (
-              <PublicRoute>
-                {/* TODO: Aktifkan logic setelah endpoint BE tersedia */}
-                <ResetPassword />
-              </PublicRoute>
-            ),
+            element: <ResetPassword />, // allow even when authenticated
           },
           {
             path: "verify-email",
@@ -279,6 +274,22 @@ export const router = createBrowserRouter([
     ],
   },
 
+  // Standalone profile route (accessible for any authenticated user)
+  {
+    path: "/profile",
+    element: (
+      <ProtectedRoute>
+        <DashboardLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <StudentProfile />,
+      },
+    ],
+  },
+
   // Legacy redirects
   {
     path: "login",
@@ -287,6 +298,10 @@ export const router = createBrowserRouter([
   {
     path: "register",
     element: <Navigate to="/auth/register" replace />,
+  },
+  {
+    path: "reset-password",
+    element: <ResetPassword />, // Direct access without redirect to preserve query params
   },
   {
     path: "classes/:classId/assignments/:assignmentId/write",
