@@ -33,25 +33,16 @@ const GoogleCallback = () => {
 
       if (token) {
         try {
-          // Simpan token ke localStorage
           localStorage.setItem("token", token);
-
-          // Ambil data user dan accessToken dari BE
           const response = await authService.getGoogleUser();
           const { accessToken, user } = response;
-
-          // Simpan accessToken dan user ke localStorage
           localStorage.setItem("token", accessToken);
           localStorage.setItem("user", JSON.stringify(user));
-
           dispatch({
             type: "LOGIN_SUCCESS",
             payload: { user, token: accessToken },
           });
-
           toast.success(`Selamat datang, ${user.fullName}!`);
-
-          // Redirect sesuai role
           const redirectPath = getDefaultRoute(user.role);
           navigate(redirectPath, { replace: true });
         } catch (error) {

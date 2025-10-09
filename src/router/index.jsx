@@ -6,10 +6,9 @@ import RootLayout from "../layouts/RootLayout";
 import AuthLayout from "../layouts/AuthLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
 
-// Components
-import ProtectedRoute from "../components/ProtectedRoute";
+// Route Guards
+import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "../components/PublicRoute";
-import ErrorBoundary from "../components/ErrorBoundary";
 
 // Public Pages
 import {
@@ -53,25 +52,25 @@ import {
   InstructorDashboard,
   InstructorClasses,
   CreateClass,
-  ClassDetail,
-  ClassSettings,
   CreateAssignment,
-  AssignmentDetail,
   MonitorSubmissions,
   BulkGrade,
   AssignmentAnalytics,
+  ClassDetail,
+  ClassSettings,
+  AssignmentDetail,
   PlagiarismAnalysis,
   TransactionHistory,
   TransactionDetail,
 } from "../pages/instructor";
 
-export const router = createBrowserRouter([
+const router = createBrowserRouter([
+  // Public routes
   {
     path: "/",
-    element: <RootLayout />, // Layout dengan Header untuk public pages
+    element: <RootLayout />,
     errorElement: <NotFound />,
     children: [
-      // Public routes
       { index: true, element: <Home /> },
       { path: "about", element: <About /> },
       { path: "pricing", element: <Pricing /> },
@@ -79,18 +78,10 @@ export const router = createBrowserRouter([
       { path: "docs", element: <Docs /> },
       { path: "privacy", element: <Privacy /> },
       { path: "terms", element: <Terms /> },
-      {
-        path: "verify-email",
-        element: (
-          <PublicRoute>
-            <EmailVerification />
-          </PublicRoute>
-        ),
-      },
-
-      // Auth routes (gunakan RootLayout juga)
+      // Auth routes (only for non-authenticated users)
       {
         path: "auth",
+        element: <AuthLayout />,
         children: [
           {
             path: "login",
@@ -118,26 +109,25 @@ export const router = createBrowserRouter([
           },
           {
             path: "google/callback",
-            element: <GoogleCallback />,
+            element: (
+              <PublicRoute>
+                <GoogleCallback />
+              </PublicRoute>
+            ),
           },
           {
             path: "forgot-password",
             element: (
               <PublicRoute>
-                {/* TODO: Aktifkan logic setelah endpoint BE tersedia */}
                 <ForgotPassword />
               </PublicRoute>
             ),
           },
           {
             path: "reset-password",
-            element: <ResetPassword />, // allow even when authenticated
-          },
-          {
-            path: "verify-email",
             element: (
               <PublicRoute>
-                <EmailVerification />
+                <ResetPassword />
               </PublicRoute>
             ),
           },
@@ -146,7 +136,7 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // Dashboard routes dengan layout terpisah (tanpa Header)
+  // Student dashboard routes
   {
     path: "/dashboard",
     element: (
@@ -155,62 +145,25 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      {
-        index: true,
-        element: <Navigate to="overview" replace />,
-      },
-      {
-        path: "overview",
-        element: <StudentDashboard />,
-      },
-      {
-        path: "classes",
-        element: <StudentClasses />,
-      },
-      {
-        path: "join-class",
-        element: <JoinClass />,
-      },
-      {
-        path: "assignments",
-        element: <StudentAssignments />,
-      },
-      {
-        path: "submissions",
-        element: <StudentSubmissions />,
-      },
-      {
-        path: "classes/:classId",
-        element: <StudentClassDetail />,
-      },
-      {
-        path: "assignments/:id/write",
-        element: <WriteAssignment />,
-      },
-      {
-        path: "profile",
-        element: <StudentProfile />,
-      },
-      {
-        path: "submissions/:id",
-        element: <SubmissionDetail />,
-      },
+      { index: true, element: <Navigate to="overview" replace /> },
+      { path: "overview", element: <StudentDashboard /> },
+      { path: "classes", element: <StudentClasses /> },
+      { path: "join-class", element: <JoinClass /> },
+      { path: "assignments", element: <StudentAssignments /> },
+      { path: "assignments/:id/write", element: <WriteAssignment /> },
+      { path: "submissions", element: <StudentSubmissions /> },
+      { path: "submissions/:id", element: <SubmissionDetail /> },
       {
         path: "submissions/:id/plagiarism-report",
         element: <PlagiarismReport />,
       },
-      {
-        path: "storage-health",
-        element: <StorageHealth />,
-      },
-      {
-        path: "plagiarism/:submissionId",
-        element: <PlagiarismAnalysis />,
-      },
+      { path: "classes/:classId", element: <StudentClassDetail /> },
+      { path: "profile", element: <StudentProfile /> },
+      { path: "storage-health", element: <StorageHealth /> },
     ],
   },
 
-  // Instructor routes dengan layout terpisah (tanpa Header)
+  // Instructor dashboard routes
   {
     path: "/instructor",
     element: (
@@ -219,58 +172,31 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
+      { path: "dashboard", element: <InstructorDashboard /> },
+      { path: "classes", element: <InstructorClasses /> },
+      { path: "create-class", element: <CreateClass /> },
+      { path: "classes/:classId", element: <ClassDetail /> },
+      { path: "classes/:classId/settings", element: <ClassSettings /> },
       {
-        path: "dashboard",
-        element: <InstructorDashboard />,
-      },
-      {
-        path: "classes",
-        element: <InstructorClasses />,
-      },
-      {
-        path: "create-class",
-        element: <CreateClass />,
-      },
-      {
-        path: "classes/:classId",
-        element: <ClassDetail />,
-      },
-      {
-        path: "classes/:classId/settings",
-        element: <ClassSettings />,
-      },
-      {
-        path: "classes/:classId/create-assignment",
+        path: "classes/:classId/assignments/create",
         element: <CreateAssignment />,
       },
-      {
-        path: "assignments/:assignmentId",
-        element: <AssignmentDetail />,
-      },
-      {
-        path: "assignments/:assignmentId/monitor",
-        element: <MonitorSubmissions />,
-      },
-      {
-        path: "assignments/:assignmentId/bulk-grade",
-        element: <BulkGrade />,
-      },
+      { path: "assignments/:assignmentId", element: <AssignmentDetail /> },
       {
         path: "assignments/:assignmentId/analytics",
         element: <AssignmentAnalytics />,
       },
       {
-        path: "plagiarism/:submissionId",
+        path: "assignments/:assignmentId/submissions",
+        element: <MonitorSubmissions />,
+      },
+      { path: "assignments/:assignmentId/bulk-grade", element: <BulkGrade /> },
+      {
+        path: "submissions/:submissionId/plagiarism",
         element: <PlagiarismAnalysis />,
       },
-      {
-        path: "transactions",
-        element: <TransactionHistory />,
-      },
-      {
-        path: "transactions/:transactionId",
-        element: <TransactionDetail />,
-      },
+      { path: "transactions", element: <TransactionHistory /> },
+      { path: "transactions/:transactionId", element: <TransactionDetail /> },
     ],
   },
 
@@ -282,31 +208,20 @@ export const router = createBrowserRouter([
         <DashboardLayout />
       </ProtectedRoute>
     ),
-    children: [
-      {
-        index: true,
-        element: <StudentProfile />,
-      },
-    ],
+    children: [{ index: true, element: <StudentProfile /> }],
   },
 
   // Legacy redirects
-  {
-    path: "login",
-    element: <Navigate to="/auth/login" replace />,
-  },
-  {
-    path: "register",
-    element: <Navigate to="/auth/register" replace />,
-  },
-  {
-    path: "reset-password",
-    element: <ResetPassword />, // Direct access without redirect to preserve query params
-  },
+  { path: "login", element: <Navigate to="/auth/login" replace /> },
+  { path: "register", element: <Navigate to="/auth/register" replace /> },
+  { path: "reset-password", element: <ResetPassword /> }, // Direct access for query params
   {
     path: "classes/:classId/assignments/:assignmentId/write",
     element: <WriteAssignment />,
   },
+
+  // 404 fallback
+  { path: "*", element: <NotFound /> },
 ]);
 
 export default router;

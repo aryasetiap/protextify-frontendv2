@@ -43,19 +43,20 @@ export default function Login() {
   const onSubmit = async (data) => {
     try {
       clearError();
-      // Kirim payload login ke context
       const response = await login({
         email: data.email,
         password: data.password,
       });
-
-      // Redirect sesuai role (gunakan helper)
-      const redirectPath = getDefaultRoute(response.user.role);
-      setTimeout(() => {
-        navigate(redirectPath, { replace: true });
-      }, 100);
+      if (response && response.user) {
+        const redirectPath = getDefaultRoute(response.user.role);
+        setTimeout(() => {
+          navigate(redirectPath, { replace: true });
+        }, 100);
+      }
+      // Tidak perlu else, error akan ditangani catch
     } catch (error) {
-      // Error sudah ditangani oleh context
+      // Error sudah ditangani oleh context, tidak perlu navigate
+      // Pesan error akan muncul di <Alert> pada form
     }
   };
 
@@ -172,7 +173,7 @@ export default function Login() {
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                   {error && (
                     <Alert variant="error" title="Login Gagal" className="mb-4">
-                      {error}
+                      {typeof error === "object" ? error.message : error}
                     </Alert>
                   )}
 
