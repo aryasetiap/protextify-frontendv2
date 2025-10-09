@@ -42,6 +42,7 @@ export default function WriteAssignment() {
   const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [editorReady, setEditorReady] = useState(false); // NEW: track editor ready state
+  const [contentInitialized, setContentInitialized] = useState(false); // NEW: track content initialization
 
   // Load assignment data
   useEffect(() => {
@@ -146,6 +147,7 @@ export default function WriteAssignment() {
         const draftContent = data.content || "";
         setInitialContent(draftContent);
         setContent(draftContent);
+        setContentInitialized(false); // Reset flag saat data baru
 
         console.log("[WriteAssignment] Set initial content:", draftContent);
       } catch (error) {
@@ -183,7 +185,12 @@ export default function WriteAssignment() {
 
   // Auto-save konten setiap 15 detik
   useEffect(() => {
-    if (!localSubmissionId || !submission || submission.status !== "DRAFT")
+    if (
+      !localSubmissionId ||
+      !submission ||
+      submission.status !== "DRAFT" ||
+      !contentInitialized
+    )
       return;
     const interval = setInterval(async () => {
       if (content.trim() === "" || content === initialContent) return; // Don't save if no changes
@@ -201,18 +208,38 @@ export default function WriteAssignment() {
       }
     }, 15000);
     return () => clearInterval(interval);
-  }, [localSubmissionId, content, submission, initialContent]);
+  }, [
+    localSubmissionId,
+    content,
+    submission,
+    initialContent,
+    contentInitialized,
+  ]);
 
   // Handle content change
   const handleContentChange = (newContent) => {
     console.log("[WriteAssignment] Content changed:", newContent);
-    setContent(newContent);
+
+    // Hanya update content setelah editor initialized dan content sudah di-set
+    if (contentInitialized) {
+      setContent(newContent);
+    } else {
+      console.log(
+        "[WriteAssignment] Ignoring content change - not initialized yet"
+      );
+    }
   };
 
   // Handle editor ready
   const handleEditorReady = () => {
     console.log("[WriteAssignment] Editor ready");
     setEditorReady(true);
+
+    // Mark content as initialized setelah editor ready dan initial content sudah di-set
+    setTimeout(() => {
+      setContentInitialized(true);
+      console.log("[WriteAssignment] Content initialization completed");
+    }, 100); // Small delay to ensure editor is fully ready
   };
 
   // Manual save

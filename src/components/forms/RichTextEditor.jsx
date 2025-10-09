@@ -168,6 +168,7 @@ const RichTextEditor = forwardRef(
     const [lastSaved, setLastSaved] = useState(null);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const [isInitialized, setIsInitialized] = useState(false);
+    const [initialContentSet, setInitialContentSet] = useState(false); // NEW: track if initial content is set
 
     const autoSaveTimeoutRef = useRef(null);
     const initialContentRef = useRef(value);
@@ -176,27 +177,6 @@ const RichTextEditor = forwardRef(
     useEffect(() => {
       initialContentRef.current = value;
     }, [value]);
-
-    // Create initial editor state from HTML
-    const createInitialEditorState = (editor) => {
-      if (!value || value.trim() === "") {
-        console.log("[RichTextEditor] No initial content");
-        return null;
-      }
-
-      return editor.parseEditorState(
-        JSON.stringify({
-          root: {
-            children: [],
-            direction: null,
-            format: "",
-            indent: 0,
-            type: "root",
-            version: 1,
-          },
-        })
-      );
-    };
 
     // Initial config with all nodes
     const initialConfig = {
@@ -294,41 +274,43 @@ const RichTextEditor = forwardRef(
       setWordCount(words);
       setCharacterCount(characters);
 
-      // Only mark as unsaved if this is a user change (not initial load)
-      if (isInitialized) {
+      // Only trigger onChange and mark as unsaved if initial content is set and this is a real user change
+      if (initialContentSet && isInitialized) {
         setHasUnsavedChanges(true);
+
+        // Call onChange callback
+        if (onChange) onChange(html);
+
+        // Auto-save logic
+        if (onAutoSave && !disabled) {
+          if (autoSaveTimeoutRef.current) {
+            clearTimeout(autoSaveTimeoutRef.current);
+          }
+          autoSaveTimeoutRef.current = setTimeout(() => {
+            setIsAutoSaving(true);
+            Promise.resolve(onAutoSave(html))
+              .then(() => {
+                setLastSaved(new Date());
+                setHasUnsavedChanges(false);
+              })
+              .catch(() => {
+                toast.error(
+                  "Auto-save gagal. Pastikan koneksi internet stabil."
+                );
+              })
+              .finally(() => {
+                setIsAutoSaving(false);
+              });
+          }, autoSaveInterval);
+        }
       }
 
-      // Limit checks
+      // Limit checks (always run)
       if (words > maxWords) {
         toast.error(`Melebihi batas maksimal ${maxWords} kata`);
       }
       if (characters > maxCharacters) {
         toast.error(`Melebihi batas maksimal ${maxCharacters} karakter`);
-      }
-
-      // Call onChange callback
-      if (onChange) onChange(html);
-
-      // Auto-save logic
-      if (onAutoSave && !disabled && isInitialized) {
-        if (autoSaveTimeoutRef.current) {
-          clearTimeout(autoSaveTimeoutRef.current);
-        }
-        autoSaveTimeoutRef.current = setTimeout(() => {
-          setIsAutoSaving(true);
-          Promise.resolve(onAutoSave(html))
-            .then(() => {
-              setLastSaved(new Date());
-              setHasUnsavedChanges(false);
-            })
-            .catch(() => {
-              toast.error("Auto-save gagal. Pastikan koneksi internet stabil.");
-            })
-            .finally(() => {
-              setIsAutoSaving(false);
-            });
-        }, autoSaveInterval);
       }
     };
 
@@ -363,6 +345,9 @@ const RichTextEditor = forwardRef(
         });
 
         setIsInitialized(true);
+        setInitialContentSet(true); // Mark that initial content is set
+
+        // Call onEditorReady callback
         if (onEditorReady) {
           onEditorReady();
         }
