@@ -168,10 +168,10 @@ const RichTextEditor = forwardRef(
     const [lastSaved, setLastSaved] = useState(null);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const [isInitialized, setIsInitialized] = useState(false);
-    const [initialContentSet, setInitialContentSet] = useState(false); // NEW: track if initial content is set
 
     const autoSaveTimeoutRef = useRef(null);
     const initialContentRef = useRef(value);
+    const initialLoadDone = useRef(false); // NEW: Track if initial load is done
 
     // Update initial content ref when value changes
     useEffect(() => {
@@ -274,12 +274,14 @@ const RichTextEditor = forwardRef(
       setWordCount(words);
       setCharacterCount(characters);
 
-      // Only trigger onChange and mark as unsaved if initial content is set and this is a real user change
-      if (initialContentSet && isInitialized) {
-        setHasUnsavedChanges(true);
+      // Always call onChange to keep parent state in sync
+      if (onChange) {
+        onChange(html);
+      }
 
-        // Call onChange callback
-        if (onChange) onChange(html);
+      // Only trigger auto-save and mark as unsaved if this is NOT the initial load
+      if (initialLoadDone.current && isInitialized) {
+        setHasUnsavedChanges(true);
 
         // Auto-save logic
         if (onAutoSave && !disabled) {
@@ -345,7 +347,12 @@ const RichTextEditor = forwardRef(
         });
 
         setIsInitialized(true);
-        setInitialContentSet(true); // Mark that initial content is set
+
+        // Mark initial load as done after a small delay to ensure content is set
+        setTimeout(() => {
+          initialLoadDone.current = true;
+          console.log("[RichTextEditor] Initial load completed");
+        }, 100);
 
         // Call onEditorReady callback
         if (onEditorReady) {
