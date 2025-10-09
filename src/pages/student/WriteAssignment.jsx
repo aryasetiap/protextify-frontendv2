@@ -229,9 +229,11 @@ export default function WriteAssignment() {
     console.log("[WriteAssignment] Editor ready");
     setEditorReady(true);
 
-    // Mark content as initialized immediately when editor is ready
-    setContentInitialized(true);
-    console.log("[WriteAssignment] Content initialization completed");
+    // Mark content as initialized setelah delay yang cukup
+    setTimeout(() => {
+      setContentInitialized(true);
+      console.log("[WriteAssignment] Content initialization completed");
+    }, 300); // Increased delay untuk memastikan editor fully ready
   };
 
   // Manual save

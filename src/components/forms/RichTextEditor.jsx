@@ -168,14 +168,21 @@ const RichTextEditor = forwardRef(
     const [lastSaved, setLastSaved] = useState(null);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const [isInitialized, setIsInitialized] = useState(false);
+    const [initialContentProcessed, setInitialContentProcessed] =
+      useState(false); // NEW: Track if initial content is processed
 
     const autoSaveTimeoutRef = useRef(null);
     const initialContentRef = useRef(value);
-    const initialLoadDone = useRef(false); // NEW: Track if initial load is done
+    const preventOnChangeRef = useRef(false); // NEW: Prevent onChange during initialization
 
     // Update initial content ref when value changes
     useEffect(() => {
       initialContentRef.current = value;
+      // Reset flags when new value comes in
+      if (value !== initialContentRef.current) {
+        setIsInitialized(false);
+        setInitialContentProcessed(false);
+      }
     }, [value]);
 
     // Initial config with all nodes
@@ -274,13 +281,18 @@ const RichTextEditor = forwardRef(
       setWordCount(words);
       setCharacterCount(characters);
 
-      // Always call onChange to keep parent state in sync
-      if (onChange) {
-        onChange(html);
-      }
+      // CRITICAL: Only call onChange if we're not preventing it during initialization
+      if (!preventOnChangeRef.current && initialContentProcessed) {
+        console.log(
+          "[RichTextEditor] onChange called:",
+          html.substring(0, 50) + "..."
+        );
 
-      // Only trigger auto-save and mark as unsaved if this is NOT the initial load
-      if (initialLoadDone.current && isInitialized) {
+        if (onChange) {
+          onChange(html);
+        }
+
+        // Mark as unsaved for auto-save
         setHasUnsavedChanges(true);
 
         // Auto-save logic
@@ -305,6 +317,10 @@ const RichTextEditor = forwardRef(
               });
           }, autoSaveInterval);
         }
+      } else {
+        console.log(
+          "[RichTextEditor] onChange prevented during initialization"
+        );
       }
 
       // Limit checks (always run)
@@ -320,6 +336,9 @@ const RichTextEditor = forwardRef(
     useEffect(() => {
       if (editor && value && !isInitialized) {
         console.log("[RichTextEditor] Setting initial content:", value);
+
+        // Prevent onChange during initialization
+        preventOnChangeRef.current = true;
 
         editor.update(() => {
           const root = $getRoot();
@@ -338,8 +357,8 @@ const RichTextEditor = forwardRef(
                 error
               );
               // Fallback: insert as plain text
-              const textNode = root.createText(value);
               const paragraph = root.createParagraph();
+              const textNode = paragraph.createText(value);
               paragraph.append(textNode);
               root.append(paragraph);
             }
@@ -348,16 +367,17 @@ const RichTextEditor = forwardRef(
 
         setIsInitialized(true);
 
-        // Mark initial load as done after a small delay to ensure content is set
+        // Allow onChange after a delay to ensure content is fully set
         setTimeout(() => {
-          initialLoadDone.current = true;
-          console.log("[RichTextEditor] Initial load completed");
-        }, 100);
+          preventOnChangeRef.current = false;
+          setInitialContentProcessed(true);
+          console.log("[RichTextEditor] Initial content processing completed");
 
-        // Call onEditorReady callback
-        if (onEditorReady) {
-          onEditorReady();
-        }
+          // Call onEditorReady callback
+          if (onEditorReady) {
+            onEditorReady();
+          }
+        }, 200); // Increased delay to ensure stability
       }
     }, [editor, value, isInitialized, onEditorReady]);
 
