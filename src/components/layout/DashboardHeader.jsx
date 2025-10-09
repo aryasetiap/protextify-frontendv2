@@ -49,7 +49,7 @@ export default function DashboardHeader() {
           <div className="flex items-center justify-between">
             {/* Left side - Enhanced Search */}
             <div className="flex items-center flex-1 max-w-md">
-              <form onSubmit={handleSearch} className="w-full">
+              {/* <form onSubmit={handleSearch} className="w-full">
                 <div className="relative group">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-white/60 group-focus-within:text-white transition-colors" />
                   <input
@@ -66,17 +66,17 @@ export default function DashboardHeader() {
                     )}
                   />
                 </div>
-              </form>
+              </form> */}
             </div>
 
             {/* Right side - Enhanced Notifications & Profile */}
             <div className="flex items-center space-x-3 lg:space-x-4">
               {/* Enhanced Notifications */}
-              <button className="relative p-3 rounded-xl hover:bg-white/10 transition-all duration-200 group border border-white/20 hover:border-white/30 hover:scale-105">
+              {/* <button className="relative p-3 rounded-xl hover:bg-white/10 transition-all duration-200 group border border-white/20 hover:border-white/30 hover:scale-105">
                 <Bell className="h-5 w-5 text-white/80 group-hover:text-white transition-colors" />
-                {/* Badge notifikasi hanya jika ada data dari BE */}
-                {/* <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full animate-pulse shadow-lg"></span> */}
-              </button>
+                Badge notifikasi hanya jika ada data dari BE
+                <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full animate-pulse shadow-lg"></span>
+              </button> */}
 
               {/* Enhanced Profile Dropdown */}
               <div className="relative">
