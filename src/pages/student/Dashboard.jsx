@@ -225,7 +225,7 @@ function StatCard({ title, value, icon: Icon, color, gradient }) {
         <div
           className={`p-2 rounded-lg ${colorClasses[color]} bg-gradient-to-r ${gradient} mr-4`}
         >
-          <Icon className="h-6 w-6" />
+          <Icon className="h-6 w-6 text-white" />
         </div>
         <div>
           <p className="text-sm font-medium text-gray-600">{title}</p>
