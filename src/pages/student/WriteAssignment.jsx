@@ -19,20 +19,14 @@ import TextStatistics from "../../components/editor/TextStatistics";
 import DraftActions from "../../components/editor/DraftActions";
 import CitationManager from "../../components/editor/CitationManager";
 import CopyPasteMonitor from "../../components/editor/CopyPasteMonitor";
-// import FileAttachment from "../../components/submission/FileAttachment";
 import SubmissionActions from "../../components/submission/SubmissionActions";
 
 import { useTextAnalytics } from "../../hooks/useTextAnalytics";
 import { assignmentsService, submissionsService } from "../../services";
 
-// TODO: WebSocket logic dihapus, gunakan polling HTTP
-
 export default function WriteAssignment() {
-  // Dukung dua pola route:
-  // 1) /dashboard/classes/:classId/assignments/:assignmentId/write
-  // 2) /dashboard/assignments/:id/write
   const { classId, assignmentId, id } = useParams();
-  const effectiveAssignmentId = assignmentId || id; // fallback ke :id jika :assignmentId tidak ada
+  const effectiveAssignmentId = assignmentId || id;
   const navigate = useNavigate();
   const editorRef = useRef(null);
 
@@ -41,11 +35,13 @@ export default function WriteAssignment() {
   const [submission, setSubmission] = useState(null);
   const [localSubmissionId, setLocalSubmissionId] = useState(null);
   const [content, setContent] = useState("");
+  const [initialContent, setInitialContent] = useState(""); // NEW: untuk pass ke editor
   const [citations, setCitations] = useState([]);
   const [loadingAssignment, setLoadingAssignment] = useState(true);
   const [loadingSubmission, setLoadingSubmission] = useState(true);
   const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [editorReady, setEditorReady] = useState(false); // NEW: track editor ready state
 
   // Load assignment data
   useEffect(() => {
@@ -63,7 +59,6 @@ export default function WriteAssignment() {
             effectiveAssignmentId
           );
         } else {
-          // fallback jika hanya punya :id
           assignmentData = await assignmentsService.getAssignmentById(
             effectiveAssignmentId
           );
@@ -146,13 +141,18 @@ export default function WriteAssignment() {
         );
         console.log("[WriteAssignment] Submission detail response:", data);
         setSubmission(data);
-        setContent(data.content || "");
+
+        // Set initial content untuk editor
+        const draftContent = data.content || "";
+        setInitialContent(draftContent);
+        setContent(draftContent);
+
+        console.log("[WriteAssignment] Set initial content:", draftContent);
       } catch (error) {
         console.error(
           "[WriteAssignment] ERROR fetch submission detail:",
           error
         );
-        toast.error("Gagal memuat detail submission");
         setSubmission(null);
       } finally {
         setLoadingSubmission(false);
@@ -186,7 +186,7 @@ export default function WriteAssignment() {
     if (!localSubmissionId || !submission || submission.status !== "DRAFT")
       return;
     const interval = setInterval(async () => {
-      if (content.trim() === "") return;
+      if (content.trim() === "" || content === initialContent) return; // Don't save if no changes
       setSaving(true);
       try {
         await submissionsService.updateSubmissionContent(
@@ -201,11 +201,18 @@ export default function WriteAssignment() {
       }
     }, 15000);
     return () => clearInterval(interval);
-  }, [localSubmissionId, content, submission]);
+  }, [localSubmissionId, content, submission, initialContent]);
 
   // Handle content change
   const handleContentChange = (newContent) => {
+    console.log("[WriteAssignment] Content changed:", newContent);
     setContent(newContent);
+  };
+
+  // Handle editor ready
+  const handleEditorReady = () => {
+    console.log("[WriteAssignment] Editor ready");
+    setEditorReady(true);
   };
 
   // Manual save
@@ -242,7 +249,6 @@ export default function WriteAssignment() {
     try {
       await submissionsService.submitSubmission(localSubmissionId);
       toast.success("Tugas berhasil dikumpulkan!");
-      // Refresh submission status
       const updated = await submissionsService.getSubmissionById(
         localSubmissionId
       );
@@ -278,15 +284,11 @@ export default function WriteAssignment() {
   };
 
   // Selalu panggil hook di atas
-  const { stats, limitChecks, validation, updateContent } = useTextAnalytics(
-    content,
-    {
-      maxWords: 1000,
-      maxCharacters: 7000,
-      minWords: 100,
-      // submissionId: localSubmissionId, // opsional, bisa null
-    }
-  );
+  const { stats, limitChecks, validation } = useTextAnalytics(content, {
+    maxWords: 1000,
+    maxCharacters: 7000,
+    minWords: 100,
+  });
 
   // Baru lakukan pengecekan data setelah hook
   if (loadingAssignment || loadingSubmission) {
@@ -326,7 +328,6 @@ export default function WriteAssignment() {
       <div className="bg-white border-b border-gray-200 shadow-sm">
         <Container className="py-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            {/* Left: Breadcrumb & Title */}
             <div className="flex items-center gap-4 flex-wrap">
               <Link
                 to={`/dashboard/classes/${assignment.classId}`}
@@ -346,7 +347,6 @@ export default function WriteAssignment() {
                 ]}
               />
             </div>
-            {/* Right: Status */}
             <div className="flex items-center gap-3">
               <div
                 className={`px-3 py-1 rounded-lg text-sm font-medium ${
@@ -359,7 +359,6 @@ export default function WriteAssignment() {
               >
                 {statusInfo.label}
               </div>
-              {/* Status penyimpanan (autosave/draft) */}
               {saving && (
                 <span className="text-blue-600 text-xs ml-2 animate-pulse">
                   Menyimpan...
@@ -383,7 +382,6 @@ export default function WriteAssignment() {
       {/* Main Content */}
       <Container className="py-8">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Main Editor Area */}
           <div className="flex-1 min-w-0 space-y-8">
             {/* Assignment Info */}
             <Card className="mb-2">
@@ -416,8 +414,10 @@ export default function WriteAssignment() {
               <CardContent className="p-0">
                 <RichTextEditor
                   ref={editorRef}
-                  value={content}
+                  key={localSubmissionId} // Force re-render when submission changes
+                  value={initialContent} // Use initialContent instead of content
                   onChange={handleContentChange}
+                  onEditorReady={handleEditorReady}
                   disabled={submission.status !== "DRAFT"}
                   maxWords={1000}
                   placeholder="Mulai tulis jawaban Anda di sini..."
@@ -441,24 +441,6 @@ export default function WriteAssignment() {
               </CardContent>
             </Card>
 
-            {/* File Attachments */}
-            {/* <Card className="mb-2">
-              <CardContent>
-                <FileAttachment
-                  submission={submission}
-                  onFileUploaded={(files) => {
-                    // Handle file upload
-                    console.log("Files uploaded:", files);
-                  }}
-                  onFileDeleted={(fileId) => {
-                    // Handle file deletion
-                    console.log("File deleted:", fileId);
-                  }}
-                  readOnly={submission?.status === "SUBMITTED"}
-                />
-              </CardContent>
-            </Card> */}
-
             {/* Submission Actions */}
             {submission && (
               <Card className="mb-2">
@@ -477,21 +459,18 @@ export default function WriteAssignment() {
 
           {/* Sidebar */}
           <div className="w-full lg:w-[340px] flex-shrink-0 space-y-6">
-            {/* Text Statistics */}
             <TextStatistics
               stats={stats}
               limitChecks={limitChecks}
               validation={validation}
             />
 
-            {/* Copy-Paste Monitor */}
             <CopyPasteMonitor
               editorRef={editorRef}
               onSuspiciousActivity={handleSuspiciousActivity}
               enabled={submission.status === "DRAFT"}
             />
 
-            {/* Additional Info */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm">Informasi Tambahan</CardTitle>

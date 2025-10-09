@@ -144,6 +144,7 @@ const RichTextEditor = forwardRef(
       value = "",
       onChange,
       onAutoSave,
+      onEditorReady,
       placeholder = "Mulai tulis jawaban Anda...",
       maxWords = 1000,
       maxCharacters = 7000,
@@ -153,7 +154,7 @@ const RichTextEditor = forwardRef(
       showToolbar = true,
       showFloatingToolbar = true,
       enableAutoLink = true,
-      enableTables = false, // Disable by default for assignments
+      enableTables = false,
       enableImages = true,
       enableDragDrop = true,
       enableMarkdownShortcuts = true,
@@ -166,8 +167,36 @@ const RichTextEditor = forwardRef(
     const [isAutoSaving, setIsAutoSaving] = useState(false);
     const [lastSaved, setLastSaved] = useState(null);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+    const [isInitialized, setIsInitialized] = useState(false);
 
     const autoSaveTimeoutRef = useRef(null);
+    const initialContentRef = useRef(value);
+
+    // Update initial content ref when value changes
+    useEffect(() => {
+      initialContentRef.current = value;
+    }, [value]);
+
+    // Create initial editor state from HTML
+    const createInitialEditorState = (editor) => {
+      if (!value || value.trim() === "") {
+        console.log("[RichTextEditor] No initial content");
+        return null;
+      }
+
+      return editor.parseEditorState(
+        JSON.stringify({
+          root: {
+            children: [],
+            direction: null,
+            format: "",
+            indent: 0,
+            type: "root",
+            version: 1,
+          },
+        })
+      );
+    };
 
     // Initial config with all nodes
     const initialConfig = {
@@ -256,12 +285,19 @@ const RichTextEditor = forwardRef(
       const words =
         plainText.trim() === ""
           ? 0
-          : plainText.trim().split(/\s+/).filter(Boolean).length;
+          : plainText
+              .trim()
+              .split(/\s+/)
+              .filter((word) => word.length > 0).length;
       const characters = plainText.length;
 
       setWordCount(words);
       setCharacterCount(characters);
-      setHasUnsavedChanges(true);
+
+      // Only mark as unsaved if this is a user change (not initial load)
+      if (isInitialized) {
+        setHasUnsavedChanges(true);
+      }
 
       // Limit checks
       if (words > maxWords) {
@@ -275,7 +311,7 @@ const RichTextEditor = forwardRef(
       if (onChange) onChange(html);
 
       // Auto-save logic
-      if (onAutoSave && !disabled) {
+      if (onAutoSave && !disabled && isInitialized) {
         if (autoSaveTimeoutRef.current) {
           clearTimeout(autoSaveTimeoutRef.current);
         }
@@ -296,26 +332,42 @@ const RichTextEditor = forwardRef(
       }
     };
 
-    // Set initial content when value changes
+    // Set initial content when editor is ready
     useEffect(() => {
-      if (
-        editor &&
-        value &&
-        value !==
-          editor
-            .getEditorState()
-            .read(() => $generateHtmlFromNodes(editor, null))
-      ) {
+      if (editor && value && !isInitialized) {
+        console.log("[RichTextEditor] Setting initial content:", value);
+
         editor.update(() => {
-          const parser = new DOMParser();
-          const dom = parser.parseFromString(value, "text/html");
-          const nodes = $generateNodesFromDOM(editor, dom);
           const root = $getRoot();
           root.clear();
-          root.append(...nodes);
+
+          if (value.trim()) {
+            try {
+              const parser = new DOMParser();
+              const dom = parser.parseFromString(value, "text/html");
+              const nodes = $generateNodesFromDOM(editor, dom);
+              root.append(...nodes);
+              console.log("[RichTextEditor] Initial content set successfully");
+            } catch (error) {
+              console.error(
+                "[RichTextEditor] Error setting initial content:",
+                error
+              );
+              // Fallback: insert as plain text
+              const textNode = root.createText(value);
+              const paragraph = root.createParagraph();
+              paragraph.append(textNode);
+              root.append(paragraph);
+            }
+          }
         });
+
+        setIsInitialized(true);
+        if (onEditorReady) {
+          onEditorReady();
+        }
       }
-    }, [editor, value]);
+    }, [editor, value, isInitialized, onEditorReady]);
 
     // Cleanup
     useEffect(() => {
@@ -466,59 +518,6 @@ const RichTextEditor = forwardRef(
             </div>
           </LexicalComposer>
         </div>
-
-        {/* Progress Bars */}
-        {/* <div className="mt-3 space-y-2">
-          <div>
-            <div className="flex justify-between text-xs text-gray-500 mb-1">
-              <span>Kata</span>
-              <span>{((wordCount / maxWords) * 100).toFixed(1)}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  wordCount >= maxWords
-                    ? "bg-red-500"
-                    : wordCount >= maxWords * 0.9
-                    ? "bg-orange-500"
-                    : wordCount >= maxWords * 0.75
-                    ? "bg-yellow-500"
-                    : "bg-[#23407a]"
-                }`}
-                style={{
-                  width: `${Math.min(100, (wordCount / maxWords) * 100)}%`,
-                }}
-              />
-            </div>
-          </div>
-          <div>
-            <div className="flex justify-between text-xs text-gray-500 mb-1">
-              <span>Karakter</span>
-              <span>
-                {((characterCount / maxCharacters) * 100).toFixed(1)}%
-              </span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  characterCount >= maxCharacters
-                    ? "bg-red-500"
-                    : characterCount >= maxCharacters * 0.9
-                    ? "bg-orange-500"
-                    : characterCount >= maxCharacters * 0.75
-                    ? "bg-yellow-500"
-                    : "bg-[#23407a]"
-                }`}
-                style={{
-                  width: `${Math.min(
-                    100,
-                    (characterCount / maxCharacters) * 100
-                  )}%`,
-                }}
-              />
-            </div>
-          </div>
-        </div> */}
 
         {/* Error Message */}
         {error && (
