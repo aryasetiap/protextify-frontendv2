@@ -79,40 +79,25 @@ export const useStudentDashboard = () => {
       setRecentClasses(safeClassesData.slice(0, 3));
       setRecentAssignments(safeRecentAssignments);
 
-      // Activity timeline: include status, grade, plagiarismScore, submittedAt
-      const timeline = [
-        ...safeClassesData.map((cls) => ({
-          type: "class_joined",
-          title: `Bergabung ke kelas ${cls?.name || "Unknown"}`,
-          time:
-            cls?.currentUserEnrollment?.joinedAt ||
-            cls?.createdAt ||
-            new Date().toISOString(),
-          icon: "class",
-        })),
-        ...safeSubmissionsData
-          .filter((submission) => submission && submission.assignment)
-          .map((submission) => ({
-            type: "submission",
-            title: `${
-              submission.status === "SUBMITTED"
-                ? "Mengumpulkan"
-                : submission.status === "GRADED"
-                ? "Dinilai"
-                : "Mengerjakan"
-            } ${submission.assignment?.title || "Unknown Assignment"}`,
-            time:
-              submission.submittedAt ||
-              submission.updatedAt ||
-              submission.createdAt ||
-              new Date().toISOString(),
-            icon: "assignment",
-            status: submission.status,
-            grade: submission.grade ?? null,
-            plagiarismScore: submission.plagiarismScore ?? null,
-          })),
-      ]
-        .sort((a, b) => new Date(b.time) - new Date(a.time))
+      // Activity timeline: hanya submission yang punya assignment
+      const timeline = safeSubmissionsData
+        .filter((submission) => submission && submission.assignment)
+        .map((submission) => ({
+          id: submission.id,
+          assignment: submission.assignment,
+          status: submission.status,
+          grade: submission.grade ?? null,
+          plagiarismScore: submission.plagiarismScore ?? null,
+          plagiarismChecks: submission.plagiarismChecks ?? null,
+          submittedAt: submission.submittedAt,
+          updatedAt: submission.updatedAt,
+          createdAt: submission.createdAt,
+        }))
+        .sort(
+          (a, b) =>
+            new Date(b.submittedAt || b.updatedAt || b.createdAt) -
+            new Date(a.submittedAt || a.updatedAt || a.createdAt)
+        )
         .slice(0, 10);
 
       setActivityTimeline(timeline);
