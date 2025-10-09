@@ -202,21 +202,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   const value = {
-    // State
     ...state,
-
-    // Actions
     login,
     register,
     logout,
     updateUser,
     clearError,
     checkAuthStatus,
-
-    // Helper functions
     isAuthenticated: state.isAuthenticated,
     isLoading: state.loading,
     hasError: !!state.error,
+    dispatch, // Tambahkan ini!
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

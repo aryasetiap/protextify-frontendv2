@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { useAuth } from "../../contexts/AuthContext";
 import { authService } from "../../services";
-import { getDefaultRoute } from "../../utils/constants"; // ✅ Import dari constants
+import { getDefaultRoute } from "../../utils/constants";
 import {
   LoadingSpinner,
   Container,
@@ -15,7 +15,7 @@ import {
 const GoogleCallback = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { dispatch } = useAuth();
+  const { clearError, isAuthenticated, user, ...authContext } = useAuth();
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -25,7 +25,7 @@ const GoogleCallback = () => {
 
       if (error) {
         const errorMessage = errorDescription || "Google login failed";
-        dispatch({ type: "LOGIN_ERROR", payload: errorMessage });
+        clearError();
         toast.error(`Login Google gagal: ${errorMessage}`);
         navigate("/auth/login", { replace: true });
         return;
@@ -34,25 +34,22 @@ const GoogleCallback = () => {
       if (token) {
         try {
           localStorage.setItem("token", token);
+          // Ambil user dari BE menggunakan token yang baru saja disimpan
           const response = await authService.getGoogleUser();
           const { accessToken, user } = response;
           localStorage.setItem("token", accessToken);
           localStorage.setItem("user", JSON.stringify(user));
-          dispatch({
-            type: "LOGIN_SUCCESS",
-            payload: { user, token: accessToken },
-          });
+          // Update context secara manual
+          if (authContext && authContext.dispatch) {
+            authContext.dispatch({
+              type: "LOGIN_SUCCESS",
+              payload: { user, token: accessToken },
+            });
+          }
           toast.success(`Selamat datang, ${user.fullName}!`);
-          const redirectPath = getDefaultRoute(user.role);
-          navigate(redirectPath, { replace: true });
+          navigate(getDefaultRoute(user.role), { replace: true });
         } catch (error) {
-          dispatch({
-            type: "LOGIN_ERROR",
-            payload:
-              error?.response?.data?.message ||
-              error?.message ||
-              "Gagal mendapatkan informasi pengguna",
-          });
+          clearError();
           localStorage.removeItem("token");
           localStorage.removeItem("user");
           toast.error(
@@ -63,17 +60,14 @@ const GoogleCallback = () => {
           navigate("/auth/login", { replace: true });
         }
       } else {
-        dispatch({
-          type: "LOGIN_ERROR",
-          payload: "Token tidak ditemukan",
-        });
+        clearError();
         toast.error("Token tidak ditemukan");
         navigate("/auth/login", { replace: true });
       }
     };
 
     handleCallback();
-  }, [searchParams, navigate, dispatch]);
+  }, [searchParams, navigate, clearError, authContext]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#23407a] via-[#1a2f5c] to-[#0f1b3a] relative overflow-hidden">

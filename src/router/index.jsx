@@ -108,6 +108,14 @@ const router = createBrowserRouter([
             ),
           },
           {
+            path: "callback",
+            element: (
+              <PublicRoute>
+                <GoogleCallback />
+              </PublicRoute>
+            ),
+          },
+          {
             path: "google/callback",
             element: (
               <PublicRoute>
