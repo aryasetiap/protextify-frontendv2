@@ -125,20 +125,13 @@ export default function StudentDashboard() {
 
             <div className="flex items-center space-x-3">
               <div
-                className={`flex items-center px-4 py-2 rounded-full backdrop-blur-sm border border-white/20 ${
-                  isConnected
-                    ? "bg-green-500/20 text-white"
-                    : "bg-red-500/20 text-white"
-                }`}
+                className={`flex items-center px-4 py-2 rounded-full backdrop-blur-sm border border-white/20 bg-green-500/20 text-white`}
               >
                 <div
-                  className={`w-2 h-2 rounded-full mr-2 ${
-                    isConnected ? "bg-green-400" : "bg-red-400"
+                  className={`w-2 h-2 rounded-full mr-2 bg-green-400
                   } animate-pulse`}
                 ></div>
-                <span className="text-sm font-medium">
-                  {isConnected ? "Online" : "Offline"}
-                </span>
+                <span className="text-sm font-medium">Online</span>
               </div>
             </div>
           </div>
