@@ -85,7 +85,6 @@ export class ImageNode extends DecoratorNode {
           width: this.__width,
           height: this.__height,
           maxWidth: "100%",
-          height: "auto",
         }}
       />
     );

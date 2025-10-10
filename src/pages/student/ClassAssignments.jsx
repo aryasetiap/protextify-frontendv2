@@ -167,7 +167,7 @@ export default function ClassAssignments() {
                       className="bg-[#23407a] hover:bg-[#1a2f5c] shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                       onClick={() =>
                         navigate(
-                          `/dashboard/assignments/${assignment.id}/write`
+                          `/dashboard/assignments/${assignment.id}`
                         )
                       }
                       aria-label={`Lihat Detail ${assignment.title}`}
@@ -185,10 +185,10 @@ export default function ClassAssignments() {
                             `/dashboard/assignments/${assignment.id}/write`
                           )
                         }
-                        aria-label={`Kumpulkan Tugas ${assignment.title}`}
+                        aria-label={`Kerjakan Tugas ${assignment.title}`}
                       >
                         <CheckCircle className="h-4 w-4 mr-2" />
-                        Kumpulkan Tugas
+                        Kerjakan Tugas
                       </Button>
                     )}
                   </CardContent>
