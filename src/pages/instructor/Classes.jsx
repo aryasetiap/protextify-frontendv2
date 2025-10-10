@@ -483,7 +483,7 @@ function ClassCard({ classData }) {
         </div>
 
         {/* Enhanced Action Buttons */}
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <Button
             variant="outline"
             size="sm"
@@ -491,7 +491,7 @@ function ClassCard({ classData }) {
             className="border-[#23407a]/30 text-[#23407a] hover:bg-[#23407a] hover:text-white transition-all duration-300"
           >
             <Eye className="h-4 w-4 mr-2" />
-            Detail
+            <span className="hidden sm:inline">Detail</span>
           </Button>
 
           <Button
@@ -503,19 +503,19 @@ function ClassCard({ classData }) {
             className="border-gray-300 text-gray-600 hover:bg-gray-600 hover:text-white transition-all duration-300"
           >
             <Settings className="h-4 w-4 mr-2" />
-            Settings
+            <span className="hidden sm:inline">Settings</span>
           </Button>
 
           <Link
             to={`/instructor/classes/${classData.id}/create-assignment`}
-            className="lg:col-span-1 col-span-2"
+            className="w-full"
           >
             <Button
               size="sm"
-              className="w-full bg-[#23407a] hover:bg-[#1a2f5c] shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+              className="w-full bg-[#23407a] hover:bg-[#1a2f5c] shadow-md hover:shadow-lg transition-all duration-300 whitespace-nowrap text-xs"
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Buat Tugas
+              <Plus className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">Buat Tugas</span>
             </Button>
           </Link>
         </div>

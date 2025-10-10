@@ -118,3 +118,19 @@ export const formatDate = (date, format = "dd/MM/yyyy") => {
 
   return d.toLocaleDateString("id-ID");
 };
+
+/**
+ * Format date and time
+ */
+export const formatDateTime = (date) => {
+  if (!date) return "-";
+  
+  const d = new Date(date);
+  return d.toLocaleString("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};

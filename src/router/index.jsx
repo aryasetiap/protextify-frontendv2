@@ -54,12 +54,15 @@ import {
   InstructorDashboard,
   InstructorClasses,
   CreateClass,
-  CreateAssignment,
-  MonitorSubmissions,
-  BulkGrade,
-  AssignmentAnalytics,
   ClassDetail,
   ClassSettings,
+  CreateAssignment,
+  MonitorSubmissions,
+  GradeSubmission,
+  InstructorAnalytics,
+  InstructorSettings,
+  BulkGrade,
+  AssignmentAnalytics,
   InstructorAssignmentDetail, // <-- gunakan alias
   PlagiarismAnalysis,
   TransactionHistory,
@@ -184,18 +187,41 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { path: "dashboard", element: <InstructorDashboard /> },
-      { path: "classes", element: <InstructorClasses /> },
-      { path: "create-class", element: <CreateClass /> },
-      { path: "classes/:classId", element: <ClassDetail /> },
-      { path: "classes/:classId/settings", element: <ClassSettings /> },
+      {
+        path: "dashboard",
+        element: <InstructorDashboard />,
+      },
+      {
+        path: "classes",
+        element: <InstructorClasses />,
+      },
+      {
+        path: "create-class",
+        element: <CreateClass />,
+      },
+      {
+        path: "classes/:classId",
+        element: <ClassDetail />,
+      },
+      {
+        path: "classes/:classId/settings",
+        element: <ClassSettings />,
+      },
       {
         path: "classes/:classId/assignments/create",
         element: <CreateAssignment />,
       },
       {
         path: "assignments/:assignmentId",
-        element: <InstructorAssignmentDetail />,
+        element: <AssignmentDetail />,
+      },
+      {
+        path: "assignments/:assignmentId/monitor",
+        element: <MonitorSubmissions />,
+      },
+      {
+        path: "assignments/:assignmentId/bulk-grade",
+        element: <BulkGrade />,
       },
       {
         path: "assignments/:assignmentId/analytics",

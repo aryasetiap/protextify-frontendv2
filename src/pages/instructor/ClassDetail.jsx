@@ -370,44 +370,58 @@ function AssignmentsTab({ classDetail }) {
       {assignments.length > 0 ? (
         <div className="space-y-4">
           {assignments.map((assignment) => (
-            <Card key={assignment.id}>
-              <CardContent className="p-4">
+            <Card 
+              key={assignment.id}
+              className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+              onClick={() => navigate(`/instructor/assignments/${assignment.id}`)}
+            >
+              <CardContent className="p-6">
                 <div className="flex justify-between items-start">
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">
-                      {assignment.title}
-                    </h4>
-                    <p className="text-sm text-gray-600 mb-3">
-                      {assignment.instructions?.substring(0, 100)}...
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h4 className="font-semibold text-gray-900 text-lg">
+                        {assignment.title}
+                      </h4>
+                      {assignment.active && (
+                        <Badge className="bg-green-100 text-green-800">
+                          <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+                          Aktif
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600 mb-4">
+                      {assignment.instructions?.substring(0, 150)}
+                      {assignment.instructions?.length > 150 ? "..." : ""}
                     </p>
-                    <div className="flex items-center space-x-4 text-sm text-gray-600">
-                      <span>Deadline: {formatDate(assignment.deadline)}</span>
-                      <span>Siswa: {assignment.expectedStudentCount}</span>
-                      <span>
-                        Submission: {assignment._count?.submissions || 0}
-                      </span>
+                    <div className="flex items-center space-x-6 text-sm">
+                      <div className="flex items-center text-gray-600">
+                        <Calendar className="h-4 w-4 mr-2 text-[#23407a]" />
+                        <span>Deadline: {formatDate(assignment.deadline)}</span>
+                      </div>
+                      <div className="flex items-center text-gray-600">
+                        <Users className="h-4 w-4 mr-2 text-[#23407a]" />
+                        <span>Siswa: {assignment.expectedStudentCount}</span>
+                      </div>
+                      <div className="flex items-center text-gray-600">
+                        <FileText className="h-4 w-4 mr-2 text-[#23407a]" />
+                        <span>
+                          Submission: {assignment._count?.submissions || 0}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    {assignment.active ? (
-                      <>
-                        <Link
-                          to={`/instructor/assignments/${assignment.id}/monitor`}
-                          className="text-blue-600 hover:text-blue-700 text-sm"
-                        >
-                          Monitor
-                        </Link>
-                        <Link
-                          to={`/instructor/assignments/${assignment.id}/analytics`}
-                          className="text-purple-600 hover:text-purple-700 text-sm"
-                        >
-                          Analytics
-                        </Link>
-                      </>
-                    ) : (
-                      <Badge variant="secondary">Inactive</Badge>
-                    )}
-                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/instructor/assignments/${assignment.id}`);
+                    }}
+                    className="border-[#23407a] text-[#23407a] hover:bg-[#23407a] hover:text-white"
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    Detail
+                  </Button>
                 </div>
               </CardContent>
             </Card>
