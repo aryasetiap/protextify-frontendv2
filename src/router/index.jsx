@@ -45,6 +45,8 @@ import {
   SubmissionDetail,
   PlagiarismReport,
   StorageHealth,
+  ClassAssignments,
+  AssignmentDetail, // <-- dari student
 } from "../pages/student";
 
 // Instructor Pages
@@ -58,7 +60,7 @@ import {
   AssignmentAnalytics,
   ClassDetail,
   ClassSettings,
-  AssignmentDetail,
+  InstructorAssignmentDetail, // <-- gunakan alias
   PlagiarismAnalysis,
   TransactionHistory,
   TransactionDetail,
@@ -156,8 +158,10 @@ const router = createBrowserRouter([
       { index: true, element: <Navigate to="overview" replace /> },
       { path: "overview", element: <StudentDashboard /> },
       { path: "classes", element: <StudentClasses /> },
+      { path: "classes/:classId/assignments", element: <ClassAssignments /> },
       { path: "join-class", element: <JoinClass /> },
       { path: "assignments", element: <StudentAssignments /> },
+      { path: "assignments/:assignmentId", element: <AssignmentDetail /> },
       { path: "assignments/:id/write", element: <WriteAssignment /> },
       { path: "submissions", element: <StudentSubmissions /> },
       { path: "submissions/:id", element: <SubmissionDetail /> },
@@ -189,7 +193,7 @@ const router = createBrowserRouter([
         path: "classes/:classId/assignments/create",
         element: <CreateAssignment />,
       },
-      { path: "assignments/:assignmentId", element: <AssignmentDetail /> },
+      { path: "assignments/:assignmentId", element: <InstructorAssignmentDetail /> },
       {
         path: "assignments/:assignmentId/analytics",
         element: <AssignmentAnalytics />,

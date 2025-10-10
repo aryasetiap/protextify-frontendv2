@@ -11,3 +11,4 @@ export { default as AssignmentDetail } from "./AssignmentDetail";
 export { default as PlagiarismAnalysis } from "./PlagiarismAnalysis";
 export { default as TransactionHistory } from "./TransactionHistory";
 export { default as TransactionDetail } from "./TransactionDetail";
+export { default as InstructorAssignmentDetail } from "./AssignmentDetail";

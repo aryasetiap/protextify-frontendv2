@@ -17,6 +17,7 @@ import {
   AlertCircle,
   FileText,
   Calendar,
+  BookOpen,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -61,7 +62,8 @@ export default function JoinClass() {
 
   // Format token input (uppercase, max 8 chars)
   const handleTokenChange = (e) => {
-    const value = e.target.value.toUpperCase().slice(0, 8);
+    // Hapus .toUpperCase()
+    const value = e.target.value.trim().slice(0, 8);
     setValue("classToken", value);
 
     // Clear preview when token changes
@@ -444,6 +446,7 @@ function ClassPreview({ classData }) {
                   ? new Date(classData.createdAt).toLocaleDateString("id-ID", {
                       day: "2-digit",
                       month: "short",
+                      year: "numeric", // tambahkan year agar tahun ikut tampil
                     })
                   : "-"}
               </p>
@@ -464,7 +467,7 @@ function ClassPreview({ classData }) {
         {/* Enhanced Success Alert */}
         <Alert variant="success" className="border-green-300 bg-green-100">
           <div className="flex items-start space-x-3">
-            <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+            {/* <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" /> */}
             <div>
               <h4 className="font-semibold text-green-800">
                 Siap untuk bergabung!

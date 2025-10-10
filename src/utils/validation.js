@@ -71,7 +71,10 @@ export const createClassSchema = z.object({
 export const joinClassSchema = z.object({
   classToken: requiredStringSchema
     .length(8, "Token kelas harus 8 karakter")
-    .regex(/^[A-Za-z0-9]+$/, "Token hanya boleh berisi huruf dan angka"),
+    .regex(
+      /^[A-Za-z0-9-]+$/,
+      "Token hanya boleh berisi huruf, angka, dan tanda strip (-)"
+    ),
 });
 
 // Assignment schemas

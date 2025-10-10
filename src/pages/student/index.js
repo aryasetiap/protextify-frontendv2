@@ -9,3 +9,5 @@ export { default as StudentProfile } from "./Profile";
 export { default as SubmissionDetail } from "./SubmissionDetail";
 export { default as PlagiarismReport } from "./PlagiarismReport";
 export { default as StorageHealth } from "./StorageHealth";
+export { default as ClassAssignments } from "./ClassAssignments";
+export { default as AssignmentDetail } from "./AssignmentDetail";
