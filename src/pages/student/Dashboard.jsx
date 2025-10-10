@@ -13,9 +13,9 @@ import {
   FileText,
   Clock,
   CheckCircle,
-  Plus,
   AlertCircle,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import useAuth from "../../hooks/useAuth";
 import { useStudentDashboard } from "../../hooks/useStudentDashboard";
 import { Container, LoadingSpinner, Alert, Button } from "../../components";
@@ -36,7 +36,6 @@ export default function StudentDashboard() {
     recentAssignments,
     activityTimeline,
     refetch,
-    isConnected,
   } = useStudentDashboard();
 
   if (loading) {
@@ -86,12 +85,20 @@ export default function StudentDashboard() {
 
   // Safe fallback untuk arrays
   const safeRecentClasses = Array.isArray(recentClasses) ? recentClasses : [];
-  const safeRecentAssignments = Array.isArray(recentAssignments)
-    ? recentAssignments
-    : [];
   const safeActivityTimeline = Array.isArray(activityTimeline)
     ? activityTimeline
     : [];
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  };
 
   return (
     <Container className="py-8">
@@ -122,24 +129,17 @@ export default function StudentDashboard() {
                 jaga konsistensi belajar.
               </p>
             </div>
-
-            <div className="flex items-center space-x-3">
-              <div
-                className={`flex items-center px-4 py-2 rounded-full backdrop-blur-sm border border-white/20 bg-green-500/20 text-white`}
-              >
-                <div
-                  className={`w-2 h-2 rounded-full mr-2 bg-green-400
-                  } animate-pulse`}
-                ></div>
-                <span className="text-sm font-medium">Online</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
 
       {/* Statistics Cards */}
-      <div className="mb-12">
+      <motion.div
+        className="mb-12"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         <div className="flex items-center mb-6">
           <div className="w-1 h-8 bg-gradient-to-b from-[#23407a] to-[#3b5fa4] rounded-full mr-4"></div>
           <h2 className="text-2xl font-bold text-gray-900">
@@ -185,10 +185,15 @@ export default function StudentDashboard() {
             />
           )}
         </Grid>
-      </div>
+      </motion.div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+      <motion.div
+        className="grid grid-cols-1 xl:grid-cols-12 gap-8"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         <div className="xl:col-span-4">
           <QuickActions stats={safeStats} />
         </div>
@@ -201,37 +206,34 @@ export default function StudentDashboard() {
         <div className="xl:col-span-4">
           <ActivityTimeline submissions={safeActivityTimeline} />
         </div>
-      </div>
+      </motion.div>
     </Container>
   );
 }
 
-// Stat Card Component
-function StatCard({ title, value, icon: Icon, color, gradient }) {
-  const colorClasses = {
-    blue: "bg-blue-100 text-blue-600",
-    yellow: "bg-yellow-100 text-yellow-600",
-    green: "bg-green-100 text-green-600",
-    purple: "bg-purple-100 text-purple-600",
-    red: "bg-red-100 text-red-600",
-    gray: "bg-gray-100 text-gray-600",
+// Modernized Stat Card Component
+function StatCard({ title, value, icon: Icon, gradient }) {
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1 },
   };
 
   return (
-    <div className="transition-all duration-300 hover:scale-105">
-      <div
-        className={`p-6 rounded-2xl shadow-lg flex items-center bg-white border border-gray-100`}
-      >
+    <motion.div
+      variants={itemVariants}
+      className="transition-all duration-300 hover:scale-105"
+    >
+      <div className="p-6 rounded-2xl shadow-lg flex items-center bg-white border border-gray-100 hover:shadow-2xl">
         <div
-          className={`p-2 rounded-lg ${colorClasses[color]} bg-gradient-to-r ${gradient} mr-4`}
+          className={`p-3 rounded-xl bg-gradient-to-r ${gradient} mr-5 shadow-md`}
         >
-          <Icon className="h-6 w-6 text-white" />
+          <Icon className="h-7 w-7 text-white" />
         </div>
         <div>
           <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-2xl font-bold text-gray-900">{value}</p>
+          <p className="text-3xl font-bold text-gray-900">{value}</p>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

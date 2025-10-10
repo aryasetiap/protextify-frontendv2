@@ -5,7 +5,7 @@
  * - Hanya assignment yang dikirim BE yang ditampilkan. Tidak render fitur/field yang tidak ada di response.
  */
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Container,
@@ -24,105 +24,147 @@ import {
   Badge,
 } from "../../components";
 import { assignmentsService, submissionsService } from "../../services";
+import { useAsyncData } from "../../hooks/useAsyncData";
 import { formatDate } from "../../utils/helpers";
-import { FileText, Clock, CheckCircle, Star } from "lucide-react";
+import {
+  FileText,
+  Clock,
+  CheckCircle,
+  Star,
+  Calendar,
+  BookOpen,
+  Eye,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function StudentAssignments() {
   const navigate = useNavigate();
-  const [assignments, setAssignments] = useState([]);
-  const [submissions, setSubmissions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("not_submitted");
 
-  // Fetch assignments & submissions
-  const fetchAssignments = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [assignmentsData, submissionsData] = await Promise.all([
-        assignmentsService.getRecentAssignments(10),
-        submissionsService.getHistory(),
-      ]);
-      setAssignments(Array.isArray(assignmentsData) ? assignmentsData : []);
-      setSubmissions(Array.isArray(submissionsData) ? submissionsData : []);
-    } catch (err) {
-      setError({
-        statusCode: err?.response?.data?.statusCode || err?.statusCode || 400,
-        message:
-          err?.response?.data?.message ||
-          err?.message ||
-          "Gagal memuat daftar tugas",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAssignments();
+  const {
+    data,
+    loading,
+    error,
+    refetch: fetchAssignments,
+  } = useAsyncData(async () => {
+    const [assignmentsData, submissionsData] = await Promise.all([
+      assignmentsService.getRecentAssignments(20), // Increased limit
+      submissionsService.getHistory(),
+    ]);
+    return {
+      assignments: Array.isArray(assignmentsData) ? assignmentsData : [],
+      submissions: Array.isArray(submissionsData) ? submissionsData : [],
+    };
   }, []);
 
-  // Helper untuk status dan grade
-  const getSubmissionInfo = (assignmentId) => {
-    const submission = submissions.find((s) => s.assignmentId === assignmentId);
-    if (!submission) return { status: "not_submitted", grade: null };
-    if (submission.status === "SUBMITTED")
-      return { status: "submitted", grade: submission.grade ?? null };
-    if (submission.status === "GRADED")
-      return { status: "graded", grade: submission.grade ?? null };
-    return { status: "draft", grade: null };
+  const { assignments, submissions } = data || {
+    assignments: [],
+    submissions: [],
   };
 
-  // Filter assignments by tab
-  const assignmentsWithStatus = assignments.map((assignment) => {
-    const info = getSubmissionInfo(assignment.id);
-    return { ...assignment, ...info };
-  });
+  // Memoize the processed assignments to avoid re-calculation on re-render
+  const processedAssignments = useMemo(() => {
+    const getSubmissionInfo = (assignmentId) => {
+      const submission = submissions.find(
+        (s) => s.assignmentId === assignmentId
+      );
+      if (!submission) return { status: "not_submitted", grade: null };
+      if (submission.status === "GRADED")
+        return { status: "graded", grade: submission.grade ?? null };
+      if (submission.status === "SUBMITTED")
+        return { status: "submitted", grade: submission.grade ?? null };
+      return { status: "draft", grade: null };
+    };
 
-  const notSubmitted = assignmentsWithStatus.filter(
+    return assignments.map((assignment) => {
+      const info = getSubmissionInfo(assignment.id);
+      return { ...assignment, ...info };
+    });
+  }, [assignments, submissions]);
+
+  const notSubmitted = processedAssignments.filter(
     (a) => a.status === "not_submitted" || a.status === "draft"
   );
-  const submitted = assignmentsWithStatus.filter(
+  const submitted = processedAssignments.filter(
     (a) => a.status === "submitted"
   );
-  const graded = assignmentsWithStatus.filter((a) => a.status === "graded");
+  const graded = processedAssignments.filter((a) => a.status === "graded");
 
-  // Badge status
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (status, grade) => {
     switch (status) {
       case "not_submitted":
         return (
-          <Badge color="yellow" className="flex items-center gap-1 w-max">
-            <Clock className="h-3 w-3" />
-            Belum Dikerjakan
+          <Badge color="yellow" className="flex items-center gap-1.5">
+            <Clock className="h-3 w-3" /> Belum Dikerjakan
           </Badge>
         );
       case "draft":
         return (
-          <Badge color="gray" className="flex items-center gap-1 w-max">
-            <Clock className="h-3 w-3" />
-            Draft
+          <Badge color="gray" className="flex items-center gap-1.5">
+            <Clock className="h-3 w-3" /> Draft
           </Badge>
         );
       case "submitted":
         return (
-          <Badge color="blue" className="flex items-center gap-1 w-max">
-            <CheckCircle className="h-3 w-3" />
-            Sudah Submit
+          <Badge color="blue" className="flex items-center gap-1.5">
+            <CheckCircle className="h-3 w-3" /> Menunggu Penilaian
           </Badge>
         );
       case "graded":
         return (
-          <Badge color="green" className="flex items-center gap-1 w-max">
-            <Star className="h-3 w-3" />
-            Sudah Dinilai
+          <Badge color="green" className="flex items-center gap-1.5">
+            <Star className="h-3 w-3" /> Dinilai: {grade}
           </Badge>
         );
       default:
         return null;
     }
+  };
+
+  const renderContent = (assignmentList) => {
+    if (assignmentList.length === 0) {
+      const messages = {
+        not_submitted: {
+          title: "Tidak Ada Tugas Aktif",
+          description: "Semua tugas sudah Anda kerjakan atau kumpulkan.",
+        },
+        submitted: {
+          title: "Tidak Ada Tugas Menunggu Penilaian",
+          description:
+            "Tugas yang sudah dinilai akan pindah ke tab 'Sudah Dinilai'.",
+        },
+        graded: {
+          title: "Belum Ada Tugas yang Dinilai",
+          description:
+            "Tugas yang sudah dinilai oleh instruktur akan muncul di sini.",
+        },
+      };
+      const message = messages[activeTab];
+      return (
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-gray-50 to-blue-50/30">
+          <CardContent className="text-center py-20 px-6">
+            <FileText className="h-12 w-12 text-[#23407a] mx-auto mb-6" />
+            <h3 className="text-2xl font-bold text-gray-900 mb-3">
+              {message.title}
+            </h3>
+            <p className="text-gray-600 mb-8 max-w-md mx-auto leading-relaxed">
+              {message.description}
+            </p>
+          </CardContent>
+        </Card>
+      );
+    }
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+        {assignmentList.map((assignment) => (
+          <AssignmentCard
+            key={assignment.id}
+            assignment={assignment}
+            statusBadge={getStatusBadge(assignment.status, assignment.grade)}
+          />
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -152,10 +194,8 @@ export default function StudentAssignments() {
         </div>
       </div>
 
-      {/* Breadcrumb */}
       <Breadcrumb />
 
-      {/* Loading/Error State */}
       {loading ? (
         <div className="flex justify-center py-12">
           <LoadingSpinner size="lg" />
@@ -169,245 +209,124 @@ export default function StudentAssignments() {
         </Alert>
       ) : (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-2">
-          <TabsList className="mb-6 flex gap-2 bg-gray-50 rounded-xl p-2 shadow">
-            <TabsTrigger
-              value="not_submitted"
-              className="flex items-center gap-2"
-            >
-              <Clock className="h-4 w-4" />
-              Belum Dikerjakan
-              <span className="ml-2 text-xs bg-gray-200 rounded px-2 py-0.5">
-                {notSubmitted.length}
-              </span>
-            </TabsTrigger>
-            <TabsTrigger value="submitted" className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4" />
-              Sudah Submit
-              <span className="ml-2 text-xs bg-gray-200 rounded px-2 py-0.5">
-                {submitted.length}
-              </span>
-            </TabsTrigger>
-            <TabsTrigger value="graded" className="flex items-center gap-2">
-              <Star className="h-4 w-4" />
-              Sudah Dinilai
-              <span className="ml-2 text-xs bg-gray-200 rounded px-2 py-0.5">
-                {graded.length}
-              </span>
-            </TabsTrigger>
+          <TabsList className="mb-8 grid w-full grid-cols-3 gap-2 rounded-xl bg-gray-100 p-2 shadow-inner">
+            {[
+              {
+                value: "not_submitted",
+                label: "Belum Dikerjakan",
+                count: notSubmitted.length,
+                icon: Clock,
+              },
+              {
+                value: "submitted",
+                label: "Menunggu Nilai",
+                count: submitted.length,
+                icon: CheckCircle,
+              },
+              {
+                value: "graded",
+                label: "Sudah Dinilai",
+                count: graded.length,
+                icon: Star,
+              },
+            ].map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className="flex items-center gap-2"
+              >
+                <tab.icon className="h-4 w-4" />
+                {tab.label}
+                <span className="ml-2 text-xs bg-gray-200 data-[state=active]:bg-white/30 rounded px-2 py-0.5">
+                  {tab.count}
+                </span>
+              </TabsTrigger>
+            ))}
           </TabsList>
 
-          {/* Belum Dikerjakan */}
-          <TabsContent value="not_submitted">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key="not_submitted"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -16 }}
-                transition={{ duration: 0.25 }}
-              >
-                {notSubmitted.length === 0 ? (
-                  <Card className="border-0 shadow-lg bg-gradient-to-br from-gray-50 to-blue-50/30">
-                    <CardContent className="text-center py-16">
-                      <FileText className="h-12 w-12 text-[#23407a] mx-auto mb-6" />
-                      <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                        Tidak ada tugas yang belum dikerjakan
-                      </h3>
-                      <p className="text-gray-600 mb-8 max-w-md mx-auto leading-relaxed">
-                        Semua tugas sudah Anda kerjakan atau dikumpulkan.
-                      </p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                    {notSubmitted.map((assignment) => (
-                      <AssignmentCard
-                        key={assignment.id}
-                        assignment={assignment}
-                        statusBadge={getStatusBadge(assignment.status)}
-                        submissionGrade={assignment.grade}
-                        onKerjakan={() =>
-                          navigate(
-                            `/dashboard/assignments/${assignment.id}/write`
-                          )
-                        }
-                      />
-                    ))}
-                  </div>
-                )}
-              </motion.div>
-            </AnimatePresence>
-          </TabsContent>
-
-          {/* Sudah Submit */}
-          <TabsContent value="submitted">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key="submitted"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -16 }}
-                transition={{ duration: 0.25 }}
-              >
-                {submitted.length === 0 ? (
-                  <Card className="border-0 shadow-lg bg-gradient-to-br from-gray-50 to-blue-50/30">
-                    <CardContent className="text-center py-16">
-                      <FileText className="h-12 w-12 text-[#23407a] mx-auto mb-6" />
-                      <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                        Tidak ada tugas yang menunggu penilaian
-                      </h3>
-                      <p className="text-gray-600 mb-8 max-w-md mx-auto leading-relaxed">
-                        Semua tugas sudah dinilai atau belum dikumpulkan.
-                      </p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                    {submitted.map((assignment) => (
-                      <AssignmentCard
-                        key={assignment.id}
-                        assignment={assignment}
-                        statusBadge={getStatusBadge(assignment.status)}
-                        submissionGrade={assignment.grade}
-                        onKerjakan={() =>
-                          navigate(
-                            `/dashboard/assignments/${assignment.id}/write`
-                          )
-                        }
-                      />
-                    ))}
-                  </div>
-                )}
-              </motion.div>
-            </AnimatePresence>
-          </TabsContent>
-
-          {/* Sudah Dinilai */}
-          <TabsContent value="graded">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key="graded"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -16 }}
-                transition={{ duration: 0.25 }}
-              >
-                {graded.length === 0 ? (
-                  <Card className="border-0 shadow-lg bg-gradient-to-br from-gray-50 to-blue-50/30">
-                    <CardContent className="text-center py-16">
-                      <FileText className="h-12 w-12 text-[#23407a] mx-auto mb-6" />
-                      <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                        Tidak ada tugas yang sudah dinilai
-                      </h3>
-                      <p className="text-gray-600 mb-8 max-w-md mx-auto leading-relaxed">
-                        Tugas yang sudah dinilai akan muncul di sini.
-                      </p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                    {graded.map((assignment) => (
-                      <AssignmentCard
-                        key={assignment.id}
-                        assignment={assignment}
-                        statusBadge={getStatusBadge(assignment.status)}
-                        submissionGrade={assignment.grade}
-                        onKerjakan={() =>
-                          navigate(
-                            `/dashboard/assignments/${assignment.id}/write`
-                          )
-                        }
-                      />
-                    ))}
-                  </div>
-                )}
-              </motion.div>
-            </AnimatePresence>
-          </TabsContent>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <TabsContent value="not_submitted">
+                {renderContent(notSubmitted)}
+              </TabsContent>
+              <TabsContent value="submitted">
+                {renderContent(submitted)}
+              </TabsContent>
+              <TabsContent value="graded">{renderContent(graded)}</TabsContent>
+            </motion.div>
+          </AnimatePresence>
         </Tabs>
       )}
     </Container>
   );
 }
 
-// AssignmentCard Component
-function AssignmentCard({
-  assignment,
-  statusBadge,
-  submissionGrade,
-  onKerjakan,
-}) {
+// Modernized AssignmentCard Component
+function AssignmentCard({ assignment, statusBadge }) {
   const navigate = useNavigate();
-  // Disable tombol "Kerjakan" jika status sudah submitted/graded
-  const disableKerjakan =
-    assignment.status === "submitted" || assignment.status === "graded";
+  const canWorkOn =
+    assignment.status === "not_submitted" || assignment.status === "draft";
+
   return (
-    <Card className="group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-gradient-to-br from-white to-blue-50/30">
-      <CardHeader className="relative z-10 pb-4">
-        <div className="flex items-start justify-between">
-          <div className="flex-1 min-w-0">
-            <CardTitle className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[#23407a] transition-colors truncate">
-              {assignment.title}
-            </CardTitle>
-            <p className="text-sm text-gray-600 mb-1">
-              Kelas: {assignment.class?.name || "-"}
-            </p>
-            <p className="text-sm text-gray-600 mb-1">
-              Deadline: {formatDate(assignment.deadline)}
-            </p>
-            <p className="text-sm text-gray-600 mb-1">
-              Status:{" "}
-              {assignment.active ? (
-                <span className="text-green-600 font-medium">Aktif</span>
-              ) : (
-                <span className="text-gray-500 font-medium">Tidak Aktif</span>
-              )}
-            </p>
-            <p className="text-sm text-gray-600 mb-1">
-              Jumlah Submission: {assignment._count?.submissions || 0}
-            </p>
-            <div className="mb-2">{statusBadge}</div>
-            {typeof submissionGrade === "number" && (
-              <p className="text-sm text-gray-600 mb-1">
-                Nilai:{" "}
-                <span className="font-bold text-green-700">
-                  {submissionGrade}
-                </span>
-              </p>
-            )}
-          </div>
+    <Card className="group relative flex flex-col overflow-hidden rounded-2xl border-0 shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-2">
+      <div className="absolute inset-0 bg-gradient-to-br from-white via-gray-50 to-blue-50"></div>
+
+      <CardHeader className="relative z-10 border-b border-gray-200/80 bg-white/50 backdrop-blur-sm">
+        <div className="flex items-center gap-2 text-sm font-medium text-gray-600 mb-2">
+          <BookOpen className="h-4 w-4 text-[#23407a]" />
+          <span className="truncate">{assignment.class?.name || "Kelas"}</span>
         </div>
+        <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-[#23407a] transition-colors truncate">
+          {assignment.title}
+        </CardTitle>
       </CardHeader>
-      <CardContent className="relative z-10 flex justify-end gap-2">
-        <Button
-          size="sm"
-          variant="outline"
-          className="border-[#23407a] text-[#23407a] hover:bg-[#23407a]/10"
-          onClick={() => navigate(`/dashboard/assignments/${assignment.id}`)}
-          aria-label={`Lihat Detail ${assignment.title}`}
-        >
-          Lihat Detail
-        </Button>
-        {assignment.active && (
+
+      <CardContent className="relative z-10 flex flex-1 flex-col p-6">
+        <div className="flex-1 space-y-4">
+          <div className="flex items-center text-sm text-red-600">
+            <Calendar className="h-4 w-4 mr-2" />
+            <span className="font-medium">
+              Deadline: {formatDate(assignment.deadline)}
+            </span>
+          </div>
+          <div>{statusBadge}</div>
+        </div>
+
+        <div className="mt-6 pt-5 border-t border-gray-200/80 flex gap-3">
           <Button
             size="sm"
-            className="bg-[#23407a] hover:bg-[#1a2f5c] shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-            onClick={() => {
-              if (!disableKerjakan) {
-                onKerjakan();
-              }
-            }}
-            aria-label={`Kerjakan ${assignment.title}`}
-            disabled={disableKerjakan}
-            title={
-              disableKerjakan
-                ? "Tugas sudah dikumpulkan/dinilai, tidak bisa diedit lagi"
-                : undefined
-            }
+            variant="outline"
+            className="flex-1 border-gray-300 text-gray-800 hover:bg-gray-100 hover:border-gray-400"
+            onClick={() => navigate(`/dashboard/assignments/${assignment.id}`)}
           >
-            Kerjakan
+            <Eye className="h-4 w-4 mr-2" />
+            Detail
           </Button>
-        )}
+          {assignment.active && (
+            <Button
+              size="sm"
+              className="flex-1 bg-[#23407a] hover:bg-[#1a2f5c] text-white shadow-md hover:shadow-lg disabled:bg-gray-300 disabled:shadow-none disabled:cursor-not-allowed"
+              onClick={() =>
+                canWorkOn &&
+                navigate(`/dashboard/assignments/${assignment.id}/write`)
+              }
+              disabled={!canWorkOn}
+              title={
+                !canWorkOn
+                  ? "Tugas sudah dikumpulkan/dinilai"
+                  : "Kerjakan Tugas"
+              }
+            >
+              {canWorkOn ? "Kerjakan" : "Lihat Hasil"}
+            </Button>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

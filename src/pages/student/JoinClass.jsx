@@ -2,7 +2,7 @@
  * Mapping utama:
  * - classesService.previewClass(classToken) -> preview kelas (id, name, description, instructor, studentsCount, assignmentsCount, createdAt)
  * - classesService.joinClass(classToken) -> { message, class }
- * - Tidak render data/fitur yang tidak dikirim BE.
+ * - Tidak render data/fitur yang tidak ada di response BE.
  */
 
 import { useState } from "react";
@@ -20,6 +20,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 import {
   Container,
@@ -31,7 +32,6 @@ import {
   Input,
   Alert,
   Breadcrumb,
-  LoadingSpinner,
 } from "../../components";
 import { classesService } from "../../services";
 import { joinClassSchema } from "../../utils/validation";
@@ -185,23 +185,6 @@ export default function JoinClass() {
       {/* Breadcrumb - moved after header */}
       <Breadcrumb />
 
-      {/* Header */}
-      <div className="flex items-center mb-6">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate("/dashboard")}
-          className="mr-4"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Kembali
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Gabung Kelas</h1>
-          <p className="text-gray-600">Masukkan token kelas untuk bergabung</p>
-        </div>
-      </div>
-
       <div className="max-w-4xl mx-auto">
         {/* Enhanced Join Form */}
         <Card className="mb-8 border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 relative overflow-hidden">
@@ -319,7 +302,11 @@ export default function JoinClass() {
         </Card>
 
         {/* Class Preview */}
-        {showPreview && previewData && <ClassPreview classData={previewData} />}
+        <AnimatePresence>
+          {showPreview && previewData && (
+            <ClassPreview classData={previewData} />
+          )}
+        </AnimatePresence>
 
         {/* Enhanced Info Box */}
         <Card className="border-0 shadow-lg bg-gradient-to-r from-blue-50 to-indigo-50">
@@ -381,106 +368,107 @@ export default function JoinClass() {
 // Class Preview Component
 function ClassPreview({ classData }) {
   return (
-    <Card className="mb-8 border-0 shadow-2xl relative overflow-hidden bg-gradient-to-br from-green-50 to-emerald-50">
-      {/* Success indicator */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 to-emerald-600"></div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Card className="mb-8 border-0 shadow-2xl relative overflow-hidden bg-gradient-to-br from-green-50 to-emerald-50">
+        {/* Success indicator */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 to-emerald-600"></div>
 
-      <CardHeader className="pb-4">
-        <div className="flex items-center space-x-4">
-          <div className="p-3 bg-green-500 rounded-2xl shadow-lg">
-            <CheckCircle className="h-8 w-8 text-white" />
-          </div>
-          <div>
-            <CardTitle className="text-2xl font-bold text-green-800 flex items-center">
-              Kelas Ditemukan!
-            </CardTitle>
-            <p className="text-green-700 mt-1">
-              Preview informasi kelas sebelum bergabung
-            </p>
-          </div>
-        </div>
-      </CardHeader>
-
-      <CardContent className="space-y-6">
-        {/* Enhanced Class Info */}
-        <div className="bg-white rounded-2xl p-6 border border-green-200/50 shadow-lg">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                {classData.name}
-              </h3>
-              {classData.description && (
-                <p className="text-gray-600 leading-relaxed mb-4">
-                  {classData.description}
-                </p>
-              )}
+        <CardHeader className="pb-4">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-green-500 rounded-2xl shadow-lg">
+              <CheckCircle className="h-8 w-8 text-white" />
             </div>
-          </div>
-
-          {/* Enhanced Stats Grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl border border-blue-200/50">
-              <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-2">
-                <Users className="h-5 w-5 text-white" />
-              </div>
-              <p className="text-2xl font-bold text-gray-900">
-                {classData.studentsCount ?? 0}
-              </p>
-              <p className="text-xs text-gray-600 font-medium">Siswa</p>
-            </div>
-            <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-xl border border-purple-200/50">
-              <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mx-auto mb-2">
-                <FileText className="h-5 w-5 text-white" />
-              </div>
-              <p className="text-2xl font-bold text-gray-900">
-                {classData.assignmentsCount ?? 0}
-              </p>
-              <p className="text-xs text-gray-600 font-medium">Tugas</p>
-            </div>
-            <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100/50 rounded-xl border border-green-200/50">
-              <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-2">
-                <Calendar className="h-5 w-5 text-white" />
-              </div>
-              <p className="text-xs font-bold text-gray-900">
-                {classData.createdAt
-                  ? new Date(classData.createdAt).toLocaleDateString("id-ID", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric", // tambahkan year agar tahun ikut tampil
-                    })
-                  : "-"}
-              </p>
-              <p className="text-xs text-gray-600 font-medium">Dibuat</p>
-            </div>
-            <div className="text-center p-4 bg-gradient-to-br from-yellow-50 to-yellow-100/50 rounded-xl border border-yellow-200/50">
-              <div className="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center mx-auto mb-2">
-                <BookOpen className="h-5 w-5 text-white" />
-              </div>
-              <p className="text-sm font-bold text-gray-900 truncate">
-                {classData.instructor?.fullName || "Instruktur"}
-              </p>
-              <p className="text-xs text-gray-600 font-medium">Pengajar</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Enhanced Success Alert */}
-        <Alert variant="success" className="border-green-300 bg-green-100">
-          <div className="flex items-start space-x-3">
-            {/* <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" /> */}
             <div>
-              <h4 className="font-semibold text-green-800">
-                Siap untuk bergabung!
-              </h4>
-              <p className="text-green-700 text-sm mt-1">
-                Kelas ini tersedia dan Anda dapat bergabung sekarang. Klik
-                tombol "Gabung Kelas Sekarang" untuk mulai mengikuti kelas dan
-                mengakses semua tugas yang tersedia.
+              <CardTitle className="text-2xl font-bold text-green-800 flex items-center">
+                Kelas Ditemukan!
+              </CardTitle>
+              <p className="text-green-700 mt-1">
+                Preview informasi kelas sebelum bergabung
               </p>
             </div>
           </div>
-        </Alert>
-      </CardContent>
-    </Card>
+        </CardHeader>
+
+        <CardContent className="space-y-6">
+          {/* Enhanced Class Info */}
+          <div className="bg-white rounded-2xl p-6 border border-green-200/50 shadow-lg">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                  {classData.name}
+                </h3>
+                {classData.description && (
+                  <p className="text-gray-600 leading-relaxed mb-4">
+                    {classData.description}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Enhanced Stats Grid */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl border border-blue-200/50">
+                <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-2">
+                  <Users className="h-5 w-5 text-white" />
+                </div>
+                <p className="text-2xl font-bold text-gray-900">
+                  {classData.studentsCount ?? 0}
+                </p>
+                <p className="text-xs text-gray-600 font-medium">Siswa</p>
+              </div>
+              <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-xl border border-purple-200/50">
+                <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mx-auto mb-2">
+                  <FileText className="h-5 w-5 text-white" />
+                </div>
+                <p className="text-2xl font-bold text-gray-900">
+                  {classData.assignmentsCount ?? 0}
+                </p>
+                <p className="text-xs text-gray-600 font-medium">Tugas</p>
+              </div>
+              <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100/50 rounded-xl border border-green-200/50">
+                <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-2">
+                  <Calendar className="h-5 w-5 text-white" />
+                </div>
+                <p className="text-xs font-bold text-gray-900">
+                  {formatDate(classData.createdAt, "dd MMM yyyy")}
+                </p>
+                <p className="text-xs text-gray-600 font-medium">Dibuat</p>
+              </div>
+              <div className="text-center p-4 bg-gradient-to-br from-yellow-50 to-yellow-100/50 rounded-xl border border-yellow-200/50">
+                <div className="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center mx-auto mb-2">
+                  <BookOpen className="h-5 w-5 text-white" />
+                </div>
+                <p className="text-sm font-bold text-gray-900 truncate">
+                  {classData.instructor?.fullName || "Instruktur"}
+                </p>
+                <p className="text-xs text-gray-600 font-medium">Pengajar</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Enhanced Success Alert */}
+          <Alert variant="success" className="border-green-300 bg-green-100">
+            <div className="flex items-start space-x-3">
+              {/* <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" /> */}
+              <div>
+                <h4 className="font-semibold text-green-800">
+                  Siap untuk bergabung!
+                </h4>
+                <p className="text-green-700 text-sm mt-1">
+                  Kelas ini tersedia dan Anda dapat bergabung sekarang. Klik
+                  tombol "Gabung Kelas Sekarang" untuk mulai mengikuti kelas dan
+                  mengakses semua tugas yang tersedia.
+                </p>
+              </div>
+            </div>
+          </Alert>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
