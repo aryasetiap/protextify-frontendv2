@@ -13,6 +13,8 @@ import {
   Breadcrumb,
   LoadingSpinner,
   Alert,
+  Button,
+  Modal,
 } from "../../components";
 
 import RichTextEditor from "../../components/forms/RichTextEditor";
@@ -45,6 +47,7 @@ export default function WriteAssignment() {
   const [submitting, setSubmitting] = useState(false);
   const [editorReady, setEditorReady] = useState(false);
   const [contentInitialized, setContentInitialized] = useState(false);
+  const [showSubmitModal, setShowSubmitModal] = useState(false); // 1. Tambahkan state modal di sini
 
   // Load assignment data
   useEffect(() => {
@@ -190,8 +193,9 @@ export default function WriteAssignment() {
   const handleSave = async () => {
     if (!localSubmissionId) return;
 
-    // Tambahkan validasi di sini untuk mencegah simpan draft kosong
-    if (content.trim() === "") {
+    // Perbaikan: Ubah validasi untuk memeriksa plain text, bukan HTML mentah.
+    const plainText = content.replace(/<[^>]*>/g, "").trim();
+    if (plainText === "") {
       toast.error("Tidak bisa menyimpan draft kosong.");
       return;
     }
@@ -221,7 +225,7 @@ export default function WriteAssignment() {
       toast.error(
         "Submission tidak bisa dikumpulkan. Pastikan draft sudah diisi."
       );
-      return;
+      return Promise.reject(new Error("Submission tidak bisa dikumpulkan")); // Return rejected promise
     }
     setSubmitting(true);
     try {
@@ -234,8 +238,19 @@ export default function WriteAssignment() {
       navigate(`/dashboard/classes/${assignment?.classId}`);
     } catch (error) {
       toast.error("Gagal mengumpulkan tugas");
+      throw error; // Re-throw error for the modal handler
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  // 2. Buat handler untuk konfirmasi dari modal
+  const handleConfirmSubmit = async () => {
+    try {
+      await handleSubmit();
+      setShowSubmitModal(false); // Tutup modal jika sukses
+    } catch (error) {
+      // Jangan tutup modal jika gagal, agar pengguna tahu ada masalah
     }
   };
 
@@ -301,7 +316,7 @@ export default function WriteAssignment() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Modern Header */}
-      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-200 shadow-sm">
+      <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-lg border-b border-gray-200 shadow-sm">
         <Container className="py-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex items-center gap-4 flex-wrap">
@@ -390,7 +405,7 @@ export default function WriteAssignment() {
                 <RichTextEditor
                   ref={editorRef}
                   key={localSubmissionId}
-                  value={initialContent}
+                  value={content}
                   onChange={handleContentChange}
                   onEditorReady={handleEditorReady}
                   disabled={submission.status !== "DRAFT"}
@@ -489,7 +504,7 @@ export default function WriteAssignment() {
             saving={saving}
             submitting={submitting}
             onSave={handleSave}
-            onSubmit={handleSubmit}
+            onSubmit={() => setShowSubmitModal(true)} // 3. Ubah prop onSubmit untuk memicu modal
             onRefresh={() => {
               if (localSubmissionId) {
                 submissionsService
@@ -501,6 +516,50 @@ export default function WriteAssignment() {
           />
         </Container>
       </div>
+
+      {/* 4. Render Modal di sini, di luar container sticky */}
+      <Modal
+        isOpen={showSubmitModal}
+        onClose={() => setShowSubmitModal(false)}
+        title="Konfirmasi Pengumpulan"
+      >
+        <div className="space-y-4">
+          <Alert variant="warning">
+            <AlertCircle className="h-4 w-4" />
+            <div>
+              <strong>Perhatian!</strong>
+              <p className="mt-1">
+                Setelah dikumpulkan, Anda tidak dapat lagi mengedit jawaban.
+                Pastikan jawaban sudah sesuai sebelum mengumpulkan.
+              </p>
+            </div>
+          </Alert>
+
+          {validation.warnings.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="font-medium text-gray-900">Peringatan:</h4>
+              <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
+                {validation.warnings.map((warning, index) => (
+                  <li key={index}>{warning}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="flex justify-end space-x-3">
+            <Button
+              variant="outline"
+              onClick={() => setShowSubmitModal(false)}
+              disabled={submitting}
+            >
+              Batal
+            </Button>
+            <Button onClick={handleConfirmSubmit} loading={submitting}>
+              Ya, Kumpulkan
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

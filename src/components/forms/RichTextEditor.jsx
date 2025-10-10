@@ -321,11 +321,6 @@ const RichTextEditor = forwardRef(
 
       // CRITICAL: Only call onChange if we're not preventing it during initialization
       if (!preventOnChangeRef.current && initialContentProcessed) {
-        console.log(
-          "[RichTextEditor] onChange called:",
-          html.substring(0, 50) + "..."
-        );
-
         if (onChange) {
           onChange(html);
         }
@@ -355,10 +350,6 @@ const RichTextEditor = forwardRef(
               });
           }, autoSaveInterval);
         }
-      } else {
-        console.log(
-          "[RichTextEditor] onChange prevented during initialization"
-        );
       }
 
       // Limit checks (always run)
@@ -372,9 +363,9 @@ const RichTextEditor = forwardRef(
 
     // Set initial content when editor is ready
     useEffect(() => {
-      if (editor && value && !isInitialized) {
-        console.log("[RichTextEditor] Setting initial content:", value);
-
+      // PERBAIKAN: Ubah kondisi `value` menjadi `value !== undefined`
+      // Ini memastikan inisialisasi berjalan bahkan jika konten awal adalah string kosong.
+      if (editor && value !== undefined && !isInitialized) {
         // Prevent onChange during initialization
         preventOnChangeRef.current = true;
 
@@ -388,7 +379,6 @@ const RichTextEditor = forwardRef(
         setTimeout(() => {
           preventOnChangeRef.current = false;
           setInitialContentProcessed(true);
-          console.log("[RichTextEditor] Initial content processing completed");
 
           // Call onEditorReady callback
           if (onEditorReady) {
