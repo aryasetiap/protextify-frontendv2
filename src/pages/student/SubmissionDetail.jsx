@@ -75,7 +75,7 @@ export default function SubmissionDetail() {
 
   // Navigate to plagiarism report page
   const handleViewPlagiarismReport = () => {
-    navigate(`/dashboard/plagiarism-report/${submissionId}`);
+    navigate(`/dashboard/submissions/${submissionId}/plagiarism-report`);
   };
 
   // Loading state
