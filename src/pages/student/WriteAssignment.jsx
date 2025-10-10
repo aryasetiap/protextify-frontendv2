@@ -250,7 +250,8 @@ export default function WriteAssignment() {
   const handleRemoveCitation = (index) =>
     setCitations(citations.filter((_, i) => i !== index));
   const handleInsertCitation = (citationText) => {
-    if (editorRef.current) editorRef.current.insertText(`(${citationText})`);
+    // Sisipkan teks sitasi lengkap tanpa tanda kurung, tambahkan spasi di akhir.
+    if (editorRef.current) editorRef.current.insertText(`${citationText} `);
   };
 
   // Suspicious activity handler
