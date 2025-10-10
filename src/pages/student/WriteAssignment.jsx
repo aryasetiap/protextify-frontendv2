@@ -454,10 +454,27 @@ export default function WriteAssignment() {
               <CardContent>
                 <CitationManager
                   citations={citations}
-                  onAdd={handleAddCitation}
-                  onEdit={handleEditCitation}
-                  onRemove={handleRemoveCitation}
-                  onInsert={handleInsertCitation}
+                  onAdd={
+                    submission.status === "DRAFT"
+                      ? handleAddCitation
+                      : undefined
+                  }
+                  onEdit={
+                    submission.status === "DRAFT"
+                      ? handleEditCitation
+                      : undefined
+                  }
+                  onRemove={
+                    submission.status === "DRAFT"
+                      ? handleRemoveCitation
+                      : undefined
+                  }
+                  onInsert={
+                    submission.status === "DRAFT"
+                      ? handleInsertCitation
+                      : undefined
+                  }
+                  disabled={submission.status !== "DRAFT"}
                 />
               </CardContent>
             </Card>

@@ -281,26 +281,43 @@ export default function AssignmentDetail() {
             <span className="text-gray-700">{submissionSubmittedAt}</span>
           </div>
           <div className="flex gap-3 mt-4">
-            <Button
-              size="lg"
-              className="bg-[#23407a] hover:bg-[#1a2f5c] shadow-lg hover:shadow-xl transition-all duration-300"
-              onClick={() =>
-                navigate(`/dashboard/assignments/${assignment.id}/write`)
-              }
-              aria-label={submission ? "Edit Pengumpulan" : "Upload Tugas"}
-            >
-              {submission ? (
-                <>
-                  <Edit className="h-5 w-5 mr-2" />
-                  Edit Pengumpulan
-                </>
-              ) : (
-                <>
-                  <Upload className="h-5 w-5 mr-2" />
-                  Upload Tugas
-                </>
+            {/* Tombol hanya muncul & aktif jika submission belum dikumpulkan (DRAFT) */}
+            {(!submission || submission.status === "DRAFT") && (
+              <Button
+                size="lg"
+                className="bg-[#23407a] hover:bg-[#1a2f5c] shadow-lg hover:shadow-xl transition-all duration-300"
+                onClick={() =>
+                  navigate(`/dashboard/assignments/${assignment.id}/write`)
+                }
+                aria-label={submission ? "Edit Pengumpulan" : "Upload Tugas"}
+              >
+                {submission ? (
+                  <>
+                    <Edit className="h-5 w-5 mr-2" />
+                    Edit Pengumpulan
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-5 w-5 mr-2" />
+                    Upload Tugas
+                  </>
+                )}
+              </Button>
+            )}
+            {/* Jika sudah SUBMITTED/GRADED, tampilkan info non-editable */}
+            {submission &&
+              (submission.status === "SUBMITTED" ||
+                submission.status === "GRADED") && (
+                <Button
+                  size="lg"
+                  disabled
+                  className="bg-gray-300 text-gray-600 cursor-not-allowed"
+                  aria-label="Pengumpulan sudah dikunci"
+                >
+                  <CheckCircle className="h-5 w-5 mr-2" />
+                  Pengumpulan Terkunci
+                </Button>
               )}
-            </Button>
           </div>
         </CardContent>
       </Card>

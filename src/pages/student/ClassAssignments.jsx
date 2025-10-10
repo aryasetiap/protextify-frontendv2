@@ -78,6 +78,14 @@ export default function ClassAssignments() {
   const instructorName = classDetail?.instructor?.fullName || "Instruktur";
   const className = classDetail?.name || "-";
 
+  // Helper: cek status submission
+  function canEditAssignment(assignment) {
+    // Jika assignment.submission ada, cek statusnya
+    // Status yang boleh edit hanya DRAFT atau belum ada submission sama sekali
+    if (!assignment.submission) return true;
+    return assignment.submission.status === "DRAFT";
+  }
+
   return (
     <Container className="py-8">
       <Breadcrumb />
@@ -166,16 +174,14 @@ export default function ClassAssignments() {
                       size="sm"
                       className="bg-[#23407a] hover:bg-[#1a2f5c] shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                       onClick={() =>
-                        navigate(
-                          `/dashboard/assignments/${assignment.id}`
-                        )
+                        navigate(`/dashboard/assignments/${assignment.id}`)
                       }
                       aria-label={`Lihat Detail ${assignment.title}`}
                     >
                       <Eye className="h-4 w-4 mr-2" />
                       Lihat Detail
                     </Button>
-                    {assignment.status !== "SUBMITTED" && (
+                    {canEditAssignment(assignment) ? (
                       <Button
                         size="sm"
                         variant="outline"
@@ -189,6 +195,18 @@ export default function ClassAssignments() {
                       >
                         <CheckCircle className="h-4 w-4 mr-2" />
                         Kerjakan Tugas
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="ml-2"
+                        disabled
+                        aria-label={`Tugas sudah dikumpulkan`}
+                        title="Tugas sudah dikumpulkan, tidak bisa diedit"
+                      >
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Sudah Dikumpulkan
                       </Button>
                     )}
                   </CardContent>

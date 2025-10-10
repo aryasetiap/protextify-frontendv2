@@ -338,6 +338,9 @@ function AssignmentCard({
   onKerjakan,
 }) {
   const navigate = useNavigate();
+  // Disable tombol "Kerjakan" jika status sudah submitted/graded
+  const disableKerjakan =
+    assignment.status === "submitted" || assignment.status === "graded";
   return (
     <Card className="group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-gradient-to-br from-white to-blue-50/30">
       <CardHeader className="relative z-10 pb-4">
@@ -389,8 +392,18 @@ function AssignmentCard({
           <Button
             size="sm"
             className="bg-[#23407a] hover:bg-[#1a2f5c] shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-            onClick={onKerjakan}
+            onClick={() => {
+              if (!disableKerjakan) {
+                onKerjakan();
+              }
+            }}
             aria-label={`Kerjakan ${assignment.title}`}
+            disabled={disableKerjakan}
+            title={
+              disableKerjakan
+                ? "Tugas sudah dikumpulkan/dinilai, tidak bisa diedit lagi"
+                : undefined
+            }
           >
             Kerjakan
           </Button>
