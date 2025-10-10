@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   Container,
   Card,
@@ -11,8 +11,6 @@ import {
   LoadingSpinner,
   Breadcrumb,
   Badge,
-  Input,
-  Textarea,
 } from "../../components";
 import { assignmentsService, submissionsService } from "../../services";
 import { formatDate } from "../../utils/helpers";
@@ -20,11 +18,13 @@ import {
   FileText,
   CheckCircle,
   Clock,
-  Upload,
   Edit,
   AlertCircle,
-  Download,
   ArrowLeft,
+  Calendar,
+  ShieldCheck,
+  Star,
+  BookOpen,
 } from "lucide-react";
 
 export default function AssignmentDetail() {
@@ -46,7 +46,6 @@ export default function AssignmentDetail() {
         );
         setAssignment(assignmentData);
 
-        // Cek apakah sudah ada submission untuk assignment ini
         if (assignmentData?.id) {
           const submissionData =
             await submissionsService.getSubmissionByAssignmentId(
@@ -69,89 +68,7 @@ export default function AssignmentDetail() {
     fetchData();
   }, [assignmentId]);
 
-  // Status assignment
-  const getStatusBadge = () => {
-    if (!submission) {
-      return (
-        <Badge color="yellow" className="flex items-center gap-1">
-          <Clock className="h-4 w-4" />
-          Belum dikumpulkan
-        </Badge>
-      );
-    }
-    if (submission.status === "SUBMITTED") {
-      return (
-        <Badge color="blue" className="flex items-center gap-1">
-          <CheckCircle className="h-4 w-4" />
-          Sudah dikumpulkan
-        </Badge>
-      );
-    }
-    if (submission.status === "GRADED") {
-      return (
-        <Badge color="green" className="flex items-center gap-1">
-          <CheckCircle className="h-4 w-4" />
-          Dinilai
-        </Badge>
-      );
-    }
-    return (
-      <Badge color="gray" className="flex items-center gap-1">
-        <AlertCircle className="h-4 w-4" />
-        Tidak diketahui
-      </Badge>
-    );
-  };
-
-  // File preview
-  const filePreview = submission?.fileUrl ? (
-    <div className="flex items-center gap-2 mt-2">
-      <FileText className="h-5 w-5 text-blue-600" />
-      <a
-        href={submission.fileUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-blue-700 underline"
-      >
-        {submission.fileName || "File Tugas"}
-      </a>
-      <Button
-        size="sm"
-        variant="outline"
-        onClick={() => window.open(submission.fileUrl, "_blank")}
-        className="ml-2"
-      >
-        <Download className="h-4 w-4 mr-1" />
-        Download
-      </Button>
-    </div>
-  ) : (
-    <div className="text-gray-500 italic">Belum ada file yang diunggah</div>
-  );
-
-  // Feedback
-  const feedbackSection =
-    submission?.status === "GRADED" ? (
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Nilai & Feedback</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-4 mb-2">
-            <span className="text-lg font-bold text-green-700">
-              Nilai:{" "}
-              {typeof submission.grade === "number" ? submission.grade : "-"}
-            </span>
-            {submission.feedback && <Badge color="blue">Ada Feedback</Badge>}
-          </div>
-          <div className="text-gray-700">
-            {submission.feedback || "Belum ada feedback dari dosen."}
-          </div>
-        </CardContent>
-      </Card>
-    ) : null;
-
-  // Loading/Error state
+  // Loading/Error states
   if (loading) {
     return (
       <Container className="py-8">
@@ -161,6 +78,7 @@ export default function AssignmentDetail() {
       </Container>
     );
   }
+
   if (error) {
     return (
       <Container className="py-8">
@@ -177,6 +95,7 @@ export default function AssignmentDetail() {
       </Container>
     );
   }
+
   if (!assignment) {
     return (
       <Container className="py-8">
@@ -195,135 +114,245 @@ export default function AssignmentDetail() {
     );
   }
 
-  // Mapping field
-  const assignmentTitle = assignment.title || "-";
-  const assignmentDescription = assignment.description || "-";
-  const assignmentDeadline = assignment.deadline
-    ? formatDate(assignment.deadline, "dd MMMM yyyy, HH:mm")
-    : "-";
-
-  // Info dari submission
-  const submissionStatus = submission?.status || "Belum dikumpulkan";
-  const submissionGrade =
-    typeof submission?.grade === "number" ? submission.grade : "-";
-  const submissionSubmittedAt = submission?.submittedAt
-    ? formatDate(submission.submittedAt, "dd MMMM yyyy, HH:mm")
-    : "-";
-  const plagiarismScore =
-    submission?.plagiarismChecks?.score ??
-    (typeof submission?.plagiarismScore === "number"
-      ? submission.plagiarismScore
-      : "-");
+  // Mapped data
   const className =
     submission?.assignment?.class?.name || assignment.class?.name || "-";
+  const classId = assignment.classId;
 
   return (
     <Container className="py-8">
       <Breadcrumb />
       {/* Header */}
-      <div className="flex items-center mb-8">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate(-1)}
-          className="mr-4"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Kembali
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {assignmentTitle}
-          </h1>
-          <p className="text-gray-600">{className}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+        <div className="flex items-center mb-4 sm:mb-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(-1)}
+            className="mr-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Kembali
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {assignment.title}
+            </h1>
+            <Link
+              to={`/dashboard/classes/${classId}`}
+              className="text-gray-600 hover:text-blue-600 transition-colors"
+            >
+              {className}
+            </Link>
+          </div>
         </div>
-        <div className="ml-auto">{getStatusBadge()}</div>
+        <div className="flex-shrink-0">
+          <StatusBadge submission={submission} />
+        </div>
       </div>
 
-      {/* Informasi Assignment */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Informasi Tugas</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-4 text-gray-700">{assignmentDescription}</div>
-          <div className="flex flex-wrap gap-6 text-sm text-gray-600">
-            <div>
-              <span className="font-medium">Deadline:</span>{" "}
-              <span className="font-bold">{assignmentDeadline}</span>
-            </div>
-            {plagiarismScore !== "-" && (
-              <div>
-                <span className="font-medium">Skor Plagiarisme:</span>{" "}
-                <span className="font-bold">{plagiarismScore}</span>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-8">
+          <AssignmentInfoCard assignment={assignment} />
+          {submission?.status === "GRADED" && (
+            <FeedbackCard submission={submission} />
+          )}
+        </div>
 
-      {/* Bagian Pengumpulan */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Pengumpulan Tugas</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-2">
-            <span className="font-medium">Status:</span>{" "}
-            <span className="font-bold">{submissionStatus}</span>
-          </div>
-          <div className="mb-2">
-            <span className="font-medium">Nilai:</span>{" "}
-            <span className="font-bold">{submissionGrade}</span>
-          </div>
-          <div className="mb-2">
-            <span className="font-medium">Waktu Pengumpulan:</span>{" "}
-            <span className="text-gray-700">{submissionSubmittedAt}</span>
-          </div>
-          <div className="flex gap-3 mt-4">
-            {/* Tombol hanya muncul & aktif jika submission belum dikumpulkan (DRAFT) */}
-            {(!submission || submission.status === "DRAFT") && (
-              <Button
-                size="lg"
-                className="bg-[#23407a] hover:bg-[#1a2f5c] shadow-lg hover:shadow-xl transition-all duration-300"
-                onClick={() =>
-                  navigate(`/dashboard/assignments/${assignment.id}/write`)
-                }
-                aria-label={submission ? "Edit Pengumpulan" : "Upload Tugas"}
-              >
-                {submission ? (
-                  <>
-                    <Edit className="h-5 w-5 mr-2" />
-                    Edit Pengumpulan
-                  </>
-                ) : (
-                  <>
-                    <Upload className="h-5 w-5 mr-2" />
-                    Upload Tugas
-                  </>
-                )}
-              </Button>
-            )}
-            {/* Jika sudah SUBMITTED/GRADED, tampilkan info non-editable */}
-            {submission &&
-              (submission.status === "SUBMITTED" ||
-                submission.status === "GRADED") && (
-                <Button
-                  size="lg"
-                  disabled
-                  className="bg-gray-300 text-gray-600 cursor-not-allowed"
-                  aria-label="Pengumpulan sudah dikunci"
-                >
-                  <CheckCircle className="h-5 w-5 mr-2" />
-                  Pengumpulan Terkunci
-                </Button>
-              )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Bagian Nilai dan Feedback */}
-      {feedbackSection}
+        {/* Sidebar */}
+        <div className="space-y-6">
+          <SubmissionStatusCard
+            assignment={assignment}
+            submission={submission}
+          />
+          <ClassInfoCard classId={classId} className={className} />
+        </div>
+      </div>
     </Container>
+  );
+}
+
+// --- Sub-components for better structure ---
+
+function StatusBadge({ submission }) {
+  if (!submission || submission.status === "DRAFT") {
+    return (
+      <Badge color="yellow" className="flex items-center gap-1.5 py-1.5 px-3">
+        <Clock className="h-4 w-4" />
+        Belum Dikumpulkan
+      </Badge>
+    );
+  }
+  if (submission.status === "SUBMITTED") {
+    return (
+      <Badge color="blue" className="flex items-center gap-1.5 py-1.5 px-3">
+        <CheckCircle className="h-4 w-4" />
+        Sudah Dikumpulkan
+      </Badge>
+    );
+  }
+  if (submission.status === "GRADED") {
+    return (
+      <Badge color="green" className="flex items-center gap-1.5 py-1.5 px-3">
+        <Star className="h-4 w-4" />
+        Sudah Dinilai
+      </Badge>
+    );
+  }
+  return (
+    <Badge color="gray" className="flex items-center gap-1.5 py-1.5 px-3">
+      <AlertCircle className="h-4 w-4" />
+      Tidak Diketahui
+    </Badge>
+  );
+}
+
+function AssignmentInfoCard({ assignment }) {
+  return (
+    <Card className="overflow-hidden">
+      <CardHeader className="bg-gray-50/50">
+        <CardTitle className="flex items-center gap-3">
+          <FileText className="h-6 w-6 text-[#23407a]" />
+          <span>Detail Tugas</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-6">
+        <div className="prose max-w-none text-gray-800 mb-6">
+          <p>{assignment.description || "Tidak ada instruksi."}</p>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-gray-600 border-t pt-4">
+          <Calendar className="h-4 w-4 text-red-500" />
+          <span className="font-medium">Deadline:</span>
+          <span className="font-semibold text-red-600">
+            {formatDate(assignment.deadline, "dd MMMM yyyy, HH:mm")}
+          </span>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function SubmissionStatusCard({ assignment, submission }) {
+  const navigate = useNavigate();
+  const canSubmit = !submission || submission.status === "DRAFT";
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Status Pengumpulan</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <InfoRow
+          label="Status"
+          value={<StatusBadge submission={submission} />}
+        />
+        <InfoRow
+          label="Nilai"
+          value={
+            typeof submission?.grade === "number" ? (
+              <span className="font-bold text-2xl text-green-600">
+                {submission.grade}
+              </span>
+            ) : (
+              <span className="text-gray-500">-</span>
+            )
+          }
+        />
+        <InfoRow
+          label="Skor Plagiarisme"
+          value={
+            typeof (
+              submission?.plagiarismChecks?.score ?? submission?.plagiarismScore
+            ) === "number" ? (
+              <span className="font-bold text-yellow-600 flex items-center">
+                <ShieldCheck className="h-5 w-5 mr-1.5" />
+                {(
+                  submission.plagiarismChecks?.score ??
+                  submission.plagiarismScore
+                ).toFixed(2)}
+                %
+              </span>
+            ) : (
+              <span className="text-gray-500">-</span>
+            )
+          }
+        />
+        <InfoRow
+          label="Waktu Kumpul"
+          value={
+            submission?.submittedAt
+              ? formatDate(submission.submittedAt, "dd MMM yyyy, HH:mm")
+              : "-"
+          }
+        />
+
+        <div className="pt-4 border-t">
+          {canSubmit ? (
+            <Button
+              size="lg"
+              className="w-full bg-[#23407a] hover:bg-[#1a2f5c] shadow-lg hover:shadow-xl transition-all"
+              onClick={() =>
+                navigate(`/dashboard/assignments/${assignment.id}/write`)
+              }
+            >
+              <Edit className="h-5 w-5 mr-2" />
+              {submission ? "Lanjutkan Mengerjakan" : "Mulai Mengerjakan"}
+            </Button>
+          ) : (
+            <div className="text-center p-3 bg-gray-100 rounded-lg">
+              <p className="text-sm font-medium text-gray-700">
+                Tugas sudah dikumpulkan dan tidak dapat diubah.
+              </p>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function FeedbackCard({ submission }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Nilai & Feedback Instruktur</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-gray-800">
+            {submission.feedback || "Belum ada feedback dari instruktur."}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ClassInfoCard({ classId, className }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Informasi Kelas</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="font-semibold text-gray-800 mb-3">{className}</p>
+        <Button variant="outline" size="sm" className="w-full" asChild>
+          <Link to={`/dashboard/classes/${classId}`}>
+            <BookOpen className="h-4 w-4 mr-2" />
+            Lihat Detail Kelas
+          </Link>
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+function InfoRow({ label, value }) {
+  return (
+    <div className="flex justify-between items-center">
+      <span className="text-sm font-medium text-gray-600">{label}</span>
+      <div className="text-sm text-gray-900 text-right">{value}</div>
+    </div>
   );
 }
