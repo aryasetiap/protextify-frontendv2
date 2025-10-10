@@ -271,6 +271,22 @@ const getClassHistory = async (classId) => {
   }
 };
 
+/**
+ * Mendapat submission milik student untuk assignment tertentu
+ * @param {string} assignmentId
+ * @returns {object|null} submission milik student (jika ada)
+ */
+const getSubmissionByAssignmentId = async (assignmentId) => {
+  try {
+    // Ambil riwayat submission student
+    const history = await getHistory();
+    // Cari submission dengan assignmentId yang sesuai
+    return history.find((s) => s.assignmentId === assignmentId) || null;
+  } catch (error) {
+    throw error;
+  }
+};
+
 // const logPasteEvent = async (submissionId, event) => {
 //   return await api.post(`/submissions/${submissionId}/paste-events`, event);
 // };
@@ -287,6 +303,7 @@ const submissionsService = {
   getSubmissionVersionById,
   getAssignmentSubmissions,
   getClassHistory,
+  getSubmissionByAssignmentId, // <-- tambahkan ini
 };
 
 export default submissionsService;

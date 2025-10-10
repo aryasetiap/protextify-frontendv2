@@ -24,6 +24,7 @@ import {
   Edit,
   AlertCircle,
   Download,
+  ArrowLeft,
 } from "lucide-react";
 
 export default function AssignmentDetail() {
@@ -195,16 +196,26 @@ export default function AssignmentDetail() {
   }
 
   // Mapping field
-  const className = assignment.class?.name || "-";
-  const instructorName = assignment.class?.instructor?.fullName || "-";
-  const deadline = assignment.deadline
+  const assignmentTitle = assignment.title || "-";
+  const assignmentDescription = assignment.description || "-";
+  const assignmentDeadline = assignment.deadline
     ? formatDate(assignment.deadline, "dd MMMM yyyy, HH:mm")
     : "-";
-  const points = assignment.points || assignment.bobot || 10;
-  const description = assignment.instructions || assignment.description || "-";
-  const lastSubmitted = submission?.submittedAt
+
+  // Info dari submission
+  const submissionStatus = submission?.status || "Belum dikumpulkan";
+  const submissionGrade =
+    typeof submission?.grade === "number" ? submission.grade : "-";
+  const submissionSubmittedAt = submission?.submittedAt
     ? formatDate(submission.submittedAt, "dd MMMM yyyy, HH:mm")
     : "-";
+  const plagiarismScore =
+    submission?.plagiarismChecks?.score ??
+    (typeof submission?.plagiarismScore === "number"
+      ? submission.plagiarismScore
+      : "-");
+  const className =
+    submission?.assignment?.class?.name || assignment.class?.name || "-";
 
   return (
     <Container className="py-8">
@@ -222,11 +233,9 @@ export default function AssignmentDetail() {
         </Button>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
-            {assignment.title}
+            {assignmentTitle}
           </h1>
-          <p className="text-gray-600">
-            {className} - {instructorName}
-          </p>
+          <p className="text-gray-600">{className}</p>
         </div>
         <div className="ml-auto">{getStatusBadge()}</div>
       </div>
@@ -237,27 +246,16 @@ export default function AssignmentDetail() {
           <CardTitle>Informasi Tugas</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 text-gray-700">{description}</div>
+          <div className="mb-4 text-gray-700">{assignmentDescription}</div>
           <div className="flex flex-wrap gap-6 text-sm text-gray-600">
             <div>
               <span className="font-medium">Deadline:</span>{" "}
-              <span className="font-bold">{deadline}</span>
+              <span className="font-bold">{assignmentDeadline}</span>
             </div>
-            <div>
-              <span className="font-medium">Bobot:</span>{" "}
-              <span className="font-bold">{points} poin</span>
-            </div>
-            {assignment.attachmentUrl && (
+            {plagiarismScore !== "-" && (
               <div>
-                <span className="font-medium">Lampiran:</span>{" "}
-                <a
-                  href={assignment.attachmentUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-700 underline"
-                >
-                  Download Lampiran
-                </a>
+                <span className="font-medium">Skor Plagiarisme:</span>{" "}
+                <span className="font-bold">{plagiarismScore}</span>
               </div>
             )}
           </div>
@@ -271,12 +269,16 @@ export default function AssignmentDetail() {
         </CardHeader>
         <CardContent>
           <div className="mb-2">
-            <span className="font-medium">File Tugas:</span>
-            {filePreview}
+            <span className="font-medium">Status:</span>{" "}
+            <span className="font-bold">{submissionStatus}</span>
           </div>
           <div className="mb-2">
-            <span className="font-medium">Waktu Pengumpulan Terakhir:</span>{" "}
-            <span className="text-gray-700">{lastSubmitted}</span>
+            <span className="font-medium">Nilai:</span>{" "}
+            <span className="font-bold">{submissionGrade}</span>
+          </div>
+          <div className="mb-2">
+            <span className="font-medium">Waktu Pengumpulan:</span>{" "}
+            <span className="text-gray-700">{submissionSubmittedAt}</span>
           </div>
           <div className="flex gap-3 mt-4">
             <Button
