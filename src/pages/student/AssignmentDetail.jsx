@@ -219,7 +219,7 @@ function AssignmentInfoCard({ assignment }) {
       </CardHeader>
       <CardContent className="p-6">
         <div className="prose max-w-none text-gray-800 mb-6">
-          <p>{assignment.description || "Tidak ada instruksi."}</p>
+          <p>{assignment.instructions || "Tidak ada instruksi."}</p>
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-600 border-t pt-4">
           <Calendar className="h-4 w-4 text-red-500" />
