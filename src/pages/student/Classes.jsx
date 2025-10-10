@@ -124,180 +124,168 @@ export default function StudentClasses() {
           ))}
         </div>
       ) : (
-        <Card className="relative overflow-hidden border-0 shadow-lg">
-          {/* Background pattern */}
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-blue-50/30"></div>
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#23407a]/10 to-blue-500/10 rounded-full transform translate-x-16 -translate-y-16"></div>
-
-          <CardContent className="relative z-10 text-center py-16">
-            <div className="w-24 h-24 bg-gradient-to-br from-[#23407a]/20 to-blue-500/20 rounded-3xl flex items-center justify-center mx-auto mb-6">
-              <BookOpen className="h-12 w-12 text-[#23407a]" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">
-              Belum Ada Kelas
-            </h3>
-            <p className="text-gray-600 mb-8 max-w-md mx-auto leading-relaxed">
-              Mulai perjalanan belajar Anda dengan bergabung ke kelas pertama.
-              Dapatkan akses ke materi pembelajaran dan tugas yang menarik.
-            </p>
-            <Button
-              onClick={() => navigate("/dashboard/join-class")}
-              size="lg"
-              className="bg-[#23407a] hover:bg-[#1a2f5c] shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-            >
-              <Plus className="h-5 w-5 mr-2" />
-              Gabung Kelas Pertama
-            </Button>
-          </CardContent>
-        </Card>
+        // Enhanced Empty State
+        <div className="text-center py-20 px-6 bg-gradient-to-br from-gray-50 to-blue-100/30 rounded-2xl shadow-lg border border-gray-200/50">
+          <div className="w-24 h-24 bg-white/70 backdrop-blur-sm rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-md">
+            <BookOpen className="h-12 w-12 text-[#23407a]" />
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 mb-3">
+            Anda Belum Bergabung di Kelas Manapun
+          </h3>
+          <p className="text-gray-600 mb-8 max-w-lg mx-auto leading-relaxed">
+            Mulai perjalanan belajar Anda dengan bergabung ke kelas pertama.
+            Dapatkan akses ke materi pembelajaran dan tugas-tugas menarik dari
+            instruktur Anda.
+          </p>
+          <Button
+            onClick={() => navigate("/dashboard/join-class")}
+            size="lg"
+            className="bg-[#23407a] hover:bg-[#1a2f5c] text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+          >
+            <Plus className="h-5 w-5 mr-2" />
+            Gabung Kelas Pertama
+          </Button>
+        </div>
       )}
     </Container>
   );
 }
 
-// Class Card Component
+// Modern Class Card Component
 function ClassCard({ classData, isNew = false }) {
   const navigate = useNavigate();
 
-  // Ambil jumlah siswa dari enrollments array
   const studentsCount = Array.isArray(classData.enrollments)
     ? classData.enrollments.length
     : 0;
-
-  // Jumlah assignments dari struktur baru
   const assignmentsCount = Array.isArray(classData.assignments)
     ? classData.assignments.length
     : 0;
-
-  // Jumlah tugas aktif
   const activeAssignments = Array.isArray(classData.assignments)
     ? classData.assignments.filter((a) => a?.active).length
     : 0;
-
-  // Nama instruktur dari field baru
   const instructorName = classData.instructor?.fullName || "Instruktur";
 
-  // Tanggal bergabung dari currentUserEnrollment.joinedAt, fallback ke createdAt
-  const joinedDate =
-    classData.currentUserEnrollment?.joinedAt || classData.createdAt;
+  // Find the next upcoming assignment
+  const nextAssignment = Array.isArray(classData.assignments)
+    ? classData.assignments
+        .filter((a) => a.active && new Date(a.deadline) > new Date())
+        .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))[0]
+    : null;
 
   return (
     <Card
-      className={`group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 ${
-        isNew ? "ring-2 ring-green-500 bg-green-50/50" : ""
+      className={`group relative flex flex-col overflow-hidden rounded-2xl border-0 shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 ${
+        isNew ? "ring-2 ring-offset-2 ring-green-500" : ""
       }`}
     >
-      {/* Decorative gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#23407a]/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      {/* Background Gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white via-gray-50 to-blue-50"></div>
 
-      {/* Status indicator for new classes */}
-      {isNew && (
-        <div className="absolute top-4 right-4 z-10">
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-500 text-white shadow-lg">
-            <div className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></div>
-            Baru Bergabung
-          </span>
-        </div>
-      )}
-
-      <CardHeader className="relative z-10 pb-4">
-        <div className="flex items-start justify-between">
-          <div className="flex-1 min-w-0">
-            <CardTitle className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[#23407a] transition-colors truncate">
-              {classData.name}
-            </CardTitle>
-            {classData.description && (
-              <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
-                {classData.description}
-              </p>
-            )}
-          </div>
-        </div>
+      {/* Header with class name and description */}
+      <CardHeader className="relative z-10 border-b border-gray-200/80 bg-white/50 backdrop-blur-sm">
+        <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-[#23407a] transition-colors truncate">
+          {classData.name}
+        </CardTitle>
+        <p className="text-sm text-gray-600 line-clamp-2 h-[40px]">
+          {classData.description || "Tidak ada deskripsi."}
+        </p>
       </CardHeader>
 
-      <CardContent className="relative z-10">
-        {/* Instructor Info */}
-        <div className="mb-6 p-4 bg-gradient-to-r from-gray-50 to-blue-50/30 rounded-xl border border-gray-100">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-[#23407a] rounded-full flex items-center justify-center text-white font-semibold text-sm">
-              {instructorName.charAt(0)}
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900">
+      <CardContent className="relative z-10 flex flex-1 flex-col p-6">
+        {/* Main content area */}
+        <div className="flex-1">
+          {/* Instructor and Stats */}
+          <div className="mb-5 flex items-center justify-between text-sm">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-[#23407a] rounded-full flex items-center justify-center text-white font-semibold text-xs">
+                {instructorName.charAt(0)}
+              </div>
+              <span className="font-medium text-gray-700">
                 {instructorName}
+              </span>
+            </div>
+            <div className="flex space-x-4 text-right">
+              <div className="flex items-center text-gray-600">
+                <Users className="h-4 w-4 mr-1.5 text-blue-500" />
+                <span className="font-semibold">{studentsCount}</span>
+              </div>
+              <div className="flex items-center text-gray-600">
+                <FileText className="h-4 w-4 mr-1.5 text-purple-500" />
+                <span className="font-semibold">{assignmentsCount}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Next Assignment Section */}
+          {/* {nextAssignment ? (
+            <div className="mb-6 rounded-xl border border-yellow-300 bg-yellow-50 p-4">
+              <p className="text-xs font-bold uppercase tracking-wider text-yellow-600 mb-1">
+                Tugas Berikutnya
               </p>
-              <p className="text-xs text-gray-500">Instruktur</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl border border-blue-200/50">
-            <div className="flex items-center justify-center mb-2">
-              <div className="p-2 bg-blue-500 rounded-lg">
-                <Users className="h-4 w-4 text-white" />
+              <h4 className="font-semibold text-gray-800 truncate">
+                {nextAssignment.title}
+              </h4>
+              <div className="mt-2 flex items-center text-sm text-yellow-800">
+                <Calendar className="h-4 w-4 mr-2" />
+                <span>Deadline: {formatDate(nextAssignment.deadline)}</span>
               </div>
             </div>
-            <p className="text-xl font-bold text-gray-900">{studentsCount}</p>
-            <p className="text-xs text-gray-600 font-medium">Siswa</p>
-          </div>
-          <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-xl border border-purple-200/50">
-            <div className="flex items-center justify-center mb-2">
-              <div className="p-2 bg-purple-500 rounded-lg">
-                <FileText className="h-4 w-4 text-white" />
-              </div>
+          ) : (
+            <div className="mb-6 rounded-xl border border-gray-200 bg-gray-100 p-4 text-center">
+              <p className="text-sm font-medium text-gray-600">
+                {activeAssignments > 0
+                  ? "Semua tugas aktif telah lewat deadline."
+                  : "Tidak ada tugas aktif saat ini."}
+              </p>
             </div>
-            <p className="text-xl font-bold text-gray-900">
-              {assignmentsCount}
-            </p>
-            <p className="text-xs text-gray-600 font-medium">Tugas</p>
+          )} */}
+        </div>
+
+        {/* Footer with action buttons */}
+        <div className="mt-auto pt-5 border-t border-gray-200/80">
+          <div className="flex space-x-3">
+            <Button
+              size="sm"
+              variant="outline"
+              className="flex-1 border-gray-300 text-gray-800 hover:bg-gray-100 hover:border-gray-400"
+              onClick={() => navigate(`/dashboard/classes/${classData.id}`)}
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              Detail Kelas
+            </Button>
+            <Button
+              size="sm"
+              className={`flex-1 transition-all duration-300 ${
+                activeAssignments > 0
+                  ? "bg-[#23407a] hover:bg-[#1a2f5c] text-white shadow-md hover:shadow-lg"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
+              onClick={() =>
+                activeAssignments > 0 &&
+                navigate(`/dashboard/classes/${classData.id}/assignments`)
+              }
+              disabled={activeAssignments === 0}
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              {activeAssignments > 0
+                ? `Tugas Aktif (${activeAssignments})`
+                : "Tidak Ada Tugas"}
+            </Button>
           </div>
-        </div>
-
-        {/* Join Date */}
-        <div className="mb-6 flex items-center text-sm text-gray-500">
-          <Calendar className="h-4 w-4 mr-2 text-[#23407a]" />
-          <span>Bergabung sejak {formatDate(joinedDate)}</span>
-        </div>
-
-        {/* Enhanced Action Buttons */}
-        <div className="flex space-x-3">
-          <Button
-            size="sm"
-            variant="outline"
-            className="flex-1 border-[#23407a]/30 text-[#23407a] hover:bg-[#23407a] hover:text-white transition-all duration-300"
-            onClick={() => navigate(`/dashboard/classes/${classData.id}`)}
-            aria-label={`Detail kelas ${classData.name}`}
-          >
-            <Eye className="h-4 w-4 mr-2" />
-            Detail
-          </Button>
-          <Button
-            size="sm"
-            className={`flex-1 transition-all duration-300 transform hover:scale-105 ${
-              activeAssignments > 0
-                ? "bg-[#23407a] hover:bg-[#1a2f5c] shadow-lg"
-                : "bg-gray-400 cursor-not-allowed"
-            }`}
-            onClick={() =>
-              activeAssignments > 0 &&
-              navigate(`/dashboard/classes/${classData.id}/assignments`)
-            }
-            disabled={activeAssignments === 0}
-            aria-label={
-              activeAssignments > 0
-                ? `Tugas (${activeAssignments})`
-                : "Belum Ada Tugas"
-            }
-          >
-            <FileText className="h-4 w-4 mr-2" />
-            {activeAssignments > 0
-              ? `Tugas (${activeAssignments})`
-              : "Belum Ada Tugas"}
-          </Button>
         </div>
       </CardContent>
+
+      {/* New Class Badge */}
+      {isNew && (
+        <div className="absolute top-3 -right-11 z-20">
+          <div className="w-32 h-8 bg-green-500 flex items-center justify-center transform rotate-45">
+            <span className="text-white text-[10px] font-bold uppercase tracking-wider">
+              Baru
+            </span>
+          </div>
+        </div>
+      )}
     </Card>
   );
 }
