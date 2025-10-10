@@ -1,5 +1,5 @@
 import {
-  useRef,
+  useRef, // Pastikan useRef diimpor
   useEffect,
   useState,
   forwardRef,
@@ -10,6 +10,7 @@ import {
   $isRangeSelection,
   $getRoot,
   $insertNodes,
+  // Hapus UNDO_COMMAND karena kita tidak akan menggunakannya lagi
 } from "lexical";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
@@ -138,6 +139,29 @@ function validateUrl(url) {
   );
 }
 
+// Helper function baru untuk mengatur ulang konten editor secara paksa
+const setEditorContent = (editor, html) => {
+  if (!editor) return;
+  editor.update(() => {
+    const root = $getRoot();
+    root.clear();
+    if (html && html.trim()) {
+      try {
+        const parser = new DOMParser();
+        const dom = parser.parseFromString(html, "text/html");
+        const nodes = $generateNodesFromDOM(editor, dom);
+        root.append(...nodes);
+      } catch (error) {
+        console.error("Gagal mem-parsing HTML untuk di-reset:", error);
+        // Fallback jika HTML tidak valid
+        const paragraph = root.createParagraph();
+        paragraph.createText(html);
+        root.append(paragraph);
+      }
+    }
+  });
+};
+
 const RichTextEditor = forwardRef(
   (
     {
@@ -145,7 +169,7 @@ const RichTextEditor = forwardRef(
       onChange,
       onAutoSave,
       onEditorReady,
-      placeholder = "Mulai tulis jawaban Anda...",
+      placeholder = "Klik untuk memuat draft yang tersedia, atau mulai tulis jawaban Anda di sini...",
       maxWords = 1000,
       maxCharacters = 7000,
       disabled = false,
@@ -171,6 +195,7 @@ const RichTextEditor = forwardRef(
     const [initialContentProcessed, setInitialContentProcessed] =
       useState(false); // NEW: Track if initial content is processed
 
+    const lastValidHtmlRef = useRef(value || ""); // 1. Tambahkan ref untuk state valid terakhir
     const autoSaveTimeoutRef = useRef(null);
     const initialContentRef = useRef(value);
     const preventOnChangeRef = useRef(false); // NEW: Prevent onChange during initialization
@@ -278,6 +303,19 @@ const RichTextEditor = forwardRef(
               .filter((word) => word.length > 0).length;
       const characters = plainText.length;
 
+      // 2. Ganti logika validasi untuk menggunakan ref
+      if (words > maxWords || characters > maxCharacters) {
+        toast.error(
+          `Batas maksimal ${maxWords} kata atau ${maxCharacters} karakter telah tercapai.`
+        );
+        // Reset ke konten valid terakhir yang disimpan di ref
+        setEditorContent(editorInstance, lastValidHtmlRef.current);
+        return; // Hentikan eksekusi lebih lanjut
+      }
+
+      // 3. Jika valid, perbarui ref dengan konten saat ini
+      lastValidHtmlRef.current = html;
+
       setWordCount(words);
       setCharacterCount(characters);
 
@@ -340,30 +378,9 @@ const RichTextEditor = forwardRef(
         // Prevent onChange during initialization
         preventOnChangeRef.current = true;
 
-        editor.update(() => {
-          const root = $getRoot();
-          root.clear();
-
-          if (value.trim()) {
-            try {
-              const parser = new DOMParser();
-              const dom = parser.parseFromString(value, "text/html");
-              const nodes = $generateNodesFromDOM(editor, dom);
-              root.append(...nodes);
-              console.log("[RichTextEditor] Initial content set successfully");
-            } catch (error) {
-              console.error(
-                "[RichTextEditor] Error setting initial content:",
-                error
-              );
-              // Fallback: insert as plain text
-              const paragraph = root.createParagraph();
-              const textNode = paragraph.createText(value);
-              paragraph.append(textNode);
-              root.append(paragraph);
-            }
-          }
-        });
+        // Gunakan helper function untuk mengatur konten
+        setEditorContent(editor, value);
+        lastValidHtmlRef.current = value; // 4. Inisialisasi ref dengan konten awal
 
         setIsInitialized(true);
 

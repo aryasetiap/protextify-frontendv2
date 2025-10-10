@@ -21,8 +21,7 @@ import {
 import { usersService, authService } from "../../services";
 import { useAsyncData } from "../../hooks/useAsyncData";
 import { useApi } from "../../hooks/useApi";
-import { updateProfileSchema, resetPasswordSchema } from "../../utils/validation";
-import { z } from "zod";
+import { updateProfileSchema } from "../../utils/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
@@ -32,8 +31,14 @@ import {
   ShieldCheck,
   Edit2,
   Save,
+  KeyRound,
+  Info,
+  Calendar,
+  RefreshCw,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
+import { formatDate } from "../../utils/helpers";
 
 export default function StudentProfile() {
   const {
@@ -50,7 +55,7 @@ export default function StudentProfile() {
     handleSubmit,
     formState: { errors, isDirty },
     reset,
-    setValue,
+    watch,
   } = useForm({
     resolver: zodResolver(updateProfileSchema),
     defaultValues: {
@@ -61,18 +66,6 @@ export default function StudentProfile() {
   });
 
   const { loading: saving, error: saveError, execute: saveProfile } = useApi();
-
-  // Reset password form
-  const {
-    register: registerReset,
-    handleSubmit: handleSubmitReset,
-    formState: { errors: resetErrors },
-    reset: resetResetForm,
-  } = useForm({
-    resolver: zodResolver(resetPasswordSchema),
-    defaultValues: { token: "", newPassword: "" },
-  });
-  const { loading: resetting, error: resetError, execute: doReset } = useApi();
   const { loading: sendingLink, execute: doSendLink } = useApi();
 
   // Sync form with user data
@@ -94,11 +87,10 @@ export default function StudentProfile() {
         successMessage: "Profil berhasil diperbarui",
         showSuccessToast: true,
       });
-      toast.success("Profil berhasil diperbarui");
       setIsEditing(false);
       refetch();
     } catch (err) {
-      // Error toast sudah ditangani oleh useApi
+      // Error toast is handled by useApi hook
     }
   };
 
@@ -106,6 +98,16 @@ export default function StudentProfile() {
   const avatar = user?.fullName
     ? user.fullName.charAt(0).toUpperCase()
     : user?.email?.charAt(0).toUpperCase() || "U";
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
 
   return (
     <Container className="py-8">
@@ -150,295 +152,259 @@ export default function StudentProfile() {
           </Button>
         </Alert>
       ) : (
-        <div className="max-w-2xl mx-auto">
-          <Card className="border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 relative overflow-hidden mb-8">
-            <CardHeader className="relative z-10 pb-6">
-              <div className="flex items-center space-x-4">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#23407a] to-[#3b5fa4] text-white flex items-center justify-center font-bold text-2xl shadow-lg">
-                  {avatar}
-                </div>
-                <div>
-                  <CardTitle className="text-2xl font-bold text-gray-900">
-                    {user?.fullName || "-"}
-                  </CardTitle>
-                  <p className="text-gray-600 mt-1">
-                    {user?.role === "STUDENT" ? "Siswa" : user?.role}
-                  </p>
-                </div>
-              </div>
-            </CardHeader>
-
-            <CardContent className="relative z-10 space-y-8">
-              <form onSubmit={handleSubmit(onSave)} className="space-y-6">
-                {/* Email (readonly) */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Email
-                  </label>
-                  <div className="flex items-center space-x-3">
-                    <Mail className="h-5 w-5 text-gray-400" />
-                    <Input
-                      value={user?.email || ""}
-                      readOnly
-                      disabled
-                      className="bg-gray-100 text-gray-600"
-                    />
-                  </div>
-                </div>
-
-                {/* Full Name */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Nama Lengkap <span className="text-red-500">*</span>
-                  </label>
-                  <div className="flex items-center space-x-3">
-                    <User className="h-5 w-5 text-gray-400" />
-                    <Input
-                      {...register("fullName")}
-                      disabled={!isEditing}
-                      placeholder="Nama lengkap"
-                      error={errors.fullName?.message}
-                      className={isEditing ? "" : "bg-gray-100 text-gray-600"}
-                    />
-                  </div>
-                  {errors.fullName && (
-                    <p className="text-xs text-red-600 mt-1">
-                      {errors.fullName.message}
-                    </p>
-                  )}
-                </div>
-
-                {/* Institution */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Institusi <span className="text-red-500">*</span>
-                  </label>
-                  <div className="flex items-center space-x-3">
-                    <GraduationCap className="h-5 w-5 text-gray-400" />
-                    <Input
-                      {...register("institution")}
-                      disabled={!isEditing}
-                      placeholder="Nama institusi"
-                      error={errors.institution?.message}
-                      className={isEditing ? "" : "bg-gray-100 text-gray-600"}
-                    />
-                  </div>
-                  {errors.institution && (
-                    <p className="text-xs text-red-600 mt-1">
-                      {errors.institution.message}
-                    </p>
-                  )}
-                </div>
-
-                {/* Phone */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Nomor Telepon
-                  </label>
-                  <div className="flex items-center space-x-3">
-                    <User className="h-5 w-5 text-gray-400" />
-                    <Input
-                      {...register("phone")}
-                      disabled={!isEditing}
-                      placeholder="Contoh: 081234567890"
-                      error={errors.phone?.message}
-                      className={isEditing ? "" : "bg-gray-100 text-gray-600"}
-                    />
-                  </div>
-                  {errors.phone && (
-                    <p className="text-xs text-red-600 mt-1">
-                      {errors.phone.message}
-                    </p>
-                  )}
-                </div>
-
-                {/* Email Verified */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Status Email
-                  </label>
-                  <div className="flex items-center space-x-2">
-                    <ShieldCheck
-                      className={`h-5 w-5 ${
-                        user?.emailVerified
-                          ? "text-green-500"
-                          : "text-yellow-500"
-                      }`}
-                    />
-                    <span
-                      className={`text-sm font-medium ${
-                        user?.emailVerified
-                          ? "text-green-700"
-                          : "text-yellow-700"
-                      }`}
-                    >
-                      {user?.emailVerified
-                        ? "Terverifikasi"
-                        : "Belum diverifikasi"}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Created/Updated At */}
-                <div className="grid grid-cols-2 gap-4 text-xs text-gray-500">
-                  <div>
-                    <span className="font-medium">Dibuat:</span>
-                    <span className="ml-2">
-                      {user?.createdAt
-                        ? new Date(user.createdAt).toLocaleString("id-ID")
-                        : "-"}
-                    </span>
+        <motion.div
+          className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {/* Left Column: Profile Form */}
+          <div className="lg:col-span-2">
+            <Card className="border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 relative overflow-hidden">
+              <CardHeader className="relative z-10 pb-6 border-b border-gray-100">
+                <div className="flex items-center space-x-4">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#23407a] to-[#3b5fa4] text-white flex items-center justify-center font-bold text-2xl shadow-lg">
+                    {avatar}
                   </div>
                   <div>
-                    <span className="font-medium">Terakhir Update:</span>
-                    <span className="ml-2">
-                      {user?.updatedAt
-                        ? new Date(user.updatedAt).toLocaleString("id-ID")
-                        : "-"}
-                    </span>
+                    <CardTitle className="text-2xl font-bold text-gray-900">
+                      {isEditing ? "Edit Profil" : user?.fullName || "-"}
+                    </CardTitle>
+                    <p className="text-gray-600 mt-1">
+                      {user?.role === "STUDENT" ? "Siswa" : user?.role}
+                    </p>
                   </div>
                 </div>
+              </CardHeader>
 
-                {/* Error Alert */}
-                {saveError && (
-                  <Alert variant="error" className="mb-4">
-                    <p>{saveError.message}</p>
-                  </Alert>
-                )}
+              <CardContent className="relative z-10 pt-8">
+                <form onSubmit={handleSubmit(onSave)} className="space-y-6">
+                  {/* Form Fields */}
+                  <ProfileField
+                    label="Nama Lengkap"
+                    name="fullName"
+                    icon={User}
+                    register={register}
+                    isEditing={isEditing}
+                    error={errors.fullName}
+                    placeholder="Nama lengkap Anda"
+                    watch={watch}
+                  />
+                  <ProfileField
+                    label="Institusi"
+                    name="institution"
+                    icon={GraduationCap}
+                    register={register}
+                    isEditing={isEditing}
+                    error={errors.institution}
+                    placeholder="Nama institusi Anda"
+                    watch={watch}
+                  />
+                  <ProfileField
+                    label="Nomor Telepon"
+                    name="phone"
+                    icon={User}
+                    register={register}
+                    isEditing={isEditing}
+                    error={errors.phone}
+                    placeholder="Contoh: 081234567890"
+                    watch={watch}
+                  />
 
-                {/* Action Buttons */}
-                <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-                  {isEditing ? (
-                    <>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="lg"
-                        onClick={() => {
-                          setIsEditing(false);
-                          reset({
-                            fullName: user?.fullName || "",
-                            institution: user?.institution || "",
-                            phone: user?.phone || "",
-                          });
-                        }}
-                        disabled={saving}
-                      >
-                        Batal
-                      </Button>
-                      <Button
-                        type="submit"
-                        loading={saving}
-                        disabled={!isDirty || saving}
-                        size="lg"
-                        className="bg-[#23407a] hover:bg-[#1a2f5c] shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                        aria-label="Simpan Perubahan"
-                      >
-                        <Save className="h-5 w-5 mr-2" />
-                        Simpan Perubahan
-                      </Button>
-                    </>
-                  ) : (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="lg"
-                      onClick={() => setIsEditing(true)}
-                      className="border-2 border-[#23407a]/30 text-[#23407a] hover:bg-[#23407a] hover:text-white transition-all duration-300"
-                      aria-label="Edit Profil"
-                    >
-                      <Edit2 className="h-5 w-5 mr-2" />
-                      Edit Profil
-                    </Button>
+                  {/* Error Alert */}
+                  {saveError && (
+                    <Alert variant="error" className="mb-4">
+                      <p>{saveError.message}</p>
+                    </Alert>
                   )}
-                </div>
-              </form>
-            </CardContent>
-          </Card>
 
-          {/* Password Management */}
-          <Card className="border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 relative overflow-hidden">
-            <CardHeader className="relative z-10 pb-2">
-              <CardTitle className="text-xl font-bold text-gray-900">
-                Keamanan & Kata Sandi
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Send reset link */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-700 font-medium">Kirim tautan reset ke email</p>
-                  <p className="text-xs text-gray-500">Kami akan mengirimkan email ke {user?.email}</p>
-                </div>
+                  {/* Action Buttons */}
+                  <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                    <AnimatePresence mode="wait">
+                      {isEditing ? (
+                        <motion.div
+                          key="edit-buttons"
+                          initial={{ opacity: 0, x: 10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 10 }}
+                          transition={{ duration: 0.2 }}
+                          className="flex justify-end space-x-3"
+                        >
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="lg"
+                            onClick={() => {
+                              setIsEditing(false);
+                              reset({
+                                fullName: user?.fullName || "",
+                                institution: user?.institution || "",
+                                phone: user?.phone || "",
+                              });
+                            }}
+                            disabled={saving}
+                          >
+                            Batal
+                          </Button>
+                          <Button
+                            type="submit"
+                            loading={saving}
+                            disabled={!isDirty || saving}
+                            size="lg"
+                            className="bg-[#23407a] hover:bg-[#1a2f5c] shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                            aria-label="Simpan Perubahan"
+                          >
+                            <Save className="h-5 w-5 mr-2" />
+                            Simpan Perubahan
+                          </Button>
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="view-button"
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -10 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="lg"
+                            onClick={() => setIsEditing(true)}
+                            className="border-2 border-[#23407a]/30 text-[#23407a] hover:bg-[#23407a] hover:text-white transition-all duration-300"
+                            aria-label="Edit Profil"
+                          >
+                            <Edit2 className="h-5 w-5 mr-2" />
+                            Edit Profil
+                          </Button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right Column: Security & Info */}
+          <div className="lg:col-span-1 space-y-8">
+            <Card className="border-0 shadow-2xl">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3">
+                  <KeyRound className="h-5 w-5 text-[#23407a]" />
+                  <span>Keamanan Akun</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-gray-600">
+                  Untuk mengubah kata sandi, kami akan mengirimkan tautan aman
+                  ke email terdaftar Anda.
+                </p>
                 <Button
                   type="button"
                   loading={sendingLink}
                   onClick={() =>
                     doSendLink(() => authService.forgotPassword(user.email), {
-                      loadingMessage: "Mengirim tautan reset...",
-                      successMessage: "Tautan reset terkirim ke email",
+                      loadingMessage: "Mengirim tautan...",
+                      successMessage: "Tautan reset terkirim ke email Anda",
                       showSuccessToast: true,
                     })
                   }
-                  className="bg-[#23407a] hover:bg-[#1a2f5c]"
+                  className="w-full bg-[#23407a] hover:bg-[#1a2f5c]"
                 >
-                  Kirim Link Reset
+                  Kirim Tautan Reset
                 </Button>
-              </div>
+              </CardContent>
+            </Card>
 
-              {/* Divider */}
-              {/* <div className="h-px bg-gray-200" /> */}
-
-              {/* Reset with token */}
-              <form
-                onSubmit={handleSubmitReset(async (payload) => {
-                  try {
-                    await doReset(() => authService.resetPassword(payload), {
-                      loadingMessage: "Mereset password...",
-                      successMessage: "Password berhasil direset",
-                      showSuccessToast: true,
-                    });
-                    resetResetForm();
-                  } catch (e) {}
-                })}
-                className="space-y-4"
-              >
-                {/* <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Token Reset
-                  </label>
-                  <Input
-                    {...registerReset("token")}
-                    placeholder="Tempel token dari email"
-                    error={resetErrors.token?.message}
-                  />
-                </div> */}
-                {/* <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Password Baru
-                  </label>
-                  <Input
-                    type="password"
-                    {...registerReset("newPassword")}
-                    placeholder="Password baru"
-                    error={resetErrors.newPassword?.message}
-                  />
-                </div> */}
-                {resetError && (
-                  <Alert variant="error">
-                    <p>{resetError.message}</p>
-                  </Alert>
-                )}
-                {/* <div className="flex justify-end">
-                  <Button type="submit" loading={resetting} className="bg-[#23407a] hover:bg-[#1a2f5c]">
-                    Reset Password
-                  </Button>
-                </div> */}
-              </form>
-            </CardContent>
-          </Card>
-        </div>
+            <Card className="border-0 shadow-2xl">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3">
+                  <Info className="h-5 w-5 text-[#23407a]" />
+                  <span>Informasi Akun</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <InfoItem icon={Mail} label="Email" value={user?.email} />
+                <InfoItem
+                  icon={ShieldCheck}
+                  label="Status Email"
+                  value={
+                    user?.emailVerified ? "Terverifikasi" : "Belum Diverifikasi"
+                  }
+                  valueColor={
+                    user?.emailVerified ? "text-green-600" : "text-yellow-600"
+                  }
+                />
+                <InfoItem
+                  icon={Calendar}
+                  label="Bergabung Pada"
+                  value={formatDate(user?.createdAt)}
+                />
+                <InfoItem
+                  icon={RefreshCw}
+                  label="Terakhir Diperbarui"
+                  value={formatDate(user?.updatedAt)}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        </motion.div>
       )}
     </Container>
+  );
+}
+
+// Helper component for profile fields
+function ProfileField({
+  label,
+  name,
+  icon: Icon,
+  register,
+  isEditing,
+  error,
+  placeholder,
+  watch, // Tambahkan prop watch
+}) {
+  const value = watch ? watch(name) : ""; // Ambil value dari form state
+
+  return (
+    <div>
+      <label className="block text-sm font-semibold text-gray-900 mb-2">
+        {label}
+      </label>
+      <div className="flex items-center space-x-3">
+        <Icon className="h-5 w-5 text-gray-400 flex-shrink-0" />
+        {isEditing ? (
+          <Input
+            {...register(name)}
+            placeholder={placeholder}
+            error={error?.message}
+            className="flex-1"
+            value={value ?? ""}
+          />
+        ) : (
+          <p className="text-gray-800 text-base w-full py-2 px-3 bg-gray-100 rounded-md">
+            {value || "-"}
+          </p>
+        )}
+      </div>
+      {error && isEditing && (
+        <p className="text-xs text-red-600 mt-1 ml-8">{error.message}</p>
+      )}
+    </div>
+  );
+}
+
+// Helper component for info items
+function InfoItem({ icon: Icon, label, value, valueColor = "text-gray-800" }) {
+  return (
+    <div className="flex items-start space-x-3 text-sm">
+      <Icon className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
+      <div className="flex-1">
+        <p className="font-medium text-gray-600">{label}</p>
+        <p className={`font-semibold ${valueColor}`}>{value || "-"}</p>
+      </div>
+    </div>
   );
 }

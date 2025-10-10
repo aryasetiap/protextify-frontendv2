@@ -80,14 +80,14 @@ const DraftActions = ({
           )}
 
           {/* Refresh button */}
-          <Button
+          {/* <Button
             variant="ghost"
             size="sm"
             onClick={onRefresh}
             disabled={saving || submitting}
           >
             <RefreshCw className="h-4 w-4" />
-          </Button>
+          </Button> */}
 
           {/* Save button */}
           {canEdit && (

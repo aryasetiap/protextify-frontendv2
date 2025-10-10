@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Save, Send, AlertCircle, RefreshCw } from "lucide-react";
 import toast from "react-hot-toast";
+import { motion } from "framer-motion";
 
 import {
   Container,
@@ -23,6 +24,7 @@ import SubmissionActions from "../../components/submission/SubmissionActions";
 
 import { useTextAnalytics } from "../../hooks/useTextAnalytics";
 import { assignmentsService, submissionsService } from "../../services";
+import { formatDate } from "../../utils/helpers";
 
 export default function WriteAssignment() {
   const { classId, assignmentId, id } = useParams();
@@ -48,10 +50,6 @@ export default function WriteAssignment() {
   useEffect(() => {
     const loadAssignmentData = async () => {
       setLoadingAssignment(true);
-      console.log(
-        "[WriteAssignment] Mulai load assignment:",
-        effectiveAssignmentId
-      );
       try {
         let assignmentData;
         if (classId) {
@@ -64,18 +62,12 @@ export default function WriteAssignment() {
             effectiveAssignmentId
           );
         }
-        console.log("[WriteAssignment] Assignment response:", assignmentData);
         setAssignment(assignmentData);
       } catch (error) {
-        console.error("[WriteAssignment] ERROR assignment:", error);
         toast.error("Gagal memuat data tugas");
         setAssignment(null);
       } finally {
         setLoadingAssignment(false);
-        console.log(
-          "[WriteAssignment] Selesai load assignment:",
-          effectiveAssignmentId
-        );
       }
     };
     if (effectiveAssignmentId) loadAssignmentData();
@@ -86,42 +78,24 @@ export default function WriteAssignment() {
     const createOrFetchSubmission = async () => {
       if (!effectiveAssignmentId || !assignment) return;
       setLoadingSubmission(true);
-      console.log(
-        "[WriteAssignment] Mulai cek/membuat submission draft:",
-        effectiveAssignmentId
-      );
       try {
         const history = await submissionsService.getHistory();
-        console.log("[WriteAssignment] Submission history:", history);
         const existing = history.find(
           (s) => s.assignmentId === effectiveAssignmentId
         );
         if (existing) {
-          console.log(
-            "[WriteAssignment] Submission draft sudah ada:",
-            existing.id
-          );
           setLocalSubmissionId(existing.id);
         } else {
           const newSubmission = await submissionsService.createSubmission(
             effectiveAssignmentId,
             { content: "" }
           );
-          console.log(
-            "[WriteAssignment] Submission draft baru dibuat:",
-            newSubmission
-          );
           setLocalSubmissionId(newSubmission.id);
         }
       } catch (error) {
-        console.error("[WriteAssignment] ERROR submission draft:", error);
         toast.error("Gagal membuat/memuat submission");
       } finally {
         setLoadingSubmission(false);
-        console.log(
-          "[WriteAssignment] Selesai cek/membuat submission draft:",
-          effectiveAssignmentId
-        );
       }
     };
     if (assignment && effectiveAssignmentId) createOrFetchSubmission();
@@ -132,36 +106,19 @@ export default function WriteAssignment() {
     const fetchSubmission = async () => {
       if (!localSubmissionId) return;
       setLoadingSubmission(true);
-      console.log(
-        "[WriteAssignment] Mulai fetch submission detail:",
-        localSubmissionId
-      );
       try {
         const data = await submissionsService.getSubmissionById(
           localSubmissionId
         );
-        console.log("[WriteAssignment] Submission detail response:", data);
         setSubmission(data);
-
-        // Set initial content untuk editor
         const draftContent = data.content || "";
         setInitialContent(draftContent);
-        setContent(draftContent); // IMPORTANT: Set content state segera
-        setContentInitialized(false); // Reset flag saat data baru
-
-        console.log("[WriteAssignment] Set initial content:", draftContent);
+        setContent(draftContent);
+        setContentInitialized(false);
       } catch (error) {
-        console.error(
-          "[WriteAssignment] ERROR fetch submission detail:",
-          error
-        );
         setSubmission(null);
       } finally {
         setLoadingSubmission(false);
-        console.log(
-          "[WriteAssignment] Selesai fetch submission detail:",
-          localSubmissionId
-        );
       }
     };
     if (localSubmissionId) fetchSubmission();
@@ -193,7 +150,7 @@ export default function WriteAssignment() {
     )
       return;
     const interval = setInterval(async () => {
-      if (content.trim() === "" || content === initialContent) return; // Don't save if no changes
+      if (content.trim() === "" || content === initialContent) return;
       setSaving(true);
       try {
         await submissionsService.updateSubmissionContent(
@@ -206,7 +163,7 @@ export default function WriteAssignment() {
       } finally {
         setSaving(false);
       }
-    }, 15000);
+    }, 60000);
     return () => clearInterval(interval);
   }, [
     localSubmissionId,
@@ -218,27 +175,27 @@ export default function WriteAssignment() {
 
   // Handle content change
   const handleContentChange = (newContent) => {
-    console.log("[WriteAssignment] Content changed:", newContent);
-
-    // ALWAYS update content state, let auto-save handle the timing
     setContent(newContent);
   };
 
   // Handle editor ready
   const handleEditorReady = () => {
-    console.log("[WriteAssignment] Editor ready");
     setEditorReady(true);
-
-    // Mark content as initialized setelah delay yang cukup
     setTimeout(() => {
       setContentInitialized(true);
-      console.log("[WriteAssignment] Content initialization completed");
-    }, 300); // Increased delay untuk memastikan editor fully ready
+    }, 300);
   };
 
   // Manual save
   const handleSave = async () => {
     if (!localSubmissionId) return;
+
+    // Tambahkan validasi di sini untuk mencegah simpan draft kosong
+    if (content.trim() === "") {
+      toast.error("Tidak bisa menyimpan draft kosong.");
+      return;
+    }
+
     setSaving(true);
     try {
       await submissionsService.updateSubmissionContent(
@@ -304,14 +261,12 @@ export default function WriteAssignment() {
     );
   };
 
-  // Selalu panggil hook di atas
   const { stats, limitChecks, validation } = useTextAnalytics(content, {
     maxWords: 1000,
     maxCharacters: 7000,
     minWords: 100,
   });
 
-  // Baru lakukan pengecekan data setelah hook
   if (loadingAssignment || loadingSubmission) {
     return (
       <Container className="py-6">
@@ -336,7 +291,6 @@ export default function WriteAssignment() {
     );
   }
 
-  // Status info
   const statusInfo = {
     DRAFT: { label: "Draft", color: "yellow" },
     SUBMITTED: { label: "Dikumpulkan", color: "blue" },
@@ -345,8 +299,8 @@ export default function WriteAssignment() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
+      {/* Modern Header */}
+      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-lg border-b border-gray-200 shadow-sm">
         <Container className="py-4">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex items-center gap-4 flex-wrap">
@@ -385,16 +339,6 @@ export default function WriteAssignment() {
                   Menyimpan...
                 </span>
               )}
-              {!saving && submission.status === "DRAFT" && (
-                <span className="text-gray-500 text-xs ml-2">
-                  Draft belum dikirim
-                </span>
-              )}
-              {submission.status === "SUBMITTED" && (
-                <span className="text-green-600 text-xs ml-2">
-                  Sudah dikumpulkan
-                </span>
-              )}
             </div>
           </div>
         </Container>
@@ -402,52 +346,61 @@ export default function WriteAssignment() {
 
       {/* Main Content */}
       <Container className="py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          <div className="flex-1 min-w-0 space-y-8">
+        <motion.div
+          className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="lg:col-span-3 space-y-8 w-full">
             {/* Assignment Info */}
-            <Card className="mb-2">
+            <Card className="border-0 shadow-lg">
               <CardHeader>
-                <CardTitle className="text-xl font-bold text-gray-900">
+                <CardTitle className="text-2xl font-bold text-gray-900">
                   {assignment.title}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="prose max-w-none text-gray-700">
+                <div className="prose max-w-none text-gray-700 mb-6">
                   <div
                     dangerouslySetInnerHTML={{
                       __html: assignment.instructions,
                     }}
                   />
                 </div>
-                <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                <div className="mt-4 pt-4 border-t border-gray-200 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-600">
                   <span>
-                    Deadline:{" "}
-                    {new Date(assignment.deadline).toLocaleString("id-ID")}
+                    <strong>Deadline:</strong>{" "}
+                    {formatDate(assignment.deadline, "dd MMM yyyy, HH:mm")}
                   </span>
-                  <span>Minimal: 100 kata</span>
-                  <span>Maksimal: 1000 kata</span>
+                  <span>
+                    <strong>Min:</strong> 100 kata
+                  </span>
+                  <span>
+                    <strong>Maks:</strong> 1000 kata
+                  </span>
                 </div>
               </CardContent>
             </Card>
 
             {/* Editor */}
-            <Card className="mb-2">
+            <Card className="border-0 shadow-lg">
               <CardContent className="p-0">
                 <RichTextEditor
                   ref={editorRef}
-                  key={localSubmissionId} // Force re-render when submission changes
-                  value={initialContent} // Use initialContent instead of content
+                  key={localSubmissionId}
+                  value={initialContent}
                   onChange={handleContentChange}
                   onEditorReady={handleEditorReady}
                   disabled={submission.status !== "DRAFT"}
                   maxWords={1000}
-                  placeholder="Mulai tulis jawaban Anda di sini..."
+                  placeholder="Klik untuk memuat draft yang tersedia, atau mulai tulis jawaban Anda di sini..."
                 />
               </CardContent>
             </Card>
 
             {/* Citations */}
-            <Card className="mb-2">
+            <Card className="border-0 shadow-lg">
               <CardHeader>
                 <CardTitle>Daftar Pustaka & Sitasi</CardTitle>
               </CardHeader>
@@ -478,74 +431,55 @@ export default function WriteAssignment() {
                 />
               </CardContent>
             </Card>
-
-            {/* Submission Actions */}
-            {submission && (
-              <Card className="mb-2">
-                <CardContent>
-                  <SubmissionActions
-                    submission={submission}
-                    type="single"
-                    onActionComplete={() => {
-                      // Refresh data if needed
-                    }}
-                  />
-                </CardContent>
-              </Card>
-            )}
           </div>
 
           {/* Sidebar */}
-          <div className="w-full lg:w-[340px] flex-shrink-0 space-y-6">
+          {/* <div className="w-full lg:sticky lg:top-24 space-y-6">
             <TextStatistics
               stats={stats}
               limitChecks={limitChecks}
               validation={validation}
             />
-
             <CopyPasteMonitor
               editorRef={editorRef}
               onSuspiciousActivity={handleSuspiciousActivity}
               enabled={submission.status === "DRAFT"}
             />
-
-            <Card>
+            <Card className="border-0 shadow-lg">
               <CardHeader>
-                <CardTitle className="text-sm">Informasi Tambahan</CardTitle>
+                <CardTitle className="text-base">Informasi Tambahan</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <div>
-                  <span className="font-medium">Kelas:</span>
-                  <p className="text-gray-600">{assignment.class?.name}</p>
-                </div>
-                <div>
-                  <span className="font-medium">Instruktur:</span>
-                  <p className="text-gray-600">
-                    {assignment.class?.instructor?.fullName}
+                  <span className="font-medium text-gray-600">Kelas:</span>
+                  <p className="font-semibold text-gray-900">
+                    {assignment.class?.name}
                   </p>
                 </div>
                 <div>
-                  <span className="font-medium">Dibuat:</span>
-                  <p className="text-gray-600">
-                    {new Date(submission.createdAt).toLocaleString("id-ID")}
+                  <span className="font-medium text-gray-600">Dibuat:</span>
+                  <p className="font-semibold text-gray-900">
+                    {formatDate(submission.createdAt)}
                   </p>
                 </div>
                 {submission.submittedAt && (
                   <div>
-                    <span className="font-medium">Dikumpulkan:</span>
-                    <p className="text-gray-600">
-                      {new Date(submission.submittedAt).toLocaleString("id-ID")}
+                    <span className="font-medium text-gray-600">
+                      Dikumpulkan:
+                    </span>
+                    <p className="font-semibold text-gray-900">
+                      {formatDate(submission.submittedAt)}
                     </p>
                   </div>
                 )}
               </CardContent>
             </Card>
-          </div>
-        </div>
+          </div> */}
+        </motion.div>
       </Container>
 
       {/* Fixed Bottom Actions */}
-      <div className="sticky bottom-0 z-30 bg-white border-t border-gray-200 shadow-lg">
+      <div className="sticky bottom-0 z-30 bg-white/80 backdrop-blur-lg border-t border-gray-200 shadow-lg">
         <Container className="py-4">
           <DraftActions
             submission={submission}
