@@ -217,7 +217,7 @@ const router = createBrowserRouter([
       },
       {
         path: "assignments/:assignmentId",
-        element: <AssignmentDetail />,
+        element: <InstructorAssignmentDetail />,
       },
       {
         path: "assignments/:assignmentId/monitor",

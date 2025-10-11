@@ -154,6 +154,26 @@ const assignmentsService = {
       throw error;
     }
   },
+
+  /**
+   * Mendapat overview submission untuk assignment tertentu (detail, stats, submissions).
+   * @param {string} assignmentId
+   * @returns {Promise<object>} Data overview dari backend.
+   */
+  getAssignmentSubmissionsOverview: async (assignmentId) => {
+    try {
+      const response = await api.get(
+        `/assignments/${assignmentId}/submissions-overview`
+      );
+      return response;
+    } catch (error) {
+      console.error(
+        `Failed to fetch submissions overview for assignment ${assignmentId}:`,
+        error
+      );
+      throw error;
+    }
+  },
 };
 
 export default assignmentsService;
