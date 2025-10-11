@@ -268,6 +268,24 @@ const regenerateClassToken = async (classId) => {
   }
 };
 
+/**
+ * Mendapat feed aktivitas terbaru di kelas (instructor only)
+ * @param {string} classId
+ * @param {number} limit
+ * @returns {Promise<Array>} Array of activity objects.
+ */
+const getClassActivityFeed = async (classId, limit = 20) => {
+  try {
+    const response = await api.get(`/classes/${classId}/activity-feed`, {
+      params: { limit },
+    });
+    return response;
+  } catch (error) {
+    console.error(`Failed to fetch activity feed for class ${classId}:`, error);
+    throw error;
+  }
+};
+
 const classesService = {
   getClasses,
   getClassById,
@@ -279,6 +297,7 @@ const classesService = {
   updateClass,
   deleteClass,
   regenerateClassToken,
+  getClassActivityFeed, // <-- Tambahkan fungsi baru
 };
 
 export default classesService;

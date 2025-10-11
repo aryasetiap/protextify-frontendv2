@@ -12,6 +12,10 @@ import {
   Calendar,
   Clock,
   Activity,
+  UserPlus,
+  FilePlus,
+  Star,
+  CheckCircle,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -32,9 +36,9 @@ import {
   MemberManagement,
   Badge,
 } from "../../components";
-import { classesService } from "../../services"; // ✅ Add this import
-import { useAsyncData } from "../../hooks/useAsyncData"; // ✅ Add this import
-import { formatDate } from "../../utils/helpers"; // ✅ Add this import
+import { classesService } from "../../services";
+import { useAsyncData } from "../../hooks/useAsyncData";
+import { formatDate, formatRelativeTime } from "../../utils/helpers";
 
 export default function ClassDetail() {
   const { classId } = useParams();
@@ -370,10 +374,12 @@ function AssignmentsTab({ classDetail }) {
       {assignments.length > 0 ? (
         <div className="space-y-4">
           {assignments.map((assignment) => (
-            <Card 
+            <Card
               key={assignment.id}
               className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
-              onClick={() => navigate(`/instructor/assignments/${assignment.id}`)}
+              onClick={() =>
+                navigate(`/instructor/assignments/${assignment.id}`)
+              }
             >
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
@@ -564,8 +570,115 @@ function StudentsTab({ classDetail }) {
 
 // Enhanced Activity Tab Component
 function ActivityTab({ classDetail }) {
+  const {
+    data: activities,
+    loading,
+    error,
+    refetch,
+  } = useAsyncData(
+    () => classesService.getClassActivityFeed(classDetail.id, 30),
+    [classDetail.id]
+  );
+
+  const renderActivityIcon = (type) => {
+    const icons = {
+      STUDENT_JOINED: {
+        icon: UserPlus,
+        bg: "bg-blue-100",
+        text: "text-blue-600",
+      },
+      ASSIGNMENT_CREATED: {
+        icon: FilePlus,
+        bg: "bg-green-100",
+        text: "text-green-600",
+      },
+      SUBMISSION_GRADED: {
+        icon: Star,
+        bg: "bg-yellow-100",
+        text: "text-yellow-600",
+      },
+      SUBMISSION_SUBMITTED: {
+        icon: CheckCircle,
+        bg: "bg-purple-100",
+        text: "text-purple-600",
+      },
+    };
+    const config = icons[type] || {
+      icon: Activity,
+      bg: "bg-gray-100",
+      text: "text-gray-600",
+    };
+    const Icon = config.icon;
+    return (
+      <div
+        className={`w-10 h-10 rounded-full flex items-center justify-center ring-8 ring-white ${config.bg}`}
+      >
+        <Icon className={`h-5 w-5 ${config.text}`} />
+      </div>
+    );
+  };
+
+  const renderActivityDetails = (activity) => {
+    const { type, details } = activity;
+    switch (type) {
+      case "STUDENT_JOINED":
+        return (
+          <p>
+            <span className="font-semibold">{details.studentName}</span> telah
+            bergabung dengan kelas.
+          </p>
+        );
+      case "ASSIGNMENT_CREATED":
+        return (
+          <p>
+            Tugas baru{" "}
+            <span className="font-semibold">"{details.assignmentTitle}"</span>{" "}
+            telah dibuat.
+          </p>
+        );
+      case "SUBMISSION_GRADED":
+        return (
+          <p>
+            <span className="font-semibold">{details.studentName}</span>{" "}
+            mendapat nilai{" "}
+            <span className="font-semibold">{details.grade}</span> untuk tugas{" "}
+            <span className="font-semibold">"{details.assignmentTitle}"</span>.
+          </p>
+        );
+      case "SUBMISSION_SUBMITTED":
+        return (
+          <p>
+            <span className="font-semibold">{details.studentName}</span> telah
+            mengumpulkan tugas{" "}
+            <span className="font-semibold">"{details.assignmentTitle}"</span>.
+          </p>
+        );
+      default:
+        return <p>Aktivitas tidak dikenal.</p>;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-12">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert variant="error" title="Gagal Memuat Aktivitas">
+        <p>{error.message || "Terjadi kesalahan saat mengambil data."}</p>
+        <Button onClick={refetch} size="sm" className="mt-4">
+          Coba Lagi
+        </Button>
+      </Alert>
+    );
+  }
+
   return (
-    <Card>
+    <Card className="border-0 shadow-lg">
       <CardHeader>
         <CardTitle className="flex items-center">
           <Activity className="h-5 w-5 mr-2" />
@@ -573,18 +686,39 @@ function ActivityTab({ classDetail }) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {/* Placeholder for activity feed */}
+        {activities && activities.length > 0 ? (
+          <div className="relative pl-4">
+            {/* Timeline line */}
+            <div className="absolute left-9 top-0 h-full w-0.5 bg-gray-200"></div>
+            <div className="space-y-8">
+              {activities.map((activity) => (
+                <div key={activity.id} className="relative flex items-start">
+                  <div className="relative z-10">
+                    {renderActivityIcon(activity.type)}
+                  </div>
+                  <div className="ml-6 flex-1">
+                    <div className="text-sm text-gray-800">
+                      {renderActivityDetails(activity)}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {formatRelativeTime(activity.timestamp)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
           <div className="text-center py-12">
             <Activity className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Feed Aktivitas
+              Belum Ada Aktivitas
             </h3>
             <p className="text-gray-600">
-              Akan menampilkan aktivitas terbaru di kelas ini
+              Aktivitas akan muncul di sini saat ada interaksi di dalam kelas.
             </p>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
