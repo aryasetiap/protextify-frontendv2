@@ -91,10 +91,11 @@ const CustomSelect = ({
   options,
   placeholder = "Pilih...",
   disabled = false,
+  className, // Tambahkan className
 }) => {
   return (
     <Select onValueChange={onChange} value={value} disabled={disabled}>
-      <SelectTrigger>
+      <SelectTrigger className={className}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
