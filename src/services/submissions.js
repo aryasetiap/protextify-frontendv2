@@ -125,6 +125,22 @@ const gradeSubmission = async (submissionId, gradeData) => {
 };
 
 /**
+ * Memberikan nilai dan feedback ke beberapa submission sekaligus.
+ * @param {object} bulkData - Payload berisi array grades.
+ * @param {Array<object>} bulkData.grades - Array of { submissionId, grade, feedback }.
+ * @returns {Promise<object>} Response dari backend.
+ */
+const bulkGradeSubmissions = async (bulkData) => {
+  try {
+    const response = await api.patch("/submissions/bulk-grade", bulkData);
+    return response;
+  } catch (error) {
+    console.error("Failed to bulk grade submissions:", error);
+    throw error;
+  }
+};
+
+/**
  * Mendapat riwayat submission untuk student
  * @returns {Array} array submission sesuai BE
  */
@@ -297,6 +313,7 @@ const submissionsService = {
   updateSubmissionContent,
   submitSubmission,
   gradeSubmission,
+  bulkGradeSubmissions, // <-- Tambahkan fungsi baru di sini
   getHistory,
   downloadSubmission,
   getSubmissionVersions,

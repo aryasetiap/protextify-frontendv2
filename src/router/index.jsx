@@ -235,7 +235,6 @@ const router = createBrowserRouter([
         path: "assignments/:assignmentId/submissions",
         element: <MonitorSubmissions />,
       },
-      { path: "assignments/:assignmentId/bulk-grade", element: <BulkGrade /> },
       {
         path: "submissions/:submissionId/plagiarism",
         element: <PlagiarismAnalysis />,
