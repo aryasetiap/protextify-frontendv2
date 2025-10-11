@@ -136,6 +136,24 @@ const assignmentsService = {
       throw error;
     }
   },
+
+  /**
+   * Mendapat data analytics untuk assignment tertentu.
+   * @param {string} assignmentId
+   * @returns {Promise<object>} Data analytics dari backend.
+   */
+  getAssignmentAnalytics: async (assignmentId) => {
+    try {
+      const response = await api.get(`/assignments/${assignmentId}/analytics`);
+      return response;
+    } catch (error) {
+      console.error(
+        `Failed to fetch analytics for assignment ${assignmentId}:`,
+        error
+      );
+      throw error;
+    }
+  },
 };
 
 export default assignmentsService;
