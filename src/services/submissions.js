@@ -142,6 +142,25 @@ const bulkGradeSubmissions = async (bulkData) => {
 };
 
 /**
+ * Mengunduh beberapa submission sekaligus (ZIP/CSV).
+ * @param {string[]} submissionIds - Array of submission IDs.
+ * @param {string} format - "zip" or "csv".
+ * @returns {Promise<object>} Response dari backend { downloadUrl, expiresAt, fileCount, filename }.
+ */
+const bulkDownloadSubmissions = async (submissionIds, format) => {
+  try {
+    const response = await api.post("/submissions/bulk-download", {
+      submissionIds,
+      format,
+    });
+    return response;
+  } catch (error) {
+    console.error("Failed to bulk download submissions:", error);
+    throw error;
+  }
+};
+
+/**
  * Mendapat riwayat submission untuk student
  * @returns {Array} array submission sesuai BE
  */
@@ -314,7 +333,8 @@ const submissionsService = {
   updateSubmissionContent,
   submitSubmission,
   gradeSubmission,
-  bulkGradeSubmissions, // <-- Tambahkan fungsi baru di sini
+  bulkGradeSubmissions,
+  bulkDownloadSubmissions, // <-- Tambahkan fungsi baru di sini
   getHistory,
   downloadSubmission,
   getSubmissionVersions,
