@@ -212,7 +212,7 @@ const router = createBrowserRouter([
         element: <ClassSettings />,
       },
       {
-        path: "classes/:classId/assignments/create",
+        path: "classes/:classId/create-assignment",
         element: <CreateAssignment />,
       },
       {
