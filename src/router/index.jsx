@@ -192,6 +192,10 @@ const router = createBrowserRouter([
         element: <InstructorDashboard />,
       },
       {
+        path: "analytics",
+        element: <InstructorAnalytics />,
+      },
+      {
         path: "classes",
         element: <InstructorClasses />,
       },

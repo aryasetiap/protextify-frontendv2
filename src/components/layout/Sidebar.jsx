@@ -48,7 +48,7 @@ export default function Sidebar() {
           label: "Analytics",
           icon: TrendingUp,
           path: "/instructor/analytics",
-          disabled: true, // Tidak ada endpoint di BE
+          disabled: false,
         },
         {
           label: "Pengaturan",
