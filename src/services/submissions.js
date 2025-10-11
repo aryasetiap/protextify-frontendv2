@@ -38,6 +38,7 @@ const getSubmissionById = async (submissionId) => {
       id: response.id,
       assignmentId: response.assignmentId,
       studentId: response.studentId,
+      student: response.student, // <-- Tambahkan baris ini
       content: response.content,
       status: response.status,
       grade: typeof response.grade === "number" ? response.grade : null,

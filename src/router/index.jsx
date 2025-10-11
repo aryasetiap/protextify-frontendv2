@@ -239,6 +239,10 @@ const router = createBrowserRouter([
         path: "submissions/:submissionId/plagiarism",
         element: <PlagiarismAnalysis />,
       },
+      {
+        path: "submissions/:submissionId/grade",
+        element: <GradeSubmission />,
+      },
       { path: "transactions", element: <TransactionHistory /> },
       { path: "transactions/:transactionId", element: <TransactionDetail /> },
     ],
